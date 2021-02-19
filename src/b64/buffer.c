@@ -20,15 +20,15 @@ char* b64_buf_malloc()
 	return buf;
 }
 
-char* b64_buf_realloc(unsigned char* ptr, size_t size)
+void* b64_buf_realloc(unsigned char* ptr, size_t size)
 {
-	if (size > bufc * B64_BUFFER_SIZE)
+	if (size > (size_t)(bufc * B64_BUFFER_SIZE))
 	{
-		while (size > bufc * B64_BUFFER_SIZE) bufc++;
+		while (size > (size_t)(bufc * B64_BUFFER_SIZE)) bufc++;
 		char* buf = b64_realloc(ptr, B64_BUFFER_SIZE * bufc);
 		if (!buf) return NULL;
 		return buf;
 	}
 
-	return ptr;
+	return (unsigned char*)ptr;
 }

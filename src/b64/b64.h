@@ -29,7 +29,7 @@ char* b64_buf_malloc();
 // Update memory size. Returns the same pointer if we
 // have enough space in the buffer. Otherwise, we add
 // additional buffers.
-char* b64_buf_realloc(unsigned char* ptr, size_t size);
+void* b64_buf_realloc(unsigned char* ptr, size_t size);
 
 /**
  * Base64 index table.
