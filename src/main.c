@@ -37,6 +37,5 @@ int main()
 
     AES_init_ctx_iv(&ctx, key, iv);
     AES_CTR_xcrypt_buffer(&ctx, bd, strlen((char *)bd));
-
     printf("DEC: %s\n", bd);
 }
