@@ -7,7 +7,7 @@
 #include "b64/b64.h"
 
 #define PASSWORD_LEN 1024
-// TODO: read file using realloc()
+// TODO(#2): read file using realloc()
 #define MAX_PASSWORDS 4
 #define PASSWORDS_STORE ".data"
 
