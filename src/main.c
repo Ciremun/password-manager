@@ -7,54 +7,66 @@
 #include "aes.h"
 #include "b64/b64.h"
 
+#define STRINGIFY2(X) #X
+#define STRINGIFY(X) STRINGIFY2(X)
+
+#define MAX_PASSWORD_LEN 1024
 #define PASSWORDS_STORE ".data"
 #define LMAX 255
 
-// TODO(#4): require password to unlock
-// unlock it REEEEE forsenSWA
 // TODO(#5): labels and usernames
 // .data: label username password
 // TODO(#6): label search
 
-ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
+ssize_t getline(char **lineptr, size_t *n, FILE *stream)
+{
     size_t pos;
     int c;
 
-    if (lineptr == NULL || stream == NULL || n == NULL) {
+    if (lineptr == NULL || stream == NULL || n == NULL)
+    {
         errno = EINVAL;
         return -1;
     }
 
     c = getc(stream);
-    if (c == EOF) {
+    if (c == EOF)
+    {
         return -1;
     }
 
-    if (*lineptr == NULL) {
+    if (*lineptr == NULL)
+    {
         *lineptr = malloc(128);
-        if (*lineptr == NULL) {
+        if (*lineptr == NULL)
+        {
             return -1;
         }
         *n = 128;
     }
 
     pos = 0;
-    while(c != EOF) {
-        if (pos + 1 >= *n) {
+    while (c != EOF)
+    {
+        if (pos + 1 >= *n)
+        {
             size_t new_size = *n + (*n >> 2);
-            if (new_size < 128) {
+            if (new_size < 128)
+            {
                 new_size = 128;
             }
             char *new_ptr = realloc(*lineptr, new_size);
-            if (new_ptr == NULL) {
+            if (new_ptr == NULL)
+            {
                 return -1;
             }
             *n = new_size;
             *lineptr = new_ptr;
         }
 
-        ((unsigned char *)(*lineptr))[pos ++] = c;
-        if (c == '\n') {
+        ((unsigned char *)(*lineptr))[pos++] = c;
+        if (c == '\n')
+        {
             break;
         }
         c = getc(stream);
@@ -64,7 +76,7 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
     return pos;
 }
 
-char** read_file(const char *fp, size_t *lsize)
+char **read_file(const char *fp, size_t *lsize)
 {
     char **lines = NULL;
     char *ln = NULL;
@@ -127,7 +139,11 @@ void write_file(const char *fp, const char *mode, void *data)
 int main(int argc, char **argv)
 {
     struct AES_ctx ctx;
-    uint8_t aes_key[] = "7bf46a2a35655558232417df6887f9cfe57f32a4";
+    uint8_t aes_key[MAX_PASSWORD_LEN] = {0};
+
+    printf("password?\n");
+    scanf("%" STRINGIFY(MAX_PASSWORD_LEN) "[^\n]", aes_key);
+
     uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
     if (argc < 2)
@@ -152,11 +168,13 @@ int main(int argc, char **argv)
 
     uint8_t *password = (uint8_t *)argv[1];
     size_t password_length = strlen(argv[1]);
-
     printf("ENC: %s\n", password);
+
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, password, password_length);
 
     char *encoded_data = b64_encode(password, password_length);
     write_file(PASSWORDS_STORE, "a", encoded_data);
+
+    return 0;
 }
