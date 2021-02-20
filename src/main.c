@@ -11,6 +11,8 @@
 #define MAX_PASSWORDS 4
 #define PASSWORDS_STORE ".data"
 
+#define COUNT(a) (sizeof(a) / sizeof(*a))
+
 int read_file(const char *fp, char lines[][PASSWORD_LEN])
 {
     FILE *f = fopen(fp, "r");
@@ -53,9 +55,10 @@ int main(int argc, char **argv)
             uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
             unsigned char *decoded_data = b64_decode(lines[i], strlen(lines[i]));
-            AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+            size_t decoded_data_length = COUNT(decoded_data); 
+	    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
             // TODO(#1): fix password length calc
-            AES_CTR_xcrypt_buffer(&ctx, decoded_data, strlen((char *)decoded_data));
+            AES_CTR_xcrypt_buffer(&ctx, decoded_data, decoded_data_length);
             printf("DEC: %s\n", decoded_data);
             free(decoded_data);
         }
@@ -66,18 +69,20 @@ int main(int argc, char **argv)
     uint8_t aes_key[] = "7bf46a2a35655558232417df6887f9cfe57f32a4";
     uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
-    if (strlen(argv[1]) > PASSWORD_LEN)
+    uint8_t *password = (uint8_t *)argv[1];
+    size_t password_length = COUNT(password); 
+    
+    if (password_length > PASSWORD_LEN)
     {
         printf("error: password length > %d\n", PASSWORD_LEN);
         exit(1);
     }
 
-    uint8_t *password = (uint8_t *)argv[1];
 
     printf("ENC: %s\n", password);
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, password, strlen((char *)password));
+    AES_CTR_xcrypt_buffer(&ctx, password, password_length);
 
-    char *encoded_data = b64_encode(password, strlen((char *)password));
+    char *encoded_data = b64_encode(password, password_length);
     write_file(PASSWORDS_STORE, "a", encoded_data);
 }
