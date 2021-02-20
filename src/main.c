@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     struct AES_ctx ctx;
     uint8_t aes_key[MAX_PASSWORD_LEN] = {0};
 
-    printf("password?\n");
+    printf("key?\n");
     scanf("%" STRINGIFY(MAX_PASSWORD_LEN) "[^\n]", aes_key);
 
     uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
