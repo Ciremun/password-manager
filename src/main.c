@@ -6,26 +6,119 @@
 #include "aes.h"
 #include "b64/b64.h"
 
-#define PASSWORD_LEN 1024
-// TODO(#2): read file using realloc()
-#define MAX_PASSWORDS 256
 #define PASSWORDS_STORE ".data"
+#define LMAX 255
 
-int read_file(const char *fp, char lines[][PASSWORD_LEN])
+
+ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 {
-    FILE *f = fopen(fp, "r");
-    if (f == NULL)
+    char *bufptr = NULL;
+    char *p = bufptr;
+    size_t size;
+    int c;
+
+    if (lineptr == NULL)
     {
-        printf("Error opening file %s.\n", fp);
+        return -1;
+    }
+    if (stream == NULL)
+    {
+        return -1;
+    }
+    if (n == NULL)
+    {
+        return -1;
+    }
+    bufptr = *lineptr;
+    size = *n;
+
+    c = fgetc(stream);
+    if (c == EOF)
+    {
+        return -1;
+    }
+    if (bufptr == NULL)
+    {
+        bufptr = malloc(128);
+        if (bufptr == NULL)
+        {
+            return -1;
+        }
+        size = 128;
+    }
+    p = bufptr;
+    while (c != EOF)
+    {
+        if ((size_t)(p - bufptr) > (size - 1))
+        {
+            size = size + 128;
+            bufptr = realloc(bufptr, size);
+            if (bufptr == NULL)
+            {
+                return -1;
+            }
+        }
+        *p++ = c;
+        if (c == '\n')
+        {
+            break;
+        }
+        c = fgetc(stream);
+    }
+
+    *p++ = '\0';
+    *lineptr = bufptr;
+    *n = size;
+
+    return p - bufptr - 1;
+}
+
+char** read_file(const char *fp, size_t *lsize)
+{
+    char **lines = NULL;
+    char *ln = NULL;
+    size_t n = 0;
+    ssize_t nchr = 0;
+    size_t idx = 0;
+    size_t lmax = LMAX;
+    FILE *f = NULL;
+
+    if (!(f = fopen(fp, "r")))
+    {
+        fprintf(stderr, "error: file open failed '%s'.", fp);
         exit(1);
     }
-    int line = 0;
-    while (fgets(lines[line], PASSWORD_LEN, f))
+
+    if (!(lines = calloc(LMAX, sizeof *lines)))
     {
-        line++;
+        fprintf(stderr, "error: memory allocation failed.");
+        exit(1);
     }
-    fclose(f);
-    return line;
+
+    while ((nchr = getline(&ln, &n, f)) != -1)
+    {
+        while (nchr > 0 && (ln[nchr - 1] == '\n' || ln[nchr - 1] == '\r'))
+            ln[--nchr] = 0;
+
+        lines[idx++] = strdup(ln);
+
+        if (idx == lmax)
+        {
+            char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
+            if (!tmp)
+                exit(1);
+            lines = tmp;
+            lmax *= 2;
+        }
+    }
+
+    if (f)
+        fclose(f);
+    if (ln)
+        free(ln);
+
+    *lsize = idx;
+    return lines;
 }
 
 void write_file(const char *fp, const char *mode, void *data)
@@ -48,9 +141,9 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        char lines[MAX_PASSWORDS][PASSWORD_LEN];
-        int line_count = read_file(PASSWORDS_STORE, lines);
-        for (int i = 0; i < line_count; i++)
+        size_t idx = 0;
+        char **lines = read_file(PASSWORDS_STORE, &idx);
+        for (size_t i = 0; i < idx; i++)
         {
             size_t decsize = 0;
             unsigned char *decoded_data = b64_decode_ex(lines[i], strlen(lines[i]), &decsize);
@@ -60,17 +153,14 @@ int main(int argc, char **argv)
             printf("DEC: %s\n", decoded_data);
             free(decoded_data);
         }
+        for (size_t it = 0; it < idx; it++)
+            free(lines[it]);
+        free(lines);
         return 0;
     }
 
     uint8_t *password = (uint8_t *)argv[1];
     size_t password_length = strlen(argv[1]);
-
-    if (password_length > PASSWORD_LEN)
-    {
-        printf("error: password length > %d\n", PASSWORD_LEN);
-        exit(1);
-    }
 
     printf("ENC: %s\n", password);
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
