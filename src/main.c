@@ -28,7 +28,7 @@ int read_file(const char *fp, char lines[][PASSWORD_LEN])
     return line;
 }
 
-void write(const char *fp, const char *mode, void *data)
+void write_file(const char *fp, const char *mode, void *data)
 {
     FILE *f = fopen(fp, mode);
     if (f == NULL)
@@ -79,5 +79,5 @@ int main(int argc, char **argv)
     AES_CTR_xcrypt_buffer(&ctx, password, strlen((char *)password));
 
     char *encoded_data = b64_encode(password, strlen((char *)password));
-    write(PASSWORDS_STORE, "a", encoded_data);
+    write_file(PASSWORDS_STORE, "a", encoded_data);
 }
