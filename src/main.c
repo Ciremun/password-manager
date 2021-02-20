@@ -14,7 +14,7 @@
 // unlock it REEEEE forsenSWA
 // TODO(#5): labels and usernames
 // .data: label username password
-// TODO: label search
+// TODO(#6): label search
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
     size_t pos;
