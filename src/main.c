@@ -10,6 +10,11 @@
 #define PASSWORDS_STORE ".data"
 #define LMAX 255
 
+// TODO(#4): require password to unlock
+// unlock it REEEEE forsenSWA
+// TODO: labels and usernames
+// .data: label username password
+// TODO: label search
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
     size_t pos;
