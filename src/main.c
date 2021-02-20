@@ -85,13 +85,13 @@ char** read_file(const char *fp, size_t *lsize)
 
     if (!(f = fopen(fp, "r")))
     {
-        fprintf(stderr, "error: file open failed '%s'.", fp);
+        fprintf(stderr, "error: file open failed '%s'.\n", fp);
         exit(1);
     }
 
     if (!(lines = calloc(LMAX, sizeof *lines)))
     {
-        fprintf(stderr, "error: memory allocation failed.");
+        fprintf(stderr, "error: memory allocation failed.\n");
         exit(1);
     }
 
