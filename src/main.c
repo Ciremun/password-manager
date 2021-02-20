@@ -56,7 +56,6 @@ int main(int argc, char **argv)
             unsigned char *decoded_data = b64_decode_ex(lines[i], strlen(lines[i]), &decsize);
 
             AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-            // TODO(#1): fix password length calc
             AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
             printf("DEC: %s\n", decoded_data);
             free(decoded_data);
