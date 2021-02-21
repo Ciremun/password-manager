@@ -204,11 +204,13 @@ void decrypt_and_print(uint8_t *aes_key, char* find_label)
             }
             if (!found_label)
             {
+                free(label);
                 continue;
             }
             size_t query_len = strlen(find_label);
             if (query_len > label_length)
             {
+                free(label);
                 continue;
             }
             int do_continue = 0;
@@ -220,6 +222,7 @@ void decrypt_and_print(uint8_t *aes_key, char* find_label)
                     break;
                 }
             }
+            free(label);
             if (do_continue)
             {
                 continue;
