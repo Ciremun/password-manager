@@ -10,13 +10,14 @@
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
 
-#define MAX_PASSWORD_LEN 1024
+#define MAX_INPUT_LEN 1024
 #define PASSWORDS_STORE ".data"
 #define LMAX 255
 
-// TODO(#5): labels and usernames
-// .data: label username password
 // TODO(#6): label search
+
+struct AES_ctx ctx;
+uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 {
@@ -136,20 +137,32 @@ void write_file(const char *fp, const char *mode, void *data)
     fclose(f);
 }
 
+void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
+{
+    printf("ENC: %s\n", data);
+
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, data, *data_length);
+
+    char *encoded_data = b64_encode(data, *data_length);
+    write_file(PASSWORDS_STORE, "a", encoded_data);
+}
+
+void input_key(uint8_t *aes_key)
+{
+    printf("key?\n");
+    scanf("%" STRINGIFY(MAX_INPUT_LEN) "[^\n]", aes_key);
+}
+
 int main(int argc, char **argv)
 {
-    struct AES_ctx ctx;
-    uint8_t aes_key[MAX_PASSWORD_LEN] = {0};
+    uint8_t *aes_key = malloc(MAX_INPUT_LEN);
 
-    printf("key?\n");
-    scanf("%" STRINGIFY(MAX_PASSWORD_LEN) "[^\n]", aes_key);
-
-    uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
-
-    if (argc < 2)
+    if (argc == 1)
     {
         size_t idx = 0;
         char **lines = read_file(PASSWORDS_STORE, &idx);
+        input_key(aes_key);
         for (size_t i = 0; i < idx; i++)
         {
             size_t decsize = 0;
@@ -166,15 +179,47 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    uint8_t *password = (uint8_t *)argv[1];
-    size_t password_length = strlen(argv[1]);
-    printf("ENC: %s\n", password);
+    char *label = NULL;
 
-    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, password, password_length);
+    if (argc > 2)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            if ((strcmp("-l", argv[i]) == 0) || (strcmp("--label", argv[i]) == 0))
+            {
+                label = argv[i + 1];
+                i++;
+                continue;
+            }
+        }
+    }
 
-    char *encoded_data = b64_encode(password, password_length);
-    write_file(PASSWORDS_STORE, "a", encoded_data);
+    uint8_t *data = NULL;
+    size_t data_length = 0;
 
+    if (label != NULL)
+    {
+        char *last_arg = argv[argc - 1];
+        if (strcmp(last_arg, label) == 0)
+        {   
+            printf("error: label provided but no data\n");
+            exit(1);
+        }
+        data = malloc(MAX_INPUT_LEN * 2 + 2);
+        snprintf((char *)data, sizeof(uint8_t) * MAX_INPUT_LEN * 2 + 2, "%s %s", label, last_arg);
+        data_length = strlen((char *)data);
+        input_key(aes_key);
+        encrypt_and_write(data, aes_key, &data_length);
+        free(data);
+    }
+    else
+    {
+        data = (uint8_t *)argv[argc - 1];
+        data_length = strlen((char *)data);
+        input_key(aes_key);
+        encrypt_and_write(data, aes_key, &data_length);
+    }
+
+    free(aes_key);
     return 0;
 }

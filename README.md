@@ -2,4 +2,4 @@
 
 ## Run
 
-    make && ./main [password]
+    make && ./main [-l (--label) <label>] [data]
