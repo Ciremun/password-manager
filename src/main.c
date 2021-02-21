@@ -39,7 +39,7 @@ ssize_t getpasswd(char **pw, size_t sz, FILE *fp)
     {
         fprintf(stderr, "%s() error: tcgetattr failed.\n", __func__);
         return -1;
-    } /* copy old to new */
+    }
     memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
 
     new_kbd_mode.c_lflag &= ~(ICANON | ECHO);
@@ -211,7 +211,6 @@ void input_key(uint8_t *aes_key)
 {
     printf("key?\n");
     getpasswd((char **)&aes_key, MAX_INPUT_LEN, stdin);
-    printf("\n");
 }
 
 void parse_arg(const char *s, const char *l, char **label, int argc, char **argv)
