@@ -14,7 +14,6 @@
 #define PASSWORDS_STORE ".data"
 #define LMAX 255
 
-// TODO(#6): label search
 // TODO(#7): hide key input
 
 struct AES_ctx ctx;
@@ -140,7 +139,7 @@ void write_file(const char *fp, const char *mode, void *data)
 
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
 {
-    printf("ENC: %s\n", data);
+    printf("%s\n", data);
 
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, data, *data_length);
@@ -155,44 +154,108 @@ void input_key(uint8_t *aes_key)
     scanf("%" STRINGIFY(MAX_INPUT_LEN) "[^\n]", aes_key);
 }
 
+void parse_arg(const char *s, const char *l, char **label, int argc, char **argv)
+{
+    for (int i = 1; i < argc; i++)
+    {
+        if ((strcmp(s, argv[i]) == 0) || (strcmp(l, argv[i]) == 0))
+        {
+            if ((i + 1) >= argc)
+            {
+                *label = argv[argc - 1];
+                return;
+            }
+            *label = argv[i + 1];
+            i++;
+            continue;
+        }
+    }
+}
+
+void decrypt_and_print(uint8_t *aes_key, char* find_label)
+{
+    size_t idx = 0;
+    char **lines = read_file(PASSWORDS_STORE, &idx);
+    input_key(aes_key);
+    int did_print = 0;
+    for (size_t i = 0; i < idx; i++)
+    {
+        size_t decsize = 0;
+        size_t line_length = strlen(lines[i]);
+        unsigned char *decoded_data = b64_decode_ex(lines[i], line_length, &decsize);
+        AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+        AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+        if (find_label != NULL)
+        {
+            char *label = malloc(MAX_INPUT_LEN);
+            size_t label_length = 0;
+            int found_label = 0;
+            for (size_t j = 0; j < decsize; j++)
+            {
+                if (decoded_data[j] == ' ')
+                {
+                    found_label = 1;
+                    label[j] = '\0';
+                    label_length++;
+                    break;
+                }
+                label[j] = decoded_data[j];
+                label_length++;
+            }
+            if (!found_label)
+            {
+                continue;
+            }
+            size_t query_len = strlen(find_label);
+            if (query_len > label_length)
+            {
+                continue;
+            }
+            int do_continue = 0;
+            for (size_t j = 0; j < query_len; j++)
+            {
+                if (find_label[j] != label[j])
+                {
+                    do_continue++;
+                    break;
+                }
+            }
+            if (do_continue)
+            {
+                continue;
+            }
+        }
+        printf("%s\n", decoded_data);
+        did_print = 1;
+        free(decoded_data);
+    }
+    if (!did_print)
+    {
+        printf("info: no results\n");
+    }
+    for (size_t it = 0; it < idx; it++)
+        free(lines[it]);
+    free(lines);
+    exit(0);
+}
+
 int main(int argc, char **argv)
 {
     uint8_t *aes_key = malloc(MAX_INPUT_LEN);
 
     if (argc == 1)
     {
-        size_t idx = 0;
-        char **lines = read_file(PASSWORDS_STORE, &idx);
-        input_key(aes_key);
-        for (size_t i = 0; i < idx; i++)
-        {
-            size_t decsize = 0;
-            unsigned char *decoded_data = b64_decode_ex(lines[i], strlen(lines[i]), &decsize);
-
-            AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-            AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
-            printf("DEC: %s\n", decoded_data);
-            free(decoded_data);
-        }
-        for (size_t it = 0; it < idx; it++)
-            free(lines[it]);
-        free(lines);
-        return 0;
+        decrypt_and_print(aes_key, NULL);
     }
 
     char *label = NULL;
+    char *find_label = NULL;
+    parse_arg("-l", "--label", &label, argc, argv);
+    parse_arg("-fl", "--find-label", &find_label, argc, argv);
 
-    if (argc > 2)
+    if (find_label != NULL)
     {
-        for (int i = 1; i < argc; i++)
-        {
-            if ((strcmp("-l", argv[i]) == 0) || (strcmp("--label", argv[i]) == 0))
-            {
-                label = argv[i + 1];
-                i++;
-                continue;
-            }
-        }
+        decrypt_and_print(aes_key, find_label);
     }
 
     uint8_t *data = NULL;
@@ -202,7 +265,7 @@ int main(int argc, char **argv)
     {
         char *last_arg = argv[argc - 1];
         if (strcmp(last_arg, label) == 0)
-        {   
+        {
             printf("error: label provided but no data\n");
             exit(1);
         }
