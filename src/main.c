@@ -3,21 +3,80 @@
 #include <stdint.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <termios.h>
 
 #include "aes.h"
 #include "b64/b64.h"
-
-#define STRINGIFY2(X) #X
-#define STRINGIFY(X) STRINGIFY2(X)
 
 #define MAX_INPUT_LEN 1024
 #define PASSWORDS_STORE ".data"
 #define LMAX 255
 
-// TODO(#7): hide key input
-
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+
+ssize_t getpasswd(char **pw, size_t sz, FILE *fp)
+{
+    if (!pw || !sz || !fp)
+        return -1;
+
+    if (*pw == NULL)
+    {
+        void *tmp = realloc(*pw, sz * sizeof **pw);
+        if (!tmp)
+            return -1;
+        memset(tmp, 0, sz);
+        *pw = (char *)tmp;
+    }
+
+    size_t idx = 0;
+    int c = 0;
+
+    struct termios old_kbd_mode;
+    struct termios new_kbd_mode;
+
+    if (tcgetattr(0, &old_kbd_mode))
+    {
+        fprintf(stderr, "%s() error: tcgetattr failed.\n", __func__);
+        return -1;
+    } /* copy old to new */
+    memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
+
+    new_kbd_mode.c_lflag &= ~(ICANON | ECHO);
+    new_kbd_mode.c_cc[VTIME] = 0;
+    new_kbd_mode.c_cc[VMIN] = 1;
+    if (tcsetattr(0, TCSANOW, &new_kbd_mode))
+    {
+        fprintf(stderr, "%s() error: tcsetattr failed.\n", __func__);
+        return -1;
+    }
+
+    while (((c = fgetc(fp)) != '\n' && c != EOF && idx < sz - 1) ||
+           (idx == sz - 1 && c == 127))
+    {
+        if (c != 127)
+        {
+            (*pw)[idx++] = c;
+        }
+        else if (idx > 0)
+        {
+            (*pw)[--idx] = 0;
+        }
+    }
+    (*pw)[idx] = 0;
+
+    if (tcsetattr(0, TCSANOW, &old_kbd_mode))
+    {
+        fprintf(stderr, "%s() error: tcsetattr failed.\n", __func__);
+        return -1;
+    }
+
+    if (idx == sz - 1 && c != '\n')
+        fprintf(stderr, " (%s() warning: truncated at %zu chars.)\n",
+                __func__, sz - 1);
+
+    return idx;
+}
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 {
@@ -151,7 +210,8 @@ void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
 void input_key(uint8_t *aes_key)
 {
     printf("key?\n");
-    scanf("%" STRINGIFY(MAX_INPUT_LEN) "[^\n]", aes_key);
+    getpasswd((char **)&aes_key, MAX_INPUT_LEN, stdin);
+    printf("\n");
 }
 
 void parse_arg(const char *s, const char *l, char **label, int argc, char **argv)
@@ -172,7 +232,7 @@ void parse_arg(const char *s, const char *l, char **label, int argc, char **argv
     }
 }
 
-void decrypt_and_print(uint8_t *aes_key, char* find_label)
+void decrypt_and_print(uint8_t *aes_key, char *find_label)
 {
     size_t idx = 0;
     char **lines = read_file(PASSWORDS_STORE, &idx);
