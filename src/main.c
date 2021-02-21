@@ -223,12 +223,10 @@ void parse_arg(const char *s, const char *l, char **label, int argc, char **argv
         {
             if ((i + 1) >= argc)
             {
-                *label = argv[argc - 1];
                 return;
             }
             *label = argv[i + 1];
-            i++;
-            continue;
+            return;
         }
     }
 }
@@ -328,14 +326,8 @@ int main(int argc, char **argv)
 
     if (label != NULL)
     {
-        char *last_arg = argv[argc - 1];
-        if (strcmp(last_arg, label) == 0)
-        {
-            printf("error: label provided but no data\n");
-            exit(1);
-        }
         data = malloc(MAX_INPUT_LEN * 2 + 2);
-        snprintf((char *)data, sizeof(uint8_t) * MAX_INPUT_LEN * 2 + 2, "%s %s", label, last_arg);
+        snprintf((char *)data, sizeof(uint8_t) * MAX_INPUT_LEN * 2 + 2, "%s %s", label, argv[argc - 1]);
         data_length = strlen((char *)data);
         input_key(aes_key);
         encrypt_and_write(data, aes_key, &data_length);
