@@ -310,15 +310,16 @@ int main(int argc, char **argv)
         decrypt_and_print(aes_key, NULL);
     }
 
-    char *label = NULL;
     char *find_label = NULL;
-    parse_arg("-l", "--label", &label, argc, argv);
     parse_arg("-fl", "--find-label", &find_label, argc, argv);
 
     if (find_label != NULL)
     {
         decrypt_and_print(aes_key, find_label);
     }
+
+    char *label = NULL;
+    parse_arg("-l", "--label", &label, argc, argv);
 
     uint8_t *data = NULL;
     size_t data_length = 0;
