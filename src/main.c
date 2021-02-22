@@ -217,7 +217,7 @@ void input_key(uint8_t *aes_key)
     getpasswd((char **)&aes_key, MAX_INPUT_LEN, stdin);
 }
 
-void parse_arg(const char *s, const char *l, char **label, int argc, char **argv)
+void parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
 {
     for (int i = 1; i < argc; i++)
     {
@@ -227,7 +227,7 @@ void parse_arg(const char *s, const char *l, char **label, int argc, char **argv
             {
                 return;
             }
-            *label = argv[i + 1];
+            *out = argv[i + 1];
             return;
         }
     }
@@ -307,39 +307,42 @@ int main(int argc, char **argv)
 {
     uint8_t *aes_key = malloc(MAX_INPUT_LEN);
 
-    if (argc == 1)
-    {
-        decrypt_and_print(aes_key, NULL);
-    }
+    uint8_t *data = NULL;
+    parse_arg("-d", "--data", (char **)&data, argc, argv);
 
-    char *find_label = NULL;
-    parse_arg("-fl", "--find-label", &find_label, argc, argv);
-
-    if (find_label != NULL)
+    if (data == NULL)
     {
-        decrypt_and_print(aes_key, find_label);
+        char *find_label = NULL;
+        parse_arg("-fl", "--find-label", &find_label, argc, argv);
+
+        if (find_label != NULL)
+        {
+            decrypt_and_print(aes_key, find_label);
+        }
+        else
+        {
+            decrypt_and_print(aes_key, NULL);
+        }
     }
 
     char *label = NULL;
     parse_arg("-l", "--label", &label, argc, argv);
 
-    uint8_t *data = NULL;
+    input_key(aes_key);
+
     size_t data_length = 0;
 
     if (label != NULL)
     {
-        data = malloc(MAX_INPUT_LEN * 2 + 2);
-        snprintf((char *)data, sizeof(uint8_t) * MAX_INPUT_LEN * 2 + 2, "%s %s", label, argv[argc - 1]);
-        data_length = strlen((char *)data);
-        input_key(aes_key);
-        encrypt_and_write(data, aes_key, &data_length);
-        free(data);
+        uint8_t *label_and_data = malloc(MAX_INPUT_LEN * 2 + 2);
+        snprintf((char *)label_and_data, sizeof(uint8_t) * MAX_INPUT_LEN * 2 + 2, "%s %s", label, data);
+        data_length = strlen((char *)label_and_data);
+        encrypt_and_write(label_and_data, aes_key, &data_length);
+        free(label_and_data);
     }
     else
     {
-        data = (uint8_t *)argv[argc - 1];
         data_length = strlen((char *)data);
-        input_key(aes_key);
         encrypt_and_write(data, aes_key, &data_length);
     }
 
