@@ -157,11 +157,6 @@ void read_file(const char *fp, char ***lines, ssize_t *lsize)
         return;
     }
 
-    printf("sizeof lines: %ld\n", sizeof(lines));
-    printf("sizeof lines2: %ld\n", sizeof(*lines));
-    printf("sizeof lines3: %ld\n", sizeof(**lines));
-    printf("sizeof lines4: %ld\n", sizeof(***lines));
-
     if (!(*lines = calloc(LMAX, sizeof(**lines))))
     {
         fprintf(stderr, "error: memory allocation failed.\n");
@@ -242,6 +237,11 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
     ssize_t idx = 0;
     char **lines = NULL;
     read_file(PASSWORDS_STORE, &lines, &idx);
+    if (idx == -1)
+    {
+        printf("Error opening file %s.\n", PASSWORDS_STORE);
+        exit(1);
+    }
     input_key(aes_key);
     int did_print = 0;
     for (ssize_t i = 0; i < idx; i++)
