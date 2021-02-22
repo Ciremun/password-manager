@@ -141,9 +141,8 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream)
     return pos;
 }
 
-char **read_file(const char *fp, size_t *lsize)
+void read_file(const char *fp, char ***lines, ssize_t *lsize)
 {
-    char **lines = NULL;
     char *ln = NULL;
     size_t n = 0;
     ssize_t nchr = 0;
@@ -154,10 +153,16 @@ char **read_file(const char *fp, size_t *lsize)
     if (!(f = fopen(fp, "r")))
     {
         fprintf(stderr, "error: file open failed '%s'.\n", fp);
-        exit(1);
+        *lsize = -1;
+        return;
     }
 
-    if (!(lines = calloc(LMAX, sizeof *lines)))
+    printf("sizeof lines: %ld\n", sizeof(lines));
+    printf("sizeof lines2: %ld\n", sizeof(*lines));
+    printf("sizeof lines3: %ld\n", sizeof(**lines));
+    printf("sizeof lines4: %ld\n", sizeof(***lines));
+
+    if (!(*lines = calloc(LMAX, sizeof(**lines))))
     {
         fprintf(stderr, "error: memory allocation failed.\n");
         exit(1);
@@ -168,14 +173,14 @@ char **read_file(const char *fp, size_t *lsize)
         while (nchr > 0 && (ln[nchr - 1] == '\n' || ln[nchr - 1] == '\r'))
             ln[--nchr] = 0;
 
-        lines[idx++] = strdup(ln);
+        (*lines)[idx++] = strdup(ln);
 
         if (idx == lmax)
         {
             char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
             if (!tmp)
                 exit(1);
-            lines = tmp;
+            *lines = tmp;
             lmax *= 2;
         }
     }
@@ -186,7 +191,6 @@ char **read_file(const char *fp, size_t *lsize)
         free(ln);
 
     *lsize = idx;
-    return lines;
 }
 
 void write_file(const char *fp, const char *mode, void *data)
@@ -235,11 +239,12 @@ void parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
 
 void decrypt_and_print(uint8_t *aes_key, char *find_label)
 {
-    size_t idx = 0;
-    char **lines = read_file(PASSWORDS_STORE, &idx);
+    ssize_t idx = 0;
+    char **lines = NULL;
+    read_file(PASSWORDS_STORE, &lines, &idx);
     input_key(aes_key);
     int did_print = 0;
-    for (size_t i = 0; i < idx; i++)
+    for (ssize_t i = 0; i < idx; i++)
     {
         size_t decsize = 0;
         size_t line_length = strlen(lines[i]);
@@ -300,7 +305,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
     {
         printf("info: no results\n");
     }
-    for (size_t it = 0; it < idx; it++)
+    for (ssize_t it = 0; it < idx; it++)
         free(lines[it]);
     free(lines);
     free(aes_key);
