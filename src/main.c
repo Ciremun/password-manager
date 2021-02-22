@@ -8,7 +8,7 @@
 #include "aes.h"
 #include "b64/b64.h"
 
-#define MAX_INPUT_LEN 1024
+#define MAX_KEY_LEN 1024
 #define PASSWORDS_STORE ".data"
 #define LMAX 255
 
@@ -214,7 +214,7 @@ void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
 void input_key(uint8_t *aes_key)
 {
     printf("key?\n");
-    getpasswd((char **)&aes_key, MAX_INPUT_LEN, stdin);
+    getpasswd((char **)&aes_key, MAX_KEY_LEN, stdin);
 }
 
 void parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
@@ -248,7 +248,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
         if (find_label != NULL)
         {
-            char *label = malloc(MAX_INPUT_LEN);
+            char *label = malloc(decsize);
             size_t label_length = 0;
             int found_label = 0;
             for (size_t j = 0; j < decsize; j++)
@@ -305,7 +305,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
 
 int main(int argc, char **argv)
 {
-    uint8_t *aes_key = malloc(MAX_INPUT_LEN);
+    uint8_t *aes_key = malloc(MAX_KEY_LEN);
 
     uint8_t *data = NULL;
     parse_arg("-d", "--data", (char **)&data, argc, argv);
@@ -330,19 +330,18 @@ int main(int argc, char **argv)
 
     input_key(aes_key);
 
-    size_t data_length = 0;
-
     if (label != NULL)
     {
-        uint8_t *label_and_data = malloc(MAX_INPUT_LEN * 2 + 2);
-        snprintf((char *)label_and_data, sizeof(uint8_t) * MAX_INPUT_LEN * 2 + 2, "%s %s", label, data);
-        data_length = strlen((char *)label_and_data);
-        encrypt_and_write(label_and_data, aes_key, &data_length);
+        size_t label_and_data_size = strlen(label) + strlen((char *)data);
+        uint8_t *label_and_data = malloc(label_and_data_size + 2);
+        snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", label, data);
+        size_t label_and_data_length = strlen((char *)label_and_data);
+        encrypt_and_write(label_and_data, aes_key, &label_and_data_length);
         free(label_and_data);
     }
     else
     {
-        data_length = strlen((char *)data);
+        size_t data_length = strlen((char *)data);
         encrypt_and_write(data, aes_key, &data_length);
     }
 
