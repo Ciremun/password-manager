@@ -203,13 +203,12 @@ void write_file(const char *fp, const char *mode, void *data)
 
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
 {
-    printf("%s\n", data);
-
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, data, *data_length);
 
     char *encoded_data = b64_encode(data, *data_length);
     write_file(PASSWORDS_STORE, "a", encoded_data);
+    free(encoded_data);
 }
 
 void input_key(uint8_t *aes_key)
@@ -267,12 +266,14 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
             if (!found_label)
             {
                 free(label);
+                free(decoded_data);
                 continue;
             }
             size_t query_len = strlen(find_label);
             if (query_len > label_length)
             {
                 free(label);
+                free(decoded_data);
                 continue;
             }
             int do_continue = 0;
@@ -287,6 +288,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
             free(label);
             if (do_continue)
             {
+                free(decoded_data);
                 continue;
             }
         }
@@ -301,6 +303,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
     for (size_t it = 0; it < idx; it++)
         free(lines[it]);
     free(lines);
+    free(aes_key);
     exit(0);
 }
 
