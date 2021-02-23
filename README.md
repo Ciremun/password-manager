@@ -9,6 +9,7 @@
     -d  --data          data to encrypt
     -l  --label         add label for data
     -fl --find-label    find data by label
+    -h  --help          display help
 
 ## Build
 

@@ -26,6 +26,7 @@ const char *help_s = "\n\
     -d  --data          data to encrypt\n\
     -l  --label         add label for data\n\
     -fl --find-label    find data by label\n\
+    -h  --help          display help\n\
 \n\
 ";
 
