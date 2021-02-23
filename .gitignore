@@ -1,4 +1,5 @@
 .vscode/
+build/
 .data
 pm
 pm.exe

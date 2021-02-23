@@ -3,7 +3,16 @@
 #include <stdint.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <termios.h>
+
+#ifdef _WIN32
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+#include "io_win.h"
+#else
+#include "io_unix.h"
+#endif
 
 #include "aes.h"
 #include "b64/b64.h"
@@ -13,7 +22,6 @@
 #define LMAX 255
 
 // TODO(#8): "generate password" flag
-// TODO(#9): doesn't work on Windows
 // TODO(#11): read data from file
 // TODO(#13): change flag precedence
 // d & l & fl > help
@@ -32,69 +40,6 @@ const char *help_s = "\n\
     -h  --help          display help\n\
 \n\
 ";
-
-ssize_t getpasswd(char **pw, size_t sz, FILE *fp)
-{
-    if (!pw || !sz || !fp)
-        return -1;
-
-    if (*pw == NULL)
-    {
-        void *tmp = realloc(*pw, sz * sizeof **pw);
-        if (!tmp)
-            return -1;
-        memset(tmp, 0, sz);
-        *pw = (char *)tmp;
-    }
-
-    size_t idx = 0;
-    int c = 0;
-
-    struct termios old_kbd_mode;
-    struct termios new_kbd_mode;
-
-    if (tcgetattr(0, &old_kbd_mode))
-    {
-        fprintf(stderr, "%s() error: tcgetattr failed.\n", __func__);
-        return -1;
-    }
-    memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
-
-    new_kbd_mode.c_lflag &= ~(ICANON | ECHO);
-    new_kbd_mode.c_cc[VTIME] = 0;
-    new_kbd_mode.c_cc[VMIN] = 1;
-    if (tcsetattr(0, TCSANOW, &new_kbd_mode))
-    {
-        fprintf(stderr, "%s() error: tcsetattr failed.\n", __func__);
-        return -1;
-    }
-
-    while (((c = fgetc(fp)) != '\n' && c != EOF && idx < sz - 1) ||
-           (idx == sz - 1 && c == 127))
-    {
-        if (c != 127)
-        {
-            (*pw)[idx++] = c;
-        }
-        else if (idx > 0)
-        {
-            (*pw)[--idx] = 0;
-        }
-    }
-    (*pw)[idx] = 0;
-
-    if (tcsetattr(0, TCSANOW, &old_kbd_mode))
-    {
-        fprintf(stderr, "%s() error: tcsetattr failed.\n", __func__);
-        return -1;
-    }
-
-    if (idx == sz - 1 && c != '\n')
-        fprintf(stderr, " (%s() warning: truncated at %zu chars.)\n",
-                __func__, sz - 1);
-
-    return idx;
-}
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 {
@@ -225,7 +170,7 @@ void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
 void input_key(uint8_t *aes_key)
 {
     printf("key?\n");
-    getpasswd((char **)&aes_key, MAX_KEY_LEN, stdin);
+    getpasswd((char **)&aes_key, MAX_KEY_LEN);
 }
 
 int parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
@@ -336,7 +281,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    uint8_t *aes_key = malloc(MAX_KEY_LEN);
+    uint8_t *aes_key = calloc(1, MAX_KEY_LEN);
 
     uint8_t *data = NULL;
     parse_arg("-d", "--data", (char **)&data, argc, argv);
