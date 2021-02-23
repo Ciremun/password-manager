@@ -23,8 +23,6 @@ typedef SSIZE_T ssize_t;
 
 // TODO(#8): "generate password" flag
 // TODO(#11): read data from file
-// TODO(#13): change flag precedence
-// d & l & fl > help
 // TODO(#14): replace data for label
 
 struct AES_ctx ctx;
@@ -272,16 +270,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
 
 int main(int argc, char **argv)
 {
-    char *help = NULL;
-    int help_flag = parse_arg("-h", "--help", &help, argc, argv);
-
-    if (help_flag)
-    {
-        printf("%s\n", help_s);
-        return 0;
-    }
-
-    uint8_t *aes_key = calloc(1, MAX_KEY_LEN);
+    uint8_t *aes_key = NULL;
 
     uint8_t *data = NULL;
     parse_arg("-d", "--data", (char **)&data, argc, argv);
@@ -293,10 +282,21 @@ int main(int argc, char **argv)
 
         if (find_label != NULL)
         {
+            aes_key = calloc(1, MAX_KEY_LEN);
             decrypt_and_print(aes_key, find_label);
         }
         else
         {
+            char *help = NULL;
+            int help_flag = parse_arg("-h", "--help", &help, argc, argv);
+
+            if (help_flag)
+            {
+                printf("%s\n", help_s);
+                return 0;
+            }
+
+            aes_key = calloc(1, MAX_KEY_LEN);
             decrypt_and_print(aes_key, NULL);
         }
     }
@@ -304,6 +304,7 @@ int main(int argc, char **argv)
     char *label = NULL;
     parse_arg("-l", "--label", &label, argc, argv);
 
+    aes_key = calloc(1, MAX_KEY_LEN);
     input_key(aes_key);
 
     if (label != NULL)
