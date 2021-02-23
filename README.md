@@ -20,11 +20,11 @@
 ### Windows
 
 ```console
-    cmd.exe
-    cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\"
-    VsDevCmd.bat
-    cd password-manager
-    build_win.bat
+cmd.exe
+cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\"
+VsDevCmd.bat
+cd password-manager
+build_win.bat
 ```
 
 ## Thank
