@@ -6,3 +6,7 @@ main:
 
 debug: CFLAGS += -g
 debug: main
+
+python:
+	-python3 update_help.py
+	$(CC) $(SOURCES) $(CFLAGS) -o pm

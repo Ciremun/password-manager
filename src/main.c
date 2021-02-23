@@ -9,16 +9,25 @@
 #include "b64/b64.h"
 
 #define MAX_KEY_LEN 1024
-#define PASSWORDS_STORE ".data"
+#define DATA_STORE ".data"
 #define LMAX 255
 
 // TODO(#8): "generate password" flag
 // TODO(#9): doesn't work on Windows
-// TODO(#10): builtin docs
 // TODO(#11): read data from file
 
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+const char *help_s = "\n\
+    ./pm [flags]        read or write data\n\
+\n\
+    flags:\n\
+\n\
+    -d  --data          data to encrypt\n\
+    -l  --label         add label for data\n\
+    -fl --find-label    find data by label\n\
+\n\
+";
 
 ssize_t getpasswd(char **pw, size_t sz, FILE *fp)
 {
@@ -152,7 +161,6 @@ void read_file(const char *fp, char ***lines, ssize_t *lsize)
 
     if (!(f = fopen(fp, "r")))
     {
-        fprintf(stderr, "error: file open failed '%s'.\n", fp);
         *lsize = -1;
         return;
     }
@@ -206,7 +214,7 @@ void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
     AES_CTR_xcrypt_buffer(&ctx, data, *data_length);
 
     char *encoded_data = b64_encode(data, *data_length);
-    write_file(PASSWORDS_STORE, "a", encoded_data);
+    write_file(DATA_STORE, "a", encoded_data);
     free(encoded_data);
 }
 
@@ -216,7 +224,7 @@ void input_key(uint8_t *aes_key)
     getpasswd((char **)&aes_key, MAX_KEY_LEN, stdin);
 }
 
-void parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
+int parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
 {
     for (int i = 1; i < argc; i++)
     {
@@ -224,22 +232,23 @@ void parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
         {
             if ((i + 1) >= argc)
             {
-                return;
+                return 1;
             }
             *out = argv[i + 1];
-            return;
+            return 1;
         }
     }
+    return 0;
 }
 
 void decrypt_and_print(uint8_t *aes_key, char *find_label)
 {
     ssize_t idx = 0;
     char **lines = NULL;
-    read_file(PASSWORDS_STORE, &lines, &idx);
+    read_file(DATA_STORE, &lines, &idx);
     if (idx == -1)
     {
-        printf("Error opening file %s.\n", PASSWORDS_STORE);
+        printf("Error opening file %s.\n", DATA_STORE);
         exit(1);
     }
     input_key(aes_key);
@@ -314,6 +323,15 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
 
 int main(int argc, char **argv)
 {
+    char *help = NULL;
+    int help_flag = parse_arg("-h", "--help", &help, argc, argv);
+
+    if (help_flag)
+    {
+        printf("%s\n", help_s);
+        return 0;
+    }
+
     uint8_t *aes_key = malloc(MAX_KEY_LEN);
 
     uint8_t *data = NULL;
