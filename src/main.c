@@ -70,17 +70,12 @@ int parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
 
 void decrypt_and_print(uint8_t *aes_key, char *find_label)
 {
-    ssize_t idx = 0;
+    size_t idx = 0;
     char **lines = NULL;
     read_file(DATA_STORE, &lines, &idx);
-    if (idx == -1)
-    {
-        printf("Error opening file %s.\n", DATA_STORE);
-        exit(1);
-    }
     input_key(aes_key);
     int did_print = 0;
-    for (ssize_t i = 0; i < idx; i++)
+    for (size_t i = 0; i < idx; i++)
     {
         size_t decsize = 0;
         size_t line_length = strlen(lines[i]);
@@ -141,7 +136,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
     {
         printf("info: no results\n");
     }
-    for (ssize_t it = 0; it < idx; it++)
+    for (size_t it = 0; it < idx; it++)
         free(lines[it]);
     free(lines);
     free(aes_key);

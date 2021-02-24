@@ -69,8 +69,8 @@ void read_file(const char *fp, char ***lines, ssize_t *lsize)
 
     if (!(f = fopen(fp, "r")))
     {
-        *lsize = -1;
-        return;
+        printf("Error opening file %s.\n", fp);
+        exit(1);
     }
 
     if (!(*lines = calloc(LMAX, sizeof(**lines))))
