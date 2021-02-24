@@ -36,6 +36,20 @@ const char *help_s = "\n\
 \n\
 ";
 
+typedef struct
+{
+    char *value;
+    int exists;
+} Flag;
+
+typedef struct
+{
+    Flag data;
+    Flag label;
+    Flag find_label;
+    Flag help;
+} Flags;
+
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
 {
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
@@ -52,21 +66,35 @@ void input_key(uint8_t *aes_key)
     getpasswd((char **)&aes_key, MAX_KEY_LEN);
 }
 
-int parse_arg(const char *s, const char *l, char **out, int argc, char **argv)
+int is_flag(char *arg, char *s, char *l)
+{
+    return (strcmp(s, arg) == 0) || (strcmp(l, arg) == 0);
+}
+
+void parse_flags(Flags *f, int argc, char **argv)
 {
     for (int i = 1; i < argc; i++)
     {
-        if ((strcmp(s, argv[i]) == 0) || (strcmp(l, argv[i]) == 0))
+        Flag *flag = NULL;
+        if      (!f->data.exists       && is_flag(argv[i], "-d", "--data"))
+            flag = &f->data;
+        else if (!f->label.exists      && is_flag(argv[i], "-l", "--label"))
+            flag = &f->label;
+        else if (!f->find_label.exists && is_flag(argv[i], "-fl", "--find-label"))
+            flag = &f->find_label;
+        else if (!f->help.exists       && is_flag(argv[i], "-h", "--help"))
+            flag = &f->help;
+
+        if (flag != NULL)
         {
+            flag->exists = 1;
             if ((i + 1) >= argc)
             {
-                return 1;
+                continue;
             }
-            *out = argv[i + 1];
-            return 1;
+            flag->value = argv[i + 1];
         }
     }
-    return 0;
 }
 
 void decrypt_and_print(uint8_t *aes_key, char *find_label)
@@ -147,26 +175,20 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
 int main(int argc, char **argv)
 {
     uint8_t *aes_key = NULL;
+    Flags flags = {0};
 
-    uint8_t *data = NULL;
-    parse_arg("-d", "--data", (char **)&data, argc, argv);
+    parse_flags(&flags, argc, argv);
 
-    if (data == NULL)
+    if (!flags.data.exists)
     {
-        char *find_label = NULL;
-        parse_arg("-fl", "--find-label", &find_label, argc, argv);
-
-        if (find_label != NULL)
+        if (flags.find_label.exists)
         {
             aes_key = calloc(1, MAX_KEY_LEN);
-            decrypt_and_print(aes_key, find_label);
+            decrypt_and_print(aes_key, flags.find_label.value);
         }
         else
         {
-            char *help = NULL;
-            int help_flag = parse_arg("-h", "--help", &help, argc, argv);
-
-            if (help_flag)
+            if (flags.help.exists)
             {
                 printf("%s\n", help_s);
                 return 0;
@@ -177,25 +199,22 @@ int main(int argc, char **argv)
         }
     }
 
-    char *label = NULL;
-    parse_arg("-l", "--label", &label, argc, argv);
-
     aes_key = calloc(1, MAX_KEY_LEN);
     input_key(aes_key);
 
-    if (label != NULL)
+    if (flags.label.exists)
     {
-        size_t label_and_data_size = strlen(label) + strlen((char *)data);
+        size_t label_and_data_size = strlen(flags.label.value) + strlen((char *)flags.data.value);
         uint8_t *label_and_data = malloc(label_and_data_size + 2);
-        snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", label, data);
+        snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", flags.label.value, flags.data.value);
         size_t label_and_data_length = strlen((char *)label_and_data);
         encrypt_and_write(label_and_data, aes_key, &label_and_data_length);
         free(label_and_data);
     }
     else
     {
-        size_t data_length = strlen((char *)data);
-        encrypt_and_write(data, aes_key, &data_length);
+        size_t data_length = strlen((char *)flags.data.value);
+        encrypt_and_write((uint8_t *)flags.data.value, aes_key, &data_length);
     }
 
     free(aes_key);
