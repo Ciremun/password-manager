@@ -6,7 +6,11 @@ mkdir build
 cd build
 
 set CFLAGS=/FC /nologo /Fepm.exe
-set SOURCES=../src/main.c ../src/aes.c ../src/b64/encode.c ../src/b64/decode.c ../src/b64/buffer.c ../src/io_win.c
+set S=../src/
+set SOURCES=%S%main.c ^
+%S%aes.c ^
+%S%b64/encode.c %S%b64/decode.c %S%b64/buffer.c ^
+%S%io/win.c %S%io/common.c
 
 cl.exe %CFLAGS% %INCLUDES% %SOURCES%
 

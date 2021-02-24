@@ -3,7 +3,7 @@
 #include <string.h>
 #include <termios.h>
 
-#include "io_unix.h"
+#include "unix.h"
 
 ssize_t getpasswd(char **pw, size_t sz)
 {

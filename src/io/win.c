@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <conio.h>
 
-#include "io_win.h"
+#include "win.h"
 
 void getpasswd(char **pw, int sz)
 {
