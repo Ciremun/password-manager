@@ -58,7 +58,7 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream)
     return pos;
 }
 
-void read_file(const char *fp, char ***lines, ssize_t *lsize)
+void read_file(const char *fp, char ***lines, size_t *lsize)
 {
     char *ln = NULL;
     size_t n = 0;
