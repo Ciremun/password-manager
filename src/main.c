@@ -20,7 +20,6 @@
 // TODO(#8): "generate password" flag
 // TODO(#11): read data from file
 // TODO(#14): replace data for label
-// TODO(#15): report error on label flag without data
 
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
@@ -181,6 +180,11 @@ int main(int argc, char **argv)
 
     if (!flags.data.exists)
     {
+        if (flags.label.exists)
+        {
+            printf("error: label flag called without --data\n");
+            return 1;
+        }
         if (flags.find_label.exists)
         {
             aes_key = calloc(1, MAX_KEY_LEN);
