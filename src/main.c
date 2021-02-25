@@ -57,6 +57,76 @@ void input_key(uint8_t **aes_key)
     getpasswd((char **)aes_key, MAX_KEY_LEN);
 }
 
+void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
+{
+    char **lines = NULL;
+    size_t idx = 0;
+    read_file(DATA_STORE, &lines, &idx);
+    input_key(&aes_key);
+
+    for (size_t i = 0; i < idx; i++)
+    {
+        size_t decsize = 0;
+        size_t line_length = strlen(lines[i]);
+        unsigned char *decoded_data = b64_decode_ex(lines[i], line_length, &decsize);
+        AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+        AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+        char *label = malloc(decsize);
+        size_t label_length = 0;
+        for (size_t j = 0; j < decsize; j++)
+        {
+            label_length++;
+            if (decoded_data[j] == ' ')
+            {
+                label[j] = '\0';
+                break;
+            }
+            label[j] = decoded_data[j];
+        }
+
+        if (strcmp(label, find_label) == 0)
+        {
+            free(decoded_data);
+
+            size_t label_and_data_size = label_length + strlen(data) + 2;
+
+            decoded_data = malloc(label_and_data_size);
+            snprintf((char *)decoded_data, sizeof(char) * label_and_data_size, "%s %s", label, data);
+            
+            AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+            AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_data, label_and_data_size);
+
+            char *encoded_data = b64_encode(decoded_data, label_and_data_size);
+            FILE *f = fopen(DATA_STORE, "w");
+            if (f == NULL)
+            {
+                printf("Error opening file %s.\n", DATA_STORE);
+                exit(1);
+            }
+
+            free(lines[i]);
+            lines[i] = malloc(strlen(encoded_data));
+            lines[i] = encoded_data;
+
+            for (size_t k = 0; k < idx; k++)
+                fprintf(f, "%s\n", (char *)lines[k]);
+
+            fclose(f);
+            free(label);
+            free(encoded_data);
+            free(decoded_data);
+            free(aes_key);
+
+            exit(0);
+        }
+
+        free(label);
+        free(decoded_data);
+        free(aes_key);
+    }
+
+}
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
 {
     input_key(&aes_key);
@@ -257,11 +327,12 @@ int main(int argc, char **argv)
             printf("error: label flag called without name\n");
             return 1;
         }
-        size_t label_and_data_size = strlen(f.label.value) + strlen(f.data.value) + 2;
-        char *label_and_data = malloc(label_and_data_size);
-        snprintf(label_and_data, sizeof(char) * label_and_data_size, "%s %s", f.label.value, f.data.value);
-        encrypt_and_write((uint8_t *)label_and_data, aes_key, strlen(label_and_data));
-        free(label_and_data);
+        // size_t label_and_data_size = strlen(f.label.value) + strlen(f.data.value) + 2;
+        // char *label_and_data = malloc(label_and_data_size);
+        // snprintf(label_and_data, sizeof(char) * label_and_data_size, "%s %s", f.label.value, f.data.value);
+        // encrypt_and_write((uint8_t *)label_and_data, aes_key, strlen(label_and_data));
+        // free(label_and_data);
+        encrypt_and_replace(f.label.value, f.data.value, aes_key);
     }
     else
     {
