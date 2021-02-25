@@ -63,7 +63,7 @@ void input_key(uint8_t **aes_key)
 {
     printf("key?\n");
     *aes_key = calloc(1, MAX_KEY_LEN);
-    getpasswd((char **)&*aes_key, MAX_KEY_LEN);
+    getpasswd((char **)aes_key, MAX_KEY_LEN);
 }
 
 int is_flag(char *arg, char *s, char *l)
