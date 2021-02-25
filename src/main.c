@@ -117,15 +117,14 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
             int found_label = 0;
             for (size_t j = 0; j < decsize; j++)
             {
+                label_length++;
                 if (decoded_data[j] == ' ')
                 {
                     found_label = 1;
                     label[j] = '\0';
-                    label_length++;
                     break;
                 }
                 label[j] = decoded_data[j];
-                label_length++;
             }
             if (!found_label)
             {
