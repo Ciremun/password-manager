@@ -18,7 +18,6 @@
 #define DATA_STORE ".data"
 
 // TODO(#8): "generate password" flag
-// TODO(#11): read data from file
 // TODO(#14): replace data for label
 
 struct AES_ctx ctx;
@@ -32,6 +31,7 @@ const char *help_s = "\n\
     -l  --label         add label for data\n\
     -fl --find-label    find data by label\n\
     -h  --help          display help\n\
+    -df --data-file     read data from file\n\
 \n\
 ";
 
@@ -50,21 +50,23 @@ typedef struct
     Flag help;
 } Flags;
 
-void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
-{
-    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, data, *data_length);
-
-    char *encoded_data = b64_encode(data, *data_length);
-    write_file(DATA_STORE, "a", encoded_data);
-    free(encoded_data);
-}
-
 void input_key(uint8_t **aes_key)
 {
     printf("key?\n");
     *aes_key = calloc(1, MAX_KEY_LEN);
     getpasswd((char **)aes_key, MAX_KEY_LEN);
+}
+
+void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
+{
+    input_key(&aes_key);
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, data, data_length);
+
+    char *encoded_data = b64_encode(data, data_length);
+    write_file(DATA_STORE, "a", encoded_data);
+    free(encoded_data);
+    free(aes_key);
 }
 
 int is_flag(char *arg, char *s, char *l)
@@ -193,20 +195,18 @@ int main(int argc, char **argv)
 
             size_t nch = 0;
             char *data = read_file_as_str(f.data_file.value, &nch);
-            input_key(&aes_key);
 
-            if (f.label.exists && f.label.value)
+            if (f.label.exists)
             {
-                size_t label_and_data_size = strlen(f.label.value) + strlen(data);
-                uint8_t *label_and_data = malloc(label_and_data_size + 2);
-                snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", f.label.value, data);
-                size_t label_and_data_length = strlen((char *)label_and_data);
-                encrypt_and_write(label_and_data, aes_key, &label_and_data_length);
+                size_t label_and_data_size = strlen(f.label.value) + nch + 2;
+                char *label_and_data = malloc(label_and_data_size);
+                snprintf(label_and_data, sizeof(char) * label_and_data_size, "%s %s", f.label.value, data);
+                encrypt_and_write((uint8_t *)label_and_data, aes_key, strlen(label_and_data));
                 free(label_and_data);
             }
             else
             {
-                encrypt_and_write(data, aes_key, &nch);
+                encrypt_and_write((uint8_t *)data, aes_key, nch);
             }
 
             free(data);
@@ -219,6 +219,11 @@ int main(int argc, char **argv)
         }
         if (f.find_label.exists)
         {
+            if (!f.find_label.value)
+            {
+                printf("error: find label flag called without name\n");
+                return 1;
+            }
             decrypt_and_print(aes_key, f.find_label.value);
         }
         else
@@ -233,29 +238,35 @@ int main(int argc, char **argv)
         }
     }
 
+    if (!f.data.value)
+    {
+        printf("error: data flag called without data\n");
+        return 1;
+    }
+
     if (f.data_file.exists)
     {
         printf("error: can't combine data and data-file flags\n");
         return 1;
     }
 
-    input_key(&aes_key);
-
     if (f.label.exists)
     {
-        size_t label_and_data_size = strlen(f.label.value) + strlen((char *)f.data.value);
-        uint8_t *label_and_data = malloc(label_and_data_size + 2);
-        snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", f.label.value, f.data.value);
-        size_t label_and_data_length = strlen((char *)label_and_data);
-        encrypt_and_write(label_and_data, aes_key, &label_and_data_length);
+        if (!f.label.value)
+        {
+            printf("error: label flag called without name\n");
+            return 1;
+        }
+        size_t label_and_data_size = strlen(f.label.value) + strlen(f.data.value) + 2;
+        char *label_and_data = malloc(label_and_data_size);
+        snprintf(label_and_data, sizeof(char) * label_and_data_size, "%s %s", f.label.value, f.data.value);
+        encrypt_and_write((uint8_t *)label_and_data, aes_key, strlen(label_and_data));
         free(label_and_data);
     }
     else
     {
-        size_t data_length = strlen((char *)f.data.value);
-        encrypt_and_write((uint8_t *)f.data.value, aes_key, &data_length);
+        encrypt_and_write((uint8_t *)f.data.value, aes_key, strlen(f.data.value));
     }
 
-    free(aes_key);
-    return 0;
+   return 0;
 }
