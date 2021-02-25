@@ -174,24 +174,24 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
 int main(int argc, char **argv)
 {
     uint8_t *aes_key = NULL;
-    Flags flags = {0};
+    Flags f = {0};
 
-    parse_flags(&flags, argc, argv);
+    parse_f(&f, argc, argv);
 
-    if (!flags.data.exists)
+    if (!f.data.exists)
     {
-        if (flags.label.exists)
+        if (f.label.exists)
         {
             printf("error: label flag called without --data\n");
             return 1;
         }
-        if (flags.find_label.exists)
+        if (f.find_label.exists)
         {
-            decrypt_and_print(aes_key, flags.find_label.value);
+            decrypt_and_print(aes_key, f.find_label.value);
         }
         else
         {
-            if (flags.help.exists)
+            if (f.help.exists)
             {
                 printf("%s\n", help_s);
                 return 0;
@@ -203,19 +203,19 @@ int main(int argc, char **argv)
 
     input_key(&aes_key);
 
-    if (flags.label.exists)
+    if (f.label.exists)
     {
-        size_t label_and_data_size = strlen(flags.label.value) + strlen((char *)flags.data.value);
+        size_t label_and_data_size = strlen(f.label.value) + strlen((char *)f.data.value);
         uint8_t *label_and_data = malloc(label_and_data_size + 2);
-        snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", flags.label.value, flags.data.value);
+        snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", f.label.value, f.data.value);
         size_t label_and_data_length = strlen((char *)label_and_data);
         encrypt_and_write(label_and_data, aes_key, &label_and_data_length);
         free(label_and_data);
     }
     else
     {
-        size_t data_length = strlen((char *)flags.data.value);
-        encrypt_and_write((uint8_t *)flags.data.value, aes_key, &data_length);
+        size_t data_length = strlen((char *)f.data.value);
+        encrypt_and_write((uint8_t *)f.data.value, aes_key, &data_length);
     }
 
     free(aes_key);
