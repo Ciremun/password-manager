@@ -46,6 +46,7 @@ typedef struct
     Flag data;
     Flag label;
     Flag find_label;
+    Flag data_file;
     Flag help;
 } Flags;
 
@@ -84,6 +85,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->find_label;
         else if (!f->help.exists       && is_flag(argv[i], "-h", "--help"))
             flag = &f->help;
+        else if (!f->data_file.exists  && is_flag(argv[i], "-df", "--data-file"))
+            flag = &f->data_file;
 
         if (flag != NULL)
         {
@@ -176,13 +179,42 @@ int main(int argc, char **argv)
     uint8_t *aes_key = NULL;
     Flags f = {0};
 
-    parse_f(&f, argc, argv);
+    parse_flags(&f, argc, argv);
 
     if (!f.data.exists)
     {
+        if (f.data_file.exists)
+        {
+            if (!f.data_file.value)
+            {
+                printf("error: data-file flag called without filename\n");
+                return 0;
+            }
+
+            size_t nch = 0;
+            char *data = read_file_as_str(f.data_file.value, &nch);
+            input_key(&aes_key);
+
+            if (f.label.exists && f.label.value)
+            {
+                size_t label_and_data_size = strlen(f.label.value) + strlen(data);
+                uint8_t *label_and_data = malloc(label_and_data_size + 2);
+                snprintf((char *)label_and_data, sizeof(uint8_t) * (label_and_data_size + 2), "%s %s", f.label.value, data);
+                size_t label_and_data_length = strlen((char *)label_and_data);
+                encrypt_and_write(label_and_data, aes_key, &label_and_data_length);
+                free(label_and_data);
+            }
+            else
+            {
+                encrypt_and_write(data, aes_key, &nch);
+            }
+
+            free(data);
+            return 0;
+        }
         if (f.label.exists)
         {
-            printf("error: label flag called without --data\n");
+            printf("error: label flag called without --data or --data-file\n");
             return 1;
         }
         if (f.find_label.exists)
@@ -199,6 +231,12 @@ int main(int argc, char **argv)
 
             decrypt_and_print(aes_key, NULL);
         }
+    }
+
+    if (f.data_file.exists)
+    {
+        printf("error: can't combine data and data-file flags\n");
+        return 1;
     }
 
     input_key(&aes_key);

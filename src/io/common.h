@@ -16,6 +16,7 @@ typedef SSIZE_T ssize_t;
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream);
 void read_file(const char *fp, char ***lines, size_t *lsize);
+char *read_file_as_str(const char *fp, size_t *nch);
 void write_file(const char *fp, const char *mode, void *data);
 
 #endif // IO_COMMON_H

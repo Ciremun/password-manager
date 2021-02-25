@@ -90,7 +90,10 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
         {
             char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
             if (!tmp)
+            {
+                fprintf(stderr, "error: memory allocation failed.\n");
                 exit(1);
+            }
             *lines = tmp;
             lmax *= 2;
         }
@@ -102,6 +105,43 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
         free(ln);
 
     *lsize = idx;
+}
+
+char *read_file_as_str(const char *fp, size_t *nch)
+{
+    FILE *f = fopen(fp, "r");
+    if (f == NULL)
+    {
+        printf("Error opening file %s.\n", fp);
+        exit(1);
+    }
+    int c;
+    size_t size = 1024;
+    char *buf = malloc(size);
+    if (buf == NULL)
+    {
+        fprintf(stderr, "error: memory allocation failed.\n");
+        exit(1);
+    }
+
+    while ((c = getc(f)) != EOF)
+    {
+        if (*nch >= size - 1)
+        {
+            size *= 2;
+            buf = realloc(buf, size);
+            if (buf == NULL)
+            {
+                fprintf(stderr, "error: memory allocation failed.\n");
+                exit(1);
+            }
+        }
+        buf[(*nch)++] = c;
+    }
+
+    buf[*nch] = 0;
+    fclose(f);
+    return buf;
 }
 
 void write_file(const char *fp, const char *mode, void *data)
