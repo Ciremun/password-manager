@@ -59,10 +59,11 @@ void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t *data_length)
     free(encoded_data);
 }
 
-void input_key(uint8_t *aes_key)
+void input_key(uint8_t **aes_key)
 {
     printf("key?\n");
-    getpasswd((char **)&aes_key, MAX_KEY_LEN);
+    *aes_key = calloc(1, MAX_KEY_LEN);
+    getpasswd((char **)&*aes_key, MAX_KEY_LEN);
 }
 
 int is_flag(char *arg, char *s, char *l)
@@ -101,7 +102,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
     size_t idx = 0;
     char **lines = NULL;
     read_file(DATA_STORE, &lines, &idx);
-    input_key(aes_key);
+    input_key(&aes_key);
     int did_print = 0;
     for (size_t i = 0; i < idx; i++)
     {
@@ -186,7 +187,6 @@ int main(int argc, char **argv)
         }
         if (flags.find_label.exists)
         {
-            aes_key = calloc(1, MAX_KEY_LEN);
             decrypt_and_print(aes_key, flags.find_label.value);
         }
         else
@@ -197,13 +197,11 @@ int main(int argc, char **argv)
                 return 0;
             }
 
-            aes_key = calloc(1, MAX_KEY_LEN);
             decrypt_and_print(aes_key, NULL);
         }
     }
 
-    aes_key = calloc(1, MAX_KEY_LEN);
-    input_key(aes_key);
+    input_key(&aes_key);
 
     if (flags.label.exists)
     {
