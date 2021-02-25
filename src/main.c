@@ -106,15 +106,19 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
             }
 
             free(lines[i]);
-            lines[i] = malloc(strlen(encoded_data));
+            lines[i] = realloc(lines[i], strlen(encoded_data));
             lines[i] = encoded_data;
 
             for (size_t k = 0; k < idx; k++)
                 fprintf(f, "%s\n", (char *)lines[k]);
 
             fclose(f);
+
+            for (size_t z = 0; z < idx; z++)
+                free(lines[z]);
+
             free(label);
-            free(encoded_data);
+            free(lines);
             free(decoded_data);
             free(aes_key);
 
