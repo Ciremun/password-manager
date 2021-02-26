@@ -61,6 +61,14 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
 {
     char **lines = NULL;
     size_t idx = 0;
+
+    FILE *f = NULL;
+    if (!(f = fopen(DATA_STORE, "r")))
+    {
+        f = fopen(DATA_STORE, "a");
+    }
+    fclose(f);
+
     read_file(DATA_STORE, &lines, &idx);
     input_key(&aes_key);
 
@@ -105,8 +113,8 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
             }
 
             memset(lines[i], 0, line_length);
-            lines[i] = realloc(lines[i], strlen(encoded_data));
-            lines[i] = encoded_data;
+            lines[i] = realloc(lines[i], strlen(encoded_data) + 1);
+            strcpy(lines[i], encoded_data);
 
             for (size_t k = 0; k < idx; k++)
             {
@@ -117,6 +125,7 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
             fclose(f);
             free(label);
             free(lines);
+            free(encoded_data);
             free(decoded_data);
             free(aes_key);
 
@@ -135,11 +144,18 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
 
     char *encoded_data = b64_encode(label_and_data, label_and_data_size);
     write_file(DATA_STORE, "a", encoded_data);
+
+    for (size_t i = 0; i < idx; i++)
+        free(lines[i]);
+
+    free(lines);
+    free(label_and_data);
     free(encoded_data);
     free(aes_key);
     exit(0);
 
 }
+
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
 {
     input_key(&aes_key);
@@ -281,11 +297,7 @@ int main(int argc, char **argv)
 
             if (f.label.exists)
             {
-                size_t label_and_data_size = strlen(f.label.value) + nch + 2;
-                char *label_and_data = malloc(label_and_data_size);
-                snprintf(label_and_data, sizeof(char) * label_and_data_size, "%s %s", f.label.value, data);
-                encrypt_and_write((uint8_t *)label_and_data, aes_key, strlen(label_and_data));
-                free(label_and_data);
+                encrypt_and_replace(f.label.value, data, aes_key);
             }
             else
             {
@@ -340,16 +352,11 @@ int main(int argc, char **argv)
             printf("error: label flag called without name\n");
             return 1;
         }
-        // size_t label_and_data_size = strlen(f.label.value) + strlen(f.data.value) + 2;
-        // char *label_and_data = malloc(label_and_data_size);
-        // snprintf(label_and_data, sizeof(char) * label_and_data_size, "%s %s", f.label.value, f.data.value);
-        // encrypt_and_write((uint8_t *)label_and_data, aes_key, strlen(label_and_data));
-        // free(label_and_data);
         encrypt_and_replace(f.label.value, f.data.value, aes_key);
     }
     else
     {
-        encrypt_and_write((uint8_t *)f.data.value, aes_key, strlen(f.data.value));
+        encrypt_and_write((uint8_t *)f.data.value, aes_key, strlen(f.data.value) + 1);
     }
 
    return 0;
