@@ -139,7 +139,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
         buf[(*nch)++] = c;
     }
 
-    buf[*nch] = 0;
+    buf[(*nch)++] = 0;
     fclose(f);
     return buf;
 }
