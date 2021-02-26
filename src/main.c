@@ -64,6 +64,8 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
     read_file(DATA_STORE, &lines, &idx);
     input_key(&aes_key);
 
+    size_t label_and_data_size = strlen(find_label) + strlen(data) + 2;
+
     for (size_t i = 0; i < idx; i++)
     {
         size_t decsize = 0;
@@ -73,10 +75,8 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
         char *label = malloc(decsize);
-        size_t label_length = 0;
         for (size_t j = 0; j < decsize; j++)
         {
-            label_length++;
             if (decoded_data[j] == ' ')
             {
                 label[j] = '\0';
@@ -87,17 +87,16 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
 
         if (strcmp(label, find_label) == 0)
         {
-            free(decoded_data);
+            memset(decoded_data, 0, decsize);
 
-            size_t label_and_data_size = label_length + strlen(data) + 2;
-
-            decoded_data = malloc(label_and_data_size);
+            decoded_data = realloc(decoded_data, label_and_data_size);
             snprintf((char *)decoded_data, sizeof(char) * label_and_data_size, "%s %s", label, data);
             
             AES_init_ctx_iv(&ctx, aes_key, aes_iv);
             AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_data, label_and_data_size);
 
             char *encoded_data = b64_encode(decoded_data, label_and_data_size);
+
             FILE *f = fopen(DATA_STORE, "w");
             if (f == NULL)
             {
@@ -105,18 +104,17 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
                 exit(1);
             }
 
-            free(lines[i]);
+            memset(lines[i], 0, line_length);
             lines[i] = realloc(lines[i], strlen(encoded_data));
             lines[i] = encoded_data;
 
             for (size_t k = 0; k < idx; k++)
+            {
                 fprintf(f, "%s\n", (char *)lines[k]);
+                free(lines[k]);
+            }
 
             fclose(f);
-
-            for (size_t z = 0; z < idx; z++)
-                free(lines[z]);
-
             free(label);
             free(lines);
             free(decoded_data);
@@ -127,8 +125,19 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
 
         free(label);
         free(decoded_data);
-        free(aes_key);
     }
+
+    uint8_t *label_and_data = malloc(label_and_data_size);
+    snprintf((char *)label_and_data, sizeof(uint8_t) * label_and_data_size, "%s %s", find_label, data);
+
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, label_and_data, label_and_data_size);
+
+    char *encoded_data = b64_encode(label_and_data, label_and_data_size);
+    write_file(DATA_STORE, "a", encoded_data);
+    free(encoded_data);
+    free(aes_key);
+    exit(0);
 
 }
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
