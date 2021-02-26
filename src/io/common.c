@@ -69,13 +69,13 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
 
     if (!(f = fopen(fp, "r")))
     {
-        printf("Error opening file %s.\n", fp);
+        printf("error opening file %s\n", fp);
         exit(1);
     }
 
     if (!(*lines = calloc(LMAX, sizeof(**lines))))
     {
-        fprintf(stderr, "error: memory allocation failed.\n");
+        fprintf(stderr, "error: memory allocation failed\n");
         exit(1);
     }
 
@@ -91,7 +91,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
             char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
             if (!tmp)
             {
-                fprintf(stderr, "error: memory allocation failed.\n");
+                fprintf(stderr, "error: memory allocation failed\n");
                 exit(1);
             }
             *lines = tmp;
@@ -112,7 +112,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
     FILE *f = fopen(fp, "r");
     if (f == NULL)
     {
-        printf("Error opening file %s.\n", fp);
+        printf("error opening file %s\n", fp);
         exit(1);
     }
     int c;
@@ -120,7 +120,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
     char *buf = malloc(size);
     if (buf == NULL)
     {
-        fprintf(stderr, "error: memory allocation failed.\n");
+        fprintf(stderr, "error: memory allocation failed\n");
         exit(1);
     }
 
@@ -132,7 +132,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
             buf = realloc(buf, size);
             if (buf == NULL)
             {
-                fprintf(stderr, "error: memory allocation failed.\n");
+                fprintf(stderr, "error: memory allocation failed\n");
                 exit(1);
             }
         }
@@ -149,7 +149,7 @@ void write_file(const char *fp, const char *mode, void *data)
     FILE *f = fopen(fp, mode);
     if (f == NULL)
     {
-        printf("Error opening file %s.\n", fp);
+        printf("Error opening file %s\n", fp);
         exit(1);
     }
     fprintf(f, "%s\n", (char *)data);

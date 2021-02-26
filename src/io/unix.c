@@ -29,7 +29,7 @@ ssize_t getpasswd(char **pw, size_t sz)
 
     if (tcgetattr(0, &old_kbd_mode))
     {
-        fprintf(stderr, "%s() error: tcgetattr failed.\n", __func__);
+        fprintf(stderr, "%s() error: tcgetattr failed\n", __func__);
         return -1;
     }
     memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
@@ -39,7 +39,7 @@ ssize_t getpasswd(char **pw, size_t sz)
     new_kbd_mode.c_cc[VMIN] = 1;
     if (tcsetattr(0, TCSANOW, &new_kbd_mode))
     {
-        fprintf(stderr, "%s() error: tcsetattr failed.\n", __func__);
+        fprintf(stderr, "%s() error: tcsetattr failed\n", __func__);
         return -1;
     }
 
@@ -59,12 +59,12 @@ ssize_t getpasswd(char **pw, size_t sz)
 
     if (tcsetattr(0, TCSANOW, &old_kbd_mode))
     {
-        fprintf(stderr, "%s() error: tcsetattr failed.\n", __func__);
+        fprintf(stderr, "%s() error: tcsetattr failed\n", __func__);
         return -1;
     }
 
     if (idx == sz - 1 && c != '\n')
-        fprintf(stderr, " (%s() warning: truncated at %zu chars.)\n",
+        fprintf(stderr, " (%s() warning: truncated at %zu chars)\n",
                 __func__, sz - 1);
 
     return idx;

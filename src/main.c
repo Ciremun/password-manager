@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
 
 #ifdef _WIN32
 #include "io/win.h"
@@ -10,6 +11,7 @@
 #endif
 
 #include "io/common.h"
+#include "rand.h"
 
 #include "aes.h"
 #include "b64/b64.h"
@@ -17,7 +19,6 @@
 #define MAX_KEY_LEN 1024
 #define DATA_STORE ".data"
 
-// TODO(#8): "generate password" flag
 // TODO(#17): tests
 
 struct AES_ctx ctx;
@@ -27,11 +28,12 @@ const char *help_s = "\n\
 \n\
     flags:\n\
 \n\
-    -d  --data          data to encrypt\n\
-    -l  --label         add label for data\n\
-    -fl --find-label    find data by label\n\
-    -h  --help          display help\n\
-    -df --data-file     read data from file\n\
+    -d  --data                  data to encrypt\n\
+    -df --data-file             read data from file\n\
+    -l  --label                 add label for data\n\
+    -fl --find-label            find data by label\n\
+    -gp --generate-password     put random data\n\
+    -h  --help                  display help\n\
 \n\
 ";
 
@@ -44,9 +46,10 @@ typedef struct
 typedef struct
 {
     Flag data;
+    Flag data_file;
     Flag label;
     Flag find_label;
-    Flag data_file;
+    Flag generate_password;
     Flag help;
 } Flags;
 
@@ -108,8 +111,8 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
             FILE *f = fopen(DATA_STORE, "w");
             if (f == NULL)
             {
-                printf("Error opening file %s.\n", DATA_STORE);
-                exit(1);
+                printf("error opening file %s\n", DATA_STORE);
+                return;
             }
 
             memset(lines[i], 0, line_length);
@@ -129,7 +132,7 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
             free(decoded_data);
             free(aes_key);
 
-            exit(0);
+            return;
         }
 
         free(label);
@@ -146,14 +149,15 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
     write_file(DATA_STORE, "a", encoded_data);
 
     for (size_t i = 0; i < idx; i++)
+    {
         free(lines[i]);
+    }
 
     free(lines);
     free(label_and_data);
     free(encoded_data);
     free(aes_key);
-    exit(0);
-
+    return;
 }
 
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
@@ -178,16 +182,18 @@ void parse_flags(Flags *f, int argc, char **argv)
     for (int i = 1; i < argc; i++)
     {
         Flag *flag = NULL;
-        if      (!f->data.exists       && is_flag(argv[i], "-d", "--data"))
+        if      (!f->data.exists               && is_flag(argv[i], "-d", "--data"))
             flag = &f->data;
-        else if (!f->label.exists      && is_flag(argv[i], "-l", "--label"))
+        else if (!f->label.exists              && is_flag(argv[i], "-l", "--label"))
             flag = &f->label;
-        else if (!f->find_label.exists && is_flag(argv[i], "-fl", "--find-label"))
+        else if (!f->find_label.exists         && is_flag(argv[i], "-fl", "--find-label"))
             flag = &f->find_label;
-        else if (!f->help.exists       && is_flag(argv[i], "-h", "--help"))
+        else if (!f->help.exists               && is_flag(argv[i], "-h", "--help"))
             flag = &f->help;
-        else if (!f->data_file.exists  && is_flag(argv[i], "-df", "--data-file"))
+        else if (!f->data_file.exists          && is_flag(argv[i], "-df", "--data-file"))
             flag = &f->data_file;
+        else if (!f->generate_password.exists  && is_flag(argv[i], "-gp", "--generate-password"))
+            flag = &f->generate_password;
 
         if (flag != NULL)
         {
@@ -269,7 +275,9 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
         printf("info: no results\n");
     }
     for (size_t it = 0; it < idx; it++)
+    {
         free(lines[it]);
+    }
     free(lines);
     free(aes_key);
     exit(0);
@@ -286,10 +294,17 @@ int main(int argc, char **argv)
     {
         if (f.data_file.exists)
         {
+
+            if (f.generate_password.exists)
+            {
+                printf("error: can't combine data-file and generate-password flags\n");
+                return 1;
+            }
+
             if (!f.data_file.value)
             {
                 printf("error: data-file flag called without filename\n");
-                return 0;
+                return 1;
             }
 
             size_t nch = 0;
@@ -307,9 +322,27 @@ int main(int argc, char **argv)
             free(data);
             return 0;
         }
+        if (f.generate_password.exists)
+        {
+            int password_length = random_int();
+            char *password = malloc(password_length + 1);
+            random_string(password_length, password);
+
+            if (f.label.exists)
+            {
+                encrypt_and_replace(f.label.value, password, aes_key);
+            }
+            else
+            {
+                encrypt_and_write((uint8_t *)password, aes_key, password_length + 1);
+            }
+
+            free(password);
+            return 0;
+        }
         if (f.label.exists)
         {
-            printf("error: label flag called without --data or --data-file\n");
+            printf("error: label flag called without --data or --data-file or --generate-password\n");
             return 1;
         }
         if (f.find_label.exists)
@@ -342,6 +375,12 @@ int main(int argc, char **argv)
     if (f.data_file.exists)
     {
         printf("error: can't combine data and data-file flags\n");
+        return 1;
+    }
+
+    if (f.generate_password.exists)
+    {
+        printf("error: can't combine data and generate-password flags\n");
         return 1;
     }
 
