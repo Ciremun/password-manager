@@ -23,6 +23,7 @@ goto :eof
 
 cd tests
 cl.exe test.c /FC /nologo /Ftest.exe %SOURCES%
+test.exe
 cd ../
 
 @REM move /y build\\pm.exe tests\\
