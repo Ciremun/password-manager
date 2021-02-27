@@ -1,12 +1,12 @@
 CFLAGS=-Wall -Wextra -pedantic
-SOURCES=src/main.c \
-src/aes.c \
+SOURCES=src/aes.c \
 src/b64/encode.c src/b64/decode.c src/b64/buffer.c \
 src/io/unix.c src/io/common.c \
-src/rand.c
+src/rand.c \
+src/parse.c
 
 main:
-	$(CC) $(SOURCES) $(CFLAGS) -o pm
+	$(CC) src/main.c $(SOURCES) $(CFLAGS) -o pm
 
 debug: CFLAGS += -g
 debug: main
@@ -16,6 +16,5 @@ python:
 	$(CC) $(SOURCES) $(CFLAGS) -o pm
 
 test:
-	$(CC) $(SOURCES) $(CFLAGS) -o tests/pm
-	$(CC) tests/main.c $(CFLAGS) -o tests/test
+	$(CC) tests/test.c $(SOURCES) $(CFLAGS) -o tests/test
 	./tests/test
