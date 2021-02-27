@@ -16,3 +16,5 @@ set SOURCES=%S%main.c ^
 cl.exe %CFLAGS% %INCLUDES% %SOURCES%
 
 cd ../
+
+@REM move /y build\\pm.exe tests\\

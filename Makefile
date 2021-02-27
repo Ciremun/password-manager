@@ -14,3 +14,8 @@ debug: main
 python:
 	-python3 update_help.py
 	$(CC) $(SOURCES) $(CFLAGS) -o pm
+
+test:
+	$(CC) $(SOURCES) $(CFLAGS) -o tests/pm
+	$(CC) tests/main.c $(CFLAGS) -o tests/test
+	./tests/test
