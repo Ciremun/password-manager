@@ -6,6 +6,11 @@ struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 uint8_t *aes_key = NULL;
 
+void reset_key()
+{
+    memcpy(aes_key, "test_aes_key!@#$%^&*();'", 25);
+}
+
 void assert_t(int check, const char *test)
 {
     if (!check)
@@ -14,37 +19,66 @@ void assert_t(int check, const char *test)
         printf("%s PASS\n", test);
 }
 
-void fill_args(int *argc, char **argv, ...)
+char **fill_args(int argc, ...)
 {
     va_list ap;
     int n = 1;
-    char *arg = NULL;
+    char **argv = calloc(1, 256);
+    argc--;
 
-    va_start(ap, argv);
-    while (*(arg = va_arg(ap, char *)))
+    va_start(ap, argc);
+    while (argc--)
     {
-        argv[n] = strdup(arg);
+        argv[n] = strdup(va_arg(ap, char *));
         n++;
     }
     va_end(ap);
-    *argc = n;
+
+    return argv;
 }
 
-void test_data_flag()
+void free_argv(int argc, char **argv)
 {
-    char **argv = calloc(1, 256);
-    int argc;
-    fill_args(&argc, argv, "-d", "data");
-    assert_t(run(aes_key, argc, argv) == 0, "\"-d data\"");
+    for (int i = 0; i < argc; i++)
+    {
+        free(argv[i]);
+    }
+    free(argv);
 }
 
-void setup_test()
+void test_data_flag(void)
 {
+    int argc = 3;
+    char **argv = fill_args(argc, "-d", "data");
+
+    run(aes_key, argc, argv);
+    reset_key();
+
+    size_t nch = 0;
+    char **lines = NULL;
+    read_file(DATA_STORE, &lines, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
+
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    assert_t(strcmp("data", (char *)decoded_data) == 0, "\"-d data\"");
+
+    free_argv(argc, argv);
+}
+
+void setup_test(void)
+{
+    reset_key();
     printf("setup\n");
 }
 
-void exit_test()
+void exit_test(void)
 {
+    reset_key();
+    remove(DATA_STORE);
     printf("free\n");
 }
 
@@ -55,10 +89,9 @@ void run_test(void (*test)(void))
     exit_test();
 }
 
-int main()
+int main(void)
 {
     aes_key = calloc(1, 32);
-    memcpy(aes_key, "test_aes_key!@#$%^&*();'", 25);
 
     run_test(test_data_flag);
 

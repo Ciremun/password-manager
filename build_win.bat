@@ -14,7 +14,7 @@ if "%~1"=="test" goto :test
 
 mkdir build
 cd build
-cl.exe %S%main.c %CFLAGS% /Fepm.exe %SOURCES%
+cl.exe %S%main.c %SOURCES% %CFLAGS% /Fepm.exe
 cd ../
 
 goto :eof
@@ -22,6 +22,6 @@ goto :eof
 :test
 
 cd tests
-cl.exe test.c %CFLAGS% /Ftest.exe %SOURCES%
+cl.exe test.c %SOURCES% %CFLAGS% /Ftest.exe
 test.exe
 cd ../
