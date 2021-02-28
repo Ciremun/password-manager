@@ -2,7 +2,7 @@
 
 rem run using VsDevCmd.bat
 
-set CFLAGS=/FC /nologo /Fepm.exe
+set CFLAGS=/FC /nologo
 set S=../src/
 set SOURCES=%S%aes.c ^
 %S%b64/encode.c %S%b64/decode.c %S%b64/buffer.c ^
@@ -14,7 +14,7 @@ if "%~1"=="test" goto :test
 
 mkdir build
 cd build
-cl.exe %S%main.c %CFLAGS% %SOURCES%
+cl.exe %S%main.c %CFLAGS% /Fepm.exe %SOURCES%
 cd ../
 
 goto :eof
@@ -22,8 +22,6 @@ goto :eof
 :test
 
 cd tests
-cl.exe test.c /FC /nologo /Ftest.exe %SOURCES%
+cl.exe test.c %CFLAGS% /Ftest.exe %SOURCES%
 test.exe
 cd ../
-
-@REM move /y build\\pm.exe tests\\

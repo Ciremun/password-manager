@@ -18,11 +18,11 @@ void fill_args(int *argc, char **argv, ...)
 {
     va_list ap;
     int n = 1;
+    char *arg = NULL;
 
     va_start(ap, argv);
-    for (int i = 0; i < 2; i++)
+    while (*(arg = va_arg(ap, char *)))
     {
-        char *arg = (char *)va_arg(ap, char *);
         argv[n] = strdup(arg);
         n++;
     }
