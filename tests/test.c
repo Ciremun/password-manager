@@ -6,6 +6,8 @@
 
 #include "../src/io/common.h"
 
+#define TABS "\t"
+
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 uint8_t *aes_key = NULL;
@@ -55,7 +57,7 @@ void test_data_flag(void)
     int argc = 2;
     char **argv = fill_args(argc, "-d");
 
-    assert_t(run(aes_key, argc, argv) != 0, "-d\t");
+    assert_t(run(aes_key, argc, argv) != 0, "-d"TABS);
     reset_key();
     free_argv(argc, argv);
 
@@ -76,7 +78,7 @@ void test_data_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data\t");
+    assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data"TABS);
 }
 
 void setup_test(void)
