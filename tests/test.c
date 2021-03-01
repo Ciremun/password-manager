@@ -1,5 +1,9 @@
 #include <stdarg.h>
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 #include "../src/io/common.h"
 
 struct AES_ctx ctx;
@@ -14,9 +18,9 @@ void reset_key()
 void assert_t(int check, const char *test)
 {
     if (!check)
-        printf("%s FAIL\n", test);
+        fprintf(stderr, "%s FAIL\n", test);
     else
-        printf("%s PASS\n", test);
+        fprintf(stderr, "%s PASS\n", test);
 }
 
 char **fill_args(int argc, ...)
@@ -51,7 +55,7 @@ void test_data_flag(void)
     int argc = 2;
     char **argv = fill_args(argc, "-d");
 
-    assert_t(run(aes_key, argc, argv) != 0, "\"-d\"\t\t");
+    assert_t(run(aes_key, argc, argv) != 0, "-d\t");
     reset_key();
     free_argv(argc, argv);
 
@@ -72,7 +76,7 @@ void test_data_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("data", (char *)decoded_data) == 0, "\"-d data\"\t");
+    assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data\t");
 }
 
 void setup_test(void)
@@ -96,6 +100,8 @@ void run_test(void (*test)(void))
 int main(void)
 {
     aes_key = calloc(1, 32);
+
+    close(1);
 
     run_test(test_data_flag);
 
