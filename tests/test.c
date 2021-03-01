@@ -48,11 +48,19 @@ void free_argv(int argc, char **argv)
 
 void test_data_flag(void)
 {
-    int argc = 3;
-    char **argv = fill_args(argc, "-d", "data");
+    int argc = 2;
+    char **argv = fill_args(argc, "-d");
+
+    assert_t(run(aes_key, argc, argv) != 0, "\"-d\"\t\t");
+    reset_key();
+    free_argv(argc, argv);
+
+    argc = 3;
+    argv = fill_args(argc, "-d", "data");
 
     run(aes_key, argc, argv);
     reset_key();
+    free_argv(argc, argv);
 
     size_t nch = 0;
     char **lines = NULL;
@@ -64,22 +72,18 @@ void test_data_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("data", (char *)decoded_data) == 0, "\"-d data\"");
-
-    free_argv(argc, argv);
+    assert_t(strcmp("data", (char *)decoded_data) == 0, "\"-d data\"\t");
 }
 
 void setup_test(void)
 {
     reset_key();
-    printf("setup\n");
 }
 
 void exit_test(void)
 {
     reset_key();
     remove(DATA_STORE);
-    printf("free\n");
 }
 
 void run_test(void (*test)(void))
