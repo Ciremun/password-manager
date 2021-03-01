@@ -52,6 +52,16 @@ void free_argv(int argc, char **argv)
     free(argv);
 }
 
+void test_no_flag(void)
+{
+    // use fork() && winapi to work around exit()
+    int argc = 1;
+    char **argv = calloc(1, 256);
+
+    assert_t(run(aes_key, argc, argv) != 0, "void");
+    free_argv(argc, argv);
+}
+
 void test_data_flag(void)
 {
     int argc = 2;
@@ -105,6 +115,7 @@ int main(void)
 
     close(1);
 
+    // run_test(test_no_flag);
     run_test(test_data_flag);
 
     return 0;
