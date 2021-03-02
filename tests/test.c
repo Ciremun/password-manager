@@ -2,6 +2,7 @@
 
 #ifndef _WIN32
 #include <unistd.h>
+#include <sys/wait.h>
 #endif
 
 #include "../src/io/common.h"
@@ -54,12 +55,28 @@ void free_argv(int argc, char **argv)
 
 void test_no_flag(void)
 {
-    // use fork() && winapi to work around exit()
-    int argc = 1;
-    char **argv = calloc(1, 256);
+    #ifdef _WIN32
+    fprintf(stderr, "TODO: test_no_flag not implemented on Windows\n");
+    #else
+    // use winapi to work around exit()
 
-    assert_t(run(aes_key, argc, argv) != 0, "void");
-    free_argv(argc, argv);
+    pid_t pid = 0;
+    int status;
+
+    pid = fork();
+    if (pid == 0)
+    {
+        int argc = 1;
+        char **argv = calloc(1, 256);
+        run(aes_key, argc, argv);
+        free_argv(argc, argv);
+    }
+    if (pid > 0)
+    {
+        pid = wait(&status);
+        assert_t(WEXITSTATUS(status) == 1, "void"TABS);
+    }
+    #endif // _WIN32
 }
 
 void test_data_flag(void)
@@ -115,7 +132,7 @@ int main(void)
 
     close(1);
 
-    // run_test(test_no_flag);
+    run_test(test_no_flag);
     run_test(test_data_flag);
 
     return 0;
