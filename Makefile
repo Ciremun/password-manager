@@ -16,5 +16,5 @@ python:
 	$(CC) $(SOURCES) $(CFLAGS) -o pm
 
 test:
-	$(CC) tests/test.c $(SOURCES) $(CFLAGS) -ggdb -o tests/test
+	$(CC) tests/test.c tests/t_unix.c $(SOURCES) $(CFLAGS) -ggdb -o tests/test
 	cd tests/ && ./test

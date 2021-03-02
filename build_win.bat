@@ -22,6 +22,6 @@ goto :eof
 :test
 
 cd tests
-cl.exe test.c %SOURCES% %CFLAGS% /Ftest.exe
+cl.exe test.c t_win.c %SOURCES% %CFLAGS% /Ftest.exe
 test.exe
 cd ../
