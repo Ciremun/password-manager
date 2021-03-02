@@ -17,6 +17,14 @@ const char *help_s = "\n\
 \n\
 ";
 
+int last_exit_code;
+
+void exit_program(int exit_code)
+{
+    last_exit_code = exit_code;
+    exit(exit_code);
+}
+
 void input_key(uint8_t **aes_key)
 {
     if (!*aes_key)
@@ -100,7 +108,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
     }
     free(lines);
     free(aes_key);
-    exit(0);
+    exit_program(0);
 }
 
 void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
@@ -285,13 +293,13 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
     if (!(f = fopen(fp, "r")))
     {
         printf("error opening file %s\n", fp);
-        exit(1);
+        exit_program(1);
     }
 
     if (!(*lines = calloc(LMAX, sizeof(**lines))))
     {
         fprintf(stderr, "error: memory allocation failed\n");
-        exit(1);
+        exit_program(1);
     }
 
     while ((nchr = getline(&ln, &n, f)) != -1)
@@ -307,7 +315,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
             if (!tmp)
             {
                 fprintf(stderr, "error: memory allocation failed\n");
-                exit(1);
+                exit_program(1);
             }
             *lines = tmp;
             lmax *= 2;
@@ -328,7 +336,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
     if (f == NULL)
     {
         printf("error opening file %s\n", fp);
-        exit(1);
+        exit_program(1);
     }
     int c;
     size_t size = 1024;
@@ -336,7 +344,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
     if (buf == NULL)
     {
         fprintf(stderr, "error: memory allocation failed\n");
-        exit(1);
+        exit_program(1);
     }
 
     while ((c = getc(f)) != EOF)
@@ -348,7 +356,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
             if (buf == NULL)
             {
                 fprintf(stderr, "error: memory allocation failed\n");
-                exit(1);
+                exit_program(1);
             }
         }
         buf[(*nch)++] = c;
@@ -365,7 +373,7 @@ void write_file(const char *fp, const char *mode, void *data)
     if (f == NULL)
     {
         printf("Error opening file %s\n", fp);
-        exit(1);
+        exit_program(1);
     }
     fprintf(f, "%s\n", (char *)data);
     fclose(f);

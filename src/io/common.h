@@ -35,5 +35,8 @@ void write_file(const char *fp, const char *mode, void *data);
 void decrypt_and_print(uint8_t *aes_key, char *find_label);
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length);
 void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key);
+void exit_program(int exit_code);
+
+extern int last_exit_code;
 
 #endif // IO_COMMON_H
