@@ -9,7 +9,7 @@
 
 #include "../src/io/common.h"
 
-#define TABS "\t"
+#define TABS "\t\t"
 
 void exit_tests(void);
 void assert_t(int check, const char *test);
@@ -19,7 +19,8 @@ void setup_test(void);
 void exit_test(void);
 void reset_key();
 void run_test(void (*test)(void));
-void test_data_flag(void);
 void test_no_flag(void);
+void test_data_flag(void);
+void test_data_file_flag(void);
 
 extern uint8_t *aes_key;

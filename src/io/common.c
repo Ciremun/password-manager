@@ -107,7 +107,6 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
         free(lines[it]);
     }
     free(lines);
-    free(aes_key);
     exit_program(0);
 }
 
@@ -162,7 +161,7 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
             FILE *f = fopen(DATA_STORE, "w");
             if (f == NULL)
             {
-                printf("error opening file %s\n", DATA_STORE);
+                fprintf(stderr, "error opening file %s\n", DATA_STORE);
                 return;
             }
 
@@ -181,7 +180,6 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
             free(lines);
             free(encoded_data);
             free(decoded_data);
-            free(aes_key);
 
             return;
         }
@@ -207,7 +205,6 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
     free(lines);
     free(label_and_data);
     free(encoded_data);
-    free(aes_key);
     return;
 }
 
@@ -220,7 +217,6 @@ void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
     char *encoded_data = b64_encode(data, data_length);
     write_file(DATA_STORE, "a", encoded_data);
     free(encoded_data);
-    free(aes_key);
 }
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream)
@@ -372,7 +368,7 @@ void write_file(const char *fp, const char *mode, void *data)
     FILE *f = fopen(fp, mode);
     if (f == NULL)
     {
-        printf("Error opening file %s\n", fp);
+        fprintf(stderr, "error opening file %s\n", fp);
         exit_program(1);
     }
     fprintf(f, "%s\n", (char *)data);

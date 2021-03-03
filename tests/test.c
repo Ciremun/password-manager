@@ -49,7 +49,7 @@ void test_data_flag(void)
     int argc = 2;
     char **argv = fill_args(argc, "-d");
 
-    assert_t(run(aes_key, argc, argv) != 0, "-d"TABS);
+    assert_t(run(aes_key, argc, argv) != 0, "-d" TABS);
     reset_key();
     free_argv(argc, argv);
 
@@ -70,7 +70,38 @@ void test_data_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data"TABS);
+    assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data" TABS);
+}
+
+void test_data_file_flag(void)
+{
+    int argc = 2;
+    char **argv = fill_args(argc, "-df");
+
+    assert_t(run(aes_key, argc, argv) == 1, "-df" TABS);
+    free_argv(argc, argv);
+
+    write_file("test.txt", "w", "test data file");
+
+    argc = 3;
+    argv = fill_args(argc, "-df", "test.txt");
+
+    run(aes_key, argc, argv);
+    reset_key();
+    free_argv(argc, argv);
+
+    remove("test.txt");
+
+    size_t nch = 0;
+    char *data = read_file_as_str(DATA_STORE, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    assert_t(strcmp("test data file\n", (char *)decoded_data) == 0, "-df test.txt\t");
 }
 
 void setup_test(void)
@@ -99,6 +130,7 @@ int main(void)
 
     run_test(test_no_flag);
     run_test(test_data_flag);
+    run_test(test_data_file_flag);
 
     exit_tests();
 }
