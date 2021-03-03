@@ -17,10 +17,8 @@ char **fill_args(int argc, ...);
 void free_argv(int argc, char **argv);
 void setup_test(void);
 void exit_test(void);
+uint8_t *get_key(void);
 void reset_key();
 void run_test(void (*test)(void));
-void test_no_flag(void);
 void test_data_flag(void);
-void test_data_file_flag(void);
-
-extern uint8_t *aes_key;
+void test_no_flag(void);

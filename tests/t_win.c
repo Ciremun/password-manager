@@ -13,9 +13,11 @@ void exit_win_thread(void)
 void run_from_win_thread(void)
 {
     atexit(exit_win_thread);
+    uint8_t *aes_key = get_key();
     int argc = 1;
     char **argv = calloc(1, 256);
     run(aes_key, argc, argv);
+    free(aes_key);
 }
 
 void test_no_flag(void)

@@ -2,9 +2,15 @@
 
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
-uint8_t *aes_key = NULL;
 
-void reset_key()
+uint8_t *get_key(void)
+{
+    uint8_t *aes_key = calloc(1, 32);
+    reset_key(aes_key);
+    return aes_key;
+}
+
+void reset_key(uint8_t *aes_key)
 {
     memcpy(aes_key, "test_aes_key!@#$%^&*();'", 25);
 }
@@ -46,18 +52,19 @@ void free_argv(int argc, char **argv)
 
 void test_data_flag(void)
 {
+    uint8_t *aes_key = get_key();
     int argc = 2;
     char **argv = fill_args(argc, "-d");
 
     assert_t(run(aes_key, argc, argv) != 0, "-d" TABS);
-    reset_key();
+    reset_key(aes_key);
     free_argv(argc, argv);
 
     argc = 3;
     argv = fill_args(argc, "-d", "data");
 
     run(aes_key, argc, argv);
-    reset_key();
+    reset_key(aes_key);
     free_argv(argc, argv);
 
     size_t nch = 0;
@@ -75,6 +82,7 @@ void test_data_flag(void)
 
 void test_data_file_flag(void)
 {
+    uint8_t *aes_key = get_key();
     int argc = 2;
     char **argv = fill_args(argc, "-df");
 
@@ -87,7 +95,7 @@ void test_data_file_flag(void)
     argv = fill_args(argc, "-df", "test.txt");
 
     run(aes_key, argc, argv);
-    reset_key();
+    reset_key(aes_key);
     free_argv(argc, argv);
 
     remove("test.txt");
@@ -106,12 +114,10 @@ void test_data_file_flag(void)
 
 void setup_test(void)
 {
-    reset_key();
 }
 
 void exit_test(void)
 {
-    reset_key();
     remove(DATA_STORE);
 }
 
@@ -124,8 +130,6 @@ void run_test(void (*test)(void))
 
 int main(void)
 {
-    aes_key = calloc(1, 32);
-
     close(1);
 
     run_test(test_no_flag);

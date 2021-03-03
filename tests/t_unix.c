@@ -7,6 +7,7 @@ void exit_tests(void)
 
 void test_no_flag(void)
 {
+    uint8_t *aes_key = get_key();
     pid_t pid = 0;
     int status;
 
@@ -22,4 +23,5 @@ void test_no_flag(void)
         pid = wait(&status);
         assert_t(WEXITSTATUS(status) == 1, "void"TABS);
     }
+    free(aes_key);
 }
