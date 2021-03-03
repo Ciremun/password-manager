@@ -31,6 +31,7 @@ void input_key(uint8_t **aes_key)
     if (!*aes_key)
     {
         printf("key?\n");
+        // TODO(#19): remove MAX_KEY_LEN
         *aes_key = calloc(1, MAX_KEY_LEN);
         getpasswd((char **)aes_key, MAX_KEY_LEN);
     }
