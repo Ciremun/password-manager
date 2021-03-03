@@ -89,6 +89,7 @@ void test_data_flag(void)
     assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data" TABS);
 }
 
+// TODO(#20): test non-existent file
 void test_data_file_flag(void)
 {
     uint8_t *aes_key = get_key();
