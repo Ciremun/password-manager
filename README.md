@@ -21,10 +21,15 @@
 
 ### Windows
 
+[Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/downloads/)  
+
+In Visual Studio Installer:  
+Windows 10 SDK  
+MSVC Build Tools & Libraries  
+
 ```console
 cmd.exe
-cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\"
-VsDevCmd.bat
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat"
 cd password-manager
 build_win.bat
 ```
