@@ -9,9 +9,6 @@ int is_flag(char *arg, char *s, char *l)
     return (strcmp(s, arg) == 0) || (strcmp(l, arg) == 0);
 }
 
-// TODO(#18): key flag
-// argv on Windows has garbage
-// argv key string differs from Unix getpasswd() input
 
 void parse_flags(Flags *f, int argc, char **argv)
 {
