@@ -13,7 +13,7 @@ debug: main
 
 python:
 	-python3 update_help.py
-	$(CC) $(SOURCES) $(CFLAGS) -o pm
+	$(CC) src/main.c $(SOURCES) $(CFLAGS) -o pm
 
 test:
 	$(CC) tests/test.c tests/t_unix.c $(SOURCES) $(CFLAGS) -ggdb -o tests/test

@@ -11,6 +11,7 @@
     -l  --label                 add label for data
     -fl --find-label            find data by label
     -gp --generate-password     put random data
+    -k  --key                   key
     -h  --help                  display help
 
 ## Build

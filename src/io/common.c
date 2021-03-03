@@ -13,6 +13,7 @@ const char *help_s = "\n\
     -l  --label                 add label for data\n\
     -fl --find-label            find data by label\n\
     -gp --generate-password     put random data\n\
+    -k  --key                   key\n\
     -h  --help                  display help\n\
 \n\
 ";
