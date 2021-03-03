@@ -30,6 +30,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->data_file;
         else if (!f->generate_password.exists  && is_flag(argv[i], "-gp", "--generate-password"))
             flag = &f->generate_password;
+        else if (!f->key.exists                && is_flag(argv[i], "-k", "--key"))
+            flag = &f->key;
 
         if (flag != NULL)
         {
@@ -48,6 +50,18 @@ int run(uint8_t *aes_key, int argc, char **argv)
     Flags f = {0};
 
     parse_flags(&f, argc, argv);
+
+    if (f.key.exists)
+    {
+        if (!f.key.value)
+        {
+            printf("error: key flag called without key value\n");
+            return 1;
+        }
+
+        aes_key = calloc(1, MAX_KEY_LEN);
+        memcpy(aes_key, f.key.value, strlen(f.key.value) + 1);
+    }
 
     if (!f.data.exists)
     {
