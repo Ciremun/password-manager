@@ -3,6 +3,14 @@
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
+void (*tests[])(void) = {
+    test_no_flag,
+    test_data_flag,
+    test_data_file_flag
+};
+
+size_t tests_count = sizeof(tests) / sizeof(tests[0]);
+
 uint8_t *get_key(void)
 {
     uint8_t *aes_key = calloc(1, 32);
@@ -132,9 +140,10 @@ int main(void)
 {
     close(1);
 
-    run_test(test_no_flag);
-    run_test(test_data_flag);
-    run_test(test_data_file_flag);
+    for (size_t i = 0; i < tests_count; i++)
+    {
+        run_test(tests[i]);
+    }
 
     exit_tests();
 }
