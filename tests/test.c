@@ -6,7 +6,8 @@ uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 
 void (*tests[])(void) = {
     test_no_flag,
     test_data_flag,
-    test_data_file_flag
+    test_data_file_flag,
+    test_label_flag
 };
 
 size_t tests_count = sizeof(tests) / sizeof(tests[0]);
@@ -118,6 +119,24 @@ void test_data_file_flag(void)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     assert_t(strcmp("test data file\n", (char *)decoded_data) == 0, "-df test.txt\t");
+}
+
+void test_label_flag(void)
+{
+    uint8_t *aes_key = get_key();
+    int argc = 2;
+    char **argv = fill_args(argc, "-l");
+
+    assert_t(run(aes_key, argc, argv) == 1, "-l" TABS);
+    reset_key(aes_key);
+    free_argv(argc, argv);
+
+    argc = 3;
+    argv = fill_args(argc, "-l", "label");
+
+    assert_t(run(aes_key, argc, argv) == 1, "-l label\t");
+    free_argv(argc, argv);
+    free(aes_key);
 }
 
 void setup_test(void)

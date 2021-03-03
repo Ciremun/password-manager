@@ -9,7 +9,6 @@ int is_flag(char *arg, char *s, char *l)
     return (strcmp(s, arg) == 0) || (strcmp(l, arg) == 0);
 }
 
-
 void parse_flags(Flags *f, int argc, char **argv)
 {
     for (int i = 1; i < argc; i++)
