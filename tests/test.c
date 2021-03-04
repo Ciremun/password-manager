@@ -7,7 +7,8 @@ void (*tests[])(void) = {
     test_no_flag,
     test_data_flag,
     test_data_file_flag,
-    test_label_flag
+    test_label_flag,
+    test_generate_password_flag,
 };
 
 size_t tests_count = sizeof(tests) / sizeof(tests[0]);
@@ -138,6 +139,22 @@ void test_label_flag(void)
     assert_t(run(aes_key, argc, argv) == 1, "-l label\t");
     free_argv(argc, argv);
     free(aes_key);
+}
+
+void test_generate_password_flag(void)
+{
+    uint8_t *aes_key = get_key();
+    int argc = 2;
+    char **argv = fill_args(argc, "-gp");
+
+    FILE *f = NULL;
+    run(aes_key, argc, argv);
+    assert_t((f = fopen(DATA_STORE, "r")) != NULL, "-gp" TABS);
+    if (f)
+    {
+        fclose(f);
+    }
+    free_argv(argc, argv);
 }
 
 void setup_test(void)

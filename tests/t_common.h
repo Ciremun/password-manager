@@ -24,3 +24,5 @@ void test_no_flag(void);
 void test_data_flag(void);
 void test_data_file_flag(void);
 void test_label_flag(void);
+
+void test_generate_password_flag(void);
