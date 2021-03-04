@@ -1,3 +1,5 @@
+#include <limits.h>
+
 #include "io/common.h"
 #include "rand.h"
 
@@ -93,9 +95,22 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         if (f.generate_password.exists)
         {
-            int password_length = random_int();
+            unsigned long password_length;
+            if (f.generate_password.value)
+            {
+                password_length = strtoul(f.generate_password.value, NULL, 10);
+                if (!(0 < password_length && password_length <= INT_MAX))
+                {
+                    printf("error: length %s is out of range 1-%d\n", f.generate_password.value, INT_MAX);
+                    return 1;
+                }
+            }
+            else
+            {
+                password_length = (unsigned long)random_int();
+            }
             char *password = malloc(password_length + 1);
-            random_string(password_length, password);
+            random_string((int)password_length, password);
 
             if (f.label.exists)
             {
@@ -103,7 +118,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
             else
             {
-                encrypt_and_write((uint8_t *)password, aes_key, password_length + 1);
+                encrypt_and_write((uint8_t *)password, aes_key, (int)password_length + 1);
             }
 
             free(password);
