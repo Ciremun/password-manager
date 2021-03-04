@@ -13,6 +13,8 @@ typedef struct
     Flag data_file;
     Flag label;
     Flag find_label;
+    // TODO(#21): generate_password optional param
+    // to specify the length
     Flag generate_password;
     Flag key;
     Flag help;
