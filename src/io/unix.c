@@ -5,6 +5,11 @@
 
 #include "unix.h"
 
+void exit_program(int exit_code)
+{
+    exit(exit_code);
+}
+
 ssize_t getpasswd(char **pw, size_t sz)
 {
     if (!pw || !sz)

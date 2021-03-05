@@ -100,6 +100,14 @@ void test_data_file_flag(void)
     assert_t(run(aes_key, argc, argv) == 1, "-df" TABS);
     free_argv(argc, argv);
 
+    Args a = {
+        .argc = 3,
+        .argv = fill_args(3, "-df", "test.txt")
+    };
+
+    assert_t(run_test_in_fork(&a) == 1, "-df test.txt (non-ex)\t");
+    free_argv(a.argc, a.argv);
+
     write_file("test.txt", "w", "test data file");
 
     argc = 3;
@@ -120,7 +128,7 @@ void test_data_file_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("test data file\n", (char *)decoded_data) == 0, "-df test.txt\t");
+    assert_t(strcmp("test data file\n", (char *)decoded_data) == 0, "-df test.txt\t\t");
 }
 
 void test_label_flag(void)
@@ -136,7 +144,7 @@ void test_label_flag(void)
     argc = 3;
     argv = fill_args(argc, "-l", "label");
 
-    assert_t(run(aes_key, argc, argv) == 1, "-l label\t");
+    assert_t(run(aes_key, argc, argv) == 1, "-l label\t\t");
     free_argv(argc, argv);
     free(aes_key);
 }
@@ -182,5 +190,5 @@ int main(void)
         run_test(tests[i]);
     }
 
-    exit_tests();
+    exit_program(0);
 }
