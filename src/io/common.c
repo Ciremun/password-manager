@@ -18,14 +18,6 @@ const char *help_s = "\n\
 \n\
 ";
 
-int last_exit_code;
-
-void exit_program(int exit_code)
-{
-    last_exit_code = exit_code;
-    exit(exit_code);
-}
-
 void input_key(uint8_t **aes_key)
 {
     if (!*aes_key)

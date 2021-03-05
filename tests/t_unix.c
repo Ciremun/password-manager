@@ -1,10 +1,5 @@
 #include "t_common.h"
 
-void exit_tests(void)
-{
-    exit(0);
-}
-
 int run_test_in_fork(Args *a)
 {
     uint8_t *aes_key = get_key();

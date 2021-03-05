@@ -9,7 +9,7 @@
 
 #include "../src/io/common.h"
 
-#define TABS "\t\t"
+#define TABS "\t\t\t"
 
 typedef struct 
 {
@@ -17,7 +17,7 @@ typedef struct
     char **argv;
 } Args;
 
-void exit_tests(void);
+int run_test_in_fork(Args *a);
 void assert_t(int check, const char *test);
 char **fill_args(int argc, ...);
 void free_argv(int argc, char **argv);
@@ -32,3 +32,5 @@ void test_data_file_flag(void);
 void test_label_flag(void);
 
 void test_generate_password_flag(void);
+
+void exit_win_thread(void);

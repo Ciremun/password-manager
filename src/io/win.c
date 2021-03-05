@@ -2,7 +2,14 @@
 #include <stdio.h>
 #include <conio.h>
 
+#include <windows.h>
+
 #include "win.h"
+
+void exit_program(int exit_code)
+{
+    ExitThread(exit_code);
+}
 
 void getpasswd(char **pw, int sz)
 {
