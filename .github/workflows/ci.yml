@@ -1,4 +1,4 @@
-name: Ubuntu
+name: CI
 
 on:
   pull_request:
