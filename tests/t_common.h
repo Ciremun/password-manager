@@ -11,6 +11,12 @@
 
 #define TABS "\t\t"
 
+typedef struct 
+{
+    int argc;
+    char **argv;
+} Args;
+
 void exit_tests(void);
 void assert_t(int check, const char *test);
 char **fill_args(int argc, ...);

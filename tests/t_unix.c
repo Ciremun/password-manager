@@ -5,7 +5,7 @@ void exit_tests(void)
     exit(0);
 }
 
-void test_no_flag(void)
+int run_test_in_fork(Args *a)
 {
     uint8_t *aes_key = get_key();
     pid_t pid = 0;
@@ -14,14 +14,21 @@ void test_no_flag(void)
     pid = fork();
     if (pid == 0)
     {
-        int argc = 1;
-        char **argv = calloc(1, 256);
-        run(aes_key, argc, argv);
+        run(aes_key, a->argc, a->argv);
+        free(aes_key);
+        exit(0);
     }
-    if (pid > 0)
+    else
     {
-        pid = wait(&status);
-        assert_t(WEXITSTATUS(status) == 1, "void"TABS);
+        wait(&status);
+        return WEXITSTATUS(status);
     }
-    free(aes_key);
+}
+
+void test_no_flag(void)
+{
+    int argc = 1;
+    char **argv = calloc(1, 256);
+    Args a = {.argc = argc, .argv = argv};
+    assert_t(run_test_in_fork(&a) == 1, "void" TABS);
 }
