@@ -149,12 +149,34 @@ void test_generate_password_flag(void)
 
     FILE *f = NULL;
     run(aes_key, argc, argv);
+    reset_key(aes_key);
     assert_t((f = fopen(DATA_STORE, "r")) != NULL, "-gp" TABS);
     if (f)
     {
         fclose(f);
     }
     free_argv(argc, argv);
+    remove(DATA_STORE);
+
+    uint8_t *new_key = get_key();
+
+    argc = 3;
+    argv = fill_args(argc, "-gp", "128");
+
+    run(new_key, argc, argv);
+    reset_key(new_key);
+    free_argv(argc, argv);
+
+    size_t nch = 0;
+    char* data = read_file_as_str(DATA_STORE, &nch);
+
+    size_t decsize = 0;
+    unsigned char* decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    AES_init_ctx_iv(&ctx, new_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    assert_t(strlen((char *)decoded_data) == 128, "-gp 128" TABS);
 }
 
 void setup_test(void)
