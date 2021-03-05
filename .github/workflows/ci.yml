@@ -1,0 +1,25 @@
+name: Ubuntu
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: run tests
+        run: make test
+  build-test-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: seanmiddleditch/gha-setup-vsdevenv@master
+
+      - name: run tests
+        shell: cmd
+        run: |
+          ./build_win.bat test
