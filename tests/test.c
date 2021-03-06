@@ -22,7 +22,7 @@ uint8_t *get_key(void)
 
 void reset_key(uint8_t *aes_key)
 {
-    memcpy(aes_key, "test_aes_key!@#$%^&*();'", 25);
+    memcpy(aes_key, AES_KEY, 25);
 }
 
 void assert_t(int check, const char *test)

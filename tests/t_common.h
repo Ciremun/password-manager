@@ -10,6 +10,7 @@
 #include "../src/io/common.h"
 
 #define TABS "\t\t\t"
+#define AES_KEY "test_aes_key!@#$%^&*();'"
 
 typedef struct 
 {
@@ -17,13 +18,13 @@ typedef struct
     char **argv;
 } Args;
 
+uint8_t *get_key(void);
 int run_test_in_fork(Args *a);
-void assert_t(int check, const char *test);
 char **fill_args(int argc, ...);
+void assert_t(int check, const char *test);
 void free_argv(int argc, char **argv);
 void setup_test(void);
 void exit_test(void);
-uint8_t *get_key(void);
 void reset_key();
 void run_test(void (*test)(void));
 void test_no_flag(void);
