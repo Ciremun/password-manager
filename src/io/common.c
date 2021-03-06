@@ -4,17 +4,17 @@ extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 
 const char *help_s = "\n\
-    ./pm [flags]                        read or write data\n\
+    ./pm [flags]                  read or write data\n\
 \n\
     flags:\n\
 \n\
-    -d  --data                          data to encrypt\n\
-    -df --data-file                     read data from file\n\
-    -l  --label                         add label for data\n\
-    -fl --find-label                    find data by label\n\
-    -gp --generate-password [Nchars]    put random data\n\
-    -k  --key                           key\n\
-    -h  --help                          display help\n\
+    -d  --data                    data to encrypt\n\
+    -df --data-file               read data from file\n\
+    -l  --label                   add label for data\n\
+    -fl --find-label              find data by label\n\
+    -gp --generate-password [N]   put random data\n\
+    -k  --key                     key\n\
+    -h  --help                    display help\n\
 \n\
 ";
 
