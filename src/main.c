@@ -1,5 +1,6 @@
 #include "io/common.h"
 
+// TODO(#24): -gp -l <label> throws range error
 // TODO(#17): tests
 
 struct AES_ctx ctx;
