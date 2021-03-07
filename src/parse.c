@@ -99,7 +99,11 @@ int run(uint8_t *aes_key, int argc, char **argv)
             if (f.generate_password.value)
             {
                 password_length = strtoul(f.generate_password.value, NULL, 10);
-                if (!(0 < password_length && password_length <= INT_MAX))
+                if (password_length == 0)
+                {
+                    password_length = (unsigned long)random_int();
+                }
+                else if (!(password_length <= INT_MAX))
                 {
                     printf("error: length %s is out of range 1-%d\n", f.generate_password.value, INT_MAX);
                     return 1;
