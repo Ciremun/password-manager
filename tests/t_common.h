@@ -33,3 +33,4 @@ void test_data_file_flag(void);
 void test_label_flag(void);
 
 void test_generate_password_flag(void);
+void test_key_flag(void);

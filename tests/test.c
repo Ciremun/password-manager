@@ -9,6 +9,7 @@ void (*tests[])(void) = {
     test_data_file_flag,
     test_label_flag,
     test_generate_password_flag,
+    test_key_flag,
 };
 
 size_t tests_count = sizeof(tests) / sizeof(tests[0]);
@@ -184,6 +185,28 @@ void test_generate_password_flag(void)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     assert_t(strlen((char *)decoded_data) == 128, "-gp 128" TABS);
+}
+
+void test_key_flag(void)
+{
+    uint8_t *aes_key = get_key();
+    int argc = 5;
+    char **argv = fill_args(argc, "-k", AES_KEY, "-d", "test_data");
+
+    run(aes_key, argc, argv);
+    reset_key(aes_key);
+    free_argv(argc, argv);
+
+    size_t nch = 0;
+    char* data = read_file_as_str(DATA_STORE, &nch);
+
+    size_t decsize = 0;
+    unsigned char* decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    assert_t(strcmp((char *)decoded_data, "test_data") == 0, "-k -d" TABS);
 }
 
 void setup_test(void)
