@@ -57,8 +57,16 @@ int run(uint8_t *aes_key, int argc, char **argv)
             return 1;
         }
 
-        aes_key = calloc(1, MAX_KEY_LEN);
-        memcpy(aes_key, f.key.value, strlen(f.key.value) + 1);
+        size_t aes_key_length = strlen(f.key.value) + 1;
+        if (aes_key_length > 128)
+        {
+            aes_key = malloc(aes_key_length);
+        }
+        else
+        {
+            aes_key = calloc(1, 128);
+        }
+        memcpy(aes_key, f.key.value, aes_key_length);
     }
 
     if (!f.data.exists)

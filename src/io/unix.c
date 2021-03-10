@@ -10,23 +10,16 @@ void exit_program(int exit_code)
     exit(exit_code);
 }
 
-ssize_t getpasswd(char **pw, size_t sz)
+ssize_t getpasswd(char **pw)
 {
-    if (!pw || !sz)
-        return -1;
-
     FILE *fp = stdin;
+    size_t buf = 128;
 
     if (*pw == NULL)
     {
-        void *tmp = realloc(*pw, sz * sizeof **pw);
-        if (!tmp)
-            return -1;
-        memset(tmp, 0, sz);
-        *pw = (char *)tmp;
+        *pw = calloc(1, buf);
     }
 
-    size_t buf = 2;
     size_t idx = 0;
     int c = 0;
 
@@ -49,16 +42,15 @@ ssize_t getpasswd(char **pw, size_t sz)
         return -1;
     }
 
-    while (((c = fgetc(fp)) != '\n' && c != EOF && idx < sz - 1) ||
-           (idx == sz - 1 && c == 127))
+    while ((c = fgetc(fp)) != '\n' && c != EOF)
     {
         if (c != 127)
         {
-	    if (idx >= buf)
-	    {
-	        buf *= 2;
-	        *pw = realloc(*pw, buf);
-	    }
+            if (idx >= buf)
+            {
+                buf *= 2;
+                *pw = realloc(*pw, buf);
+            }
             (*pw)[idx++] = c;
         }
         else if (idx > 0)
@@ -67,16 +59,15 @@ ssize_t getpasswd(char **pw, size_t sz)
         }
     }
     (*pw)[idx] = 0;
-    *pw = realloc(*pw, idx);
+    if (buf != 128)
+    {
+        *pw = realloc(*pw, idx);
+    }
     if (tcsetattr(0, TCSANOW, &old_kbd_mode))
     {
         fprintf(stderr, "%s() error: tcsetattr failed\n", __func__);
         return -1;
     }
-
-    if (idx == sz - 1 && c != '\n')
-        fprintf(stderr, " (%s() warning: truncated at %zu chars)\n",
-                __func__, sz - 1);
 
     return idx;
 }
