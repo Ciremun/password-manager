@@ -1,1 +1,0 @@
-void getpasswd(char **pw, int sz);

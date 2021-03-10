@@ -4,31 +4,31 @@
 
 #include <windows.h>
 
-#include "win.h"
-
 void exit_program(int exit_code)
 {
     ExitThread(exit_code);
 }
 
-void getpasswd(char **pw, int sz)
+size_t getpasswd(char **pw)
 {
     int c;
     int idx = 0;
+    size_t buf = 128;
 
     if (*pw == NULL)
     {
-        void *tmp = (void *)realloc(*pw, sz * sizeof **pw);
-        if (!tmp)
-            return;
-        memset(tmp, 0, sz);
-        *pw = (char *)tmp;
+        *pw = calloc(1, buf);
     }
 
-    while (((c = _getch()) != 13 && c != EOF && idx < sz - 1) || (idx == sz - 1 && c == 127))
+    while ((c = _getch()) != 13 && c != EOF)
     {
         if (c != 127)
         {
+            if (idx >= buf)
+            {
+                buf *= 2;
+                *pw = realloc(*pw, buf);
+            }
             (*pw)[idx++] = c;
         }
         else if (idx > 0)
@@ -36,4 +36,11 @@ void getpasswd(char **pw, int sz)
             (*pw)[--idx] = 0;
         }
     }
+
+    if (buf != 128)
+    {
+        *pw = realloc(*pw, idx);
+    }
+
+    return idx;
 }

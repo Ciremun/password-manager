@@ -3,14 +3,12 @@
 #include <string.h>
 #include <termios.h>
 
-#include "unix.h"
-
 void exit_program(int exit_code)
 {
     exit(exit_code);
 }
 
-ssize_t getpasswd(char **pw)
+size_t getpasswd(char **pw)
 {
     FILE *fp = stdin;
     size_t buf = 128;
@@ -58,11 +56,12 @@ ssize_t getpasswd(char **pw)
             (*pw)[--idx] = 0;
         }
     }
-    (*pw)[idx] = 0;
+
     if (buf != 128)
     {
         *pw = realloc(*pw, idx);
     }
+
     if (tcsetattr(0, TCSANOW, &old_kbd_mode))
     {
         fprintf(stderr, "%s() error: tcsetattr failed\n", __func__);
