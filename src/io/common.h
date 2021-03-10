@@ -15,19 +15,12 @@ typedef SSIZE_T ssize_t;
 #include "../b64/b64.h"
 #include "../aes.h"
 
-#ifdef _WIN32
-#include "../io/win.h"
-#else
-#include "../io/unix.h"
-#endif
-
 #include "../parse.h"
 
 #define LMAX 255
-#define MAX_KEY_LEN 1024
 #define DATA_STORE ".data"
 
-
+size_t getpasswd(char **pw);
 ssize_t getline(char **lineptr, size_t *n, FILE *stream);
 void read_file(const char *fp, char ***lines, size_t *lsize);
 char *read_file_as_str(const char *fp, size_t *nch);
