@@ -26,6 +26,7 @@ ssize_t getpasswd(char **pw, size_t sz)
         *pw = (char *)tmp;
     }
 
+    size_t buf = 2;
     size_t idx = 0;
     int c = 0;
 
@@ -53,6 +54,11 @@ ssize_t getpasswd(char **pw, size_t sz)
     {
         if (c != 127)
         {
+	    if (idx >= buf)
+	    {
+	        buf *= 2;
+	        *pw = realloc(*pw, buf);
+	    }
             (*pw)[idx++] = c;
         }
         else if (idx > 0)
@@ -61,7 +67,7 @@ ssize_t getpasswd(char **pw, size_t sz)
         }
     }
     (*pw)[idx] = 0;
-
+    *pw = realloc(*pw, idx);
     if (tcsetattr(0, TCSANOW, &old_kbd_mode))
     {
         fprintf(stderr, "%s() error: tcsetattr failed\n", __func__);
