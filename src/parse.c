@@ -5,6 +5,7 @@
 
 extern struct AES_ctx ctx;
 extern const char *help_s;
+Flags f = {0};
 
 int is_flag(char *arg, char *s, char *l)
 {
@@ -30,6 +31,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->generate_password;
         else if (!f->key.exists                && is_flag(argv[i], "-k", "--key"))
             flag = &f->key;
+        else if (!f->copy.exists               && is_flag(argv[i], "-c", "--copy"))
+            flag = &f->copy;
 
         if (flag != NULL)
         {
@@ -45,8 +48,6 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
-    Flags f = {0};
-
     parse_flags(&f, argc, argv);
 
     if (f.key.exists)

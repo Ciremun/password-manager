@@ -48,7 +48,6 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
             int found_label = 0;
             for (size_t j = 0; j < decsize; j++)
             {
-                label_length++;
                 if (decoded_data[j] == ' ')
                 {
                     found_label = 1;
@@ -56,6 +55,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
                     break;
                 }
                 label[j] = decoded_data[j];
+                label_length++;
             }
             if (!found_label)
             {
@@ -84,6 +84,15 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
             {
                 free(decoded_data);
                 continue;
+            }
+            extern Flags f;
+            if (f.copy.exists) {
+                const char *password = decoded_data + label_length + 1;
+                if (copy_to_clipboard(password, strlen(password) + 1)) {
+                    did_print = 1;
+                    free(decoded_data);
+                    break;
+                };
             }
         }
         printf("%s\n", decoded_data);

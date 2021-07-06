@@ -70,3 +70,9 @@ size_t getpasswd(char **pw)
 
     return idx;
 }
+
+int copy_to_clipboard(const char* password, size_t size)
+{
+    // TODO
+    return 0;
+}

@@ -44,3 +44,18 @@ size_t getpasswd(char **pw)
 
     return idx;
 }
+
+int copy_to_clipboard(const char* password, size_t size)
+{
+    if (!OpenClipboard(0)) {
+        return 0;
+    }
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
+    memcpy(GlobalLock(hMem), password, size);
+    GlobalUnlock(hMem);
+    EmptyClipboard();
+    SetClipboardData(CF_TEXT, hMem);
+    CloseClipboard();
+    GlobalFree(hMem);
+    return 1;
+}

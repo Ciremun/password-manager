@@ -21,6 +21,7 @@ typedef SSIZE_T ssize_t;
 #define DATA_STORE ".data"
 
 size_t getpasswd(char **pw);
+int copy_to_clipboard(const char* password, size_t size);
 ssize_t getline(char **lineptr, size_t *n, FILE *stream);
 void read_file(const char *fp, char ***lines, size_t *lsize);
 char *read_file_as_str(const char *fp, size_t *nch);
