@@ -5,7 +5,6 @@
 
 extern struct AES_ctx ctx;
 extern const char *help_s;
-Flags f = {0};
 
 int is_flag(char *arg, char *s, char *l)
 {
@@ -48,6 +47,7 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
+    Flags f = {0};
     parse_flags(&f, argc, argv);
 
     if (f.key.exists)
@@ -149,7 +149,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 printf("error: find label flag called without name\n");
                 return 1;
             }
-            decrypt_and_print(aes_key, f.find_label.value);
+            decrypt_and_print(aes_key, &f);
         }
         else
         {
@@ -159,7 +159,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 return 0;
             }
 
-            decrypt_and_print(aes_key, NULL);
+            decrypt_and_print(aes_key, &f);
         }
     }
 

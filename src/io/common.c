@@ -2,7 +2,6 @@
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
-extern Flags f;
 
 const char *help_s = "\n\
     ./pm [flags]                  read or write data\n\
@@ -28,7 +27,7 @@ void input_key(uint8_t **aes_key)
     }
 }
 
-void decrypt_and_print(uint8_t *aes_key, char *find_label)
+void decrypt_and_print(uint8_t *aes_key, Flags *f)
 {
     size_t idx = 0;
     char **lines = NULL;
@@ -42,7 +41,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
         unsigned char *decoded_data = b64_decode_ex(lines[i], line_length, &decsize);
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
-        if (find_label != NULL)
+        if (f->find_label.value != NULL)
         {
             char *label = malloc(decsize);
             size_t label_length = 0;
@@ -64,7 +63,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
                 free(decoded_data);
                 continue;
             }
-            size_t query_len = strlen(find_label);
+            size_t query_len = strlen(f->find_label.value);
             if (query_len > label_length)
             {
                 free(label);
@@ -74,7 +73,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
             int do_continue = 0;
             for (size_t j = 0; j < query_len; j++)
             {
-                if (find_label[j] != label[j])
+                if (f->find_label.value[j] != label[j])
                 {
                     do_continue++;
                     break;
@@ -86,7 +85,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
                 free(decoded_data);
                 continue;
             }
-            if (f.copy.exists) {
+            if (f->copy.exists) {
                 const char *password = (const char*)decoded_data + label_length + 1;
                 if (copy_to_clipboard(password, strlen(password) + 1)) {
                     did_print = 1;
