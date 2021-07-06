@@ -2,6 +2,7 @@
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
+extern Flags f;
 
 const char *help_s = "\n\
     ./pm [flags]                  read or write data\n\
@@ -85,7 +86,6 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
                 free(decoded_data);
                 continue;
             }
-            extern Flags f;
             if (f.copy.exists) {
                 const char *password = (const char*)decoded_data + label_length + 1;
                 if (copy_to_clipboard(password, strlen(password) + 1)) {
