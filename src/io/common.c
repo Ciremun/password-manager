@@ -87,7 +87,7 @@ void decrypt_and_print(uint8_t *aes_key, char *find_label)
             }
             extern Flags f;
             if (f.copy.exists) {
-                const char *password = decoded_data + label_length + 1;
+                const char *password = (const char*)decoded_data + label_length + 1;
                 if (copy_to_clipboard(password, strlen(password) + 1)) {
                     did_print = 1;
                     free(decoded_data);
