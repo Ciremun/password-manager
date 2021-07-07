@@ -22,7 +22,11 @@ void input_key(uint8_t **aes_key, Flags *f)
 {
     if (!*aes_key)
     {
-        if (f != NULL && !f->copy.exists) {
+        if (f != NULL) {
+            if (!f->copy.exists) {
+                printf("key?\n");
+            }
+        } else {
             printf("key?\n");
         }
         getpasswd((char **)aes_key);
