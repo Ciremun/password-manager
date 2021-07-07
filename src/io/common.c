@@ -18,11 +18,13 @@ const char *help_s = "\n\
 \n\
 ";
 
-void input_key(uint8_t **aes_key)
+void input_key(uint8_t **aes_key, Flags *f)
 {
     if (!*aes_key)
     {
-        printf("key?\n");
+        if (f != NULL && !f->copy.exists) {
+            printf("key?\n");
+        }
         getpasswd((char **)aes_key);
     }
 }
@@ -32,7 +34,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     size_t idx = 0;
     char **lines = NULL;
     read_file(DATA_STORE, &lines, &idx);
-    input_key(&aes_key);
+    input_key(&aes_key, f);
     int did_print = 0;
     for (size_t i = 0; i < idx; i++)
     {
@@ -87,11 +89,16 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
             }
             if (f->copy.exists) {
                 const char *password = (const char*)decoded_data + label_length + 1;
+                #ifdef _WIN32
                 if (copy_to_clipboard(password, strlen(password) + 1)) {
+                #else
+                {
+                    printf("%s", password);
+                #endif
                     did_print = 1;
                     free(decoded_data);
                     break;
-                };
+                }
             }
         }
         printf("%s\n", decoded_data);
@@ -124,7 +131,7 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
     fclose(f);
 
     read_file(DATA_STORE, &lines, &idx);
-    input_key(&aes_key);
+    input_key(&aes_key, NULL);
 
     size_t label_and_data_size = strlen(find_label) + strlen(data) + 2;
 
@@ -214,7 +221,7 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
 
 void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
 {
-    input_key(&aes_key);
+    input_key(&aes_key, NULL);
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, data, data_length);
 
