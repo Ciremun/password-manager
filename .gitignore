@@ -7,3 +7,4 @@ build/
 .data
 pm
 test
+update_help.py
