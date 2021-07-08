@@ -12,7 +12,7 @@ void exit_program(int exit_code)
 size_t getpasswd(char **pw)
 {
     int c;
-    int idx = 0;
+    size_t idx = 0;
     size_t buf = 128;
 
     if (*pw == NULL)
