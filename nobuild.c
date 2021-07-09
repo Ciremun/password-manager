@@ -7,14 +7,6 @@
 #include "stdlib.h"
 #include "string.h"
 
-#ifdef _WIN32
-#include <direct.h>
-#define TEST_SOURCES "tests/test.c", "tests/t_win.c"
-#else
-#include <unistd.h>
-#define TEST_SOURCES "tests/test.c", "tests/t_unix.c"
-#endif
-
 #define SOURCES "src/aes.c", "src/b64/encode.c", "src/b64/decode.c", "src/b64/buffer.c", "src/io/common.c", "src/rand.c", "src/parse.c"
 #define FLAGS "-Wall", "-Wextra", "-pedantic"
 #define MSVC_FLAGS "/FC", "/nologo", "/link", "User32.lib"
@@ -43,11 +35,11 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
-            CMD("cl.exe", "/Fetest.exe", "/Od", TEST_SOURCES, "src/io/win.c", SOURCES, MSVC_FLAGS);
+            CMD("cl.exe", "/Fetest.exe", "/Od", "tests/test.c", "tests/t_win.c", "src/io/win.c", SOURCES, MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, TEST_SOURCES, "src/io/win.c", SOURCES, FLAGS, "-lUser32", "-otest", "-O0", "-ggdb");
+            CMD(cc, "tests/test.c", "tests/t_win.c", "src/io/win.c", SOURCES, FLAGS, "-lUser32", "-otest", "-O0", "-ggdb");
         }
         CMD(".\\test.exe");
     }
@@ -69,7 +61,7 @@ int main(int argc, char **argv)
     }
     if (test)
     {
-        CMD(cc, TEST_SOURCES, "src/io/unix.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
+        CMD(cc, "tests/test.c", "tests/t_unix.c", "src/io/unix.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
         CMD("./test");
     }
     else
