@@ -12,7 +12,7 @@
     -fl --find-label              find data by label
     -c  --copy                    -fl helper, win32: copy to clipboard, posix: pipe with clip tools
     -gp --generate-password [N]   put random data
-    -k  --key                     key
+    -k  --key                     key (optional flag)
     -h  --help                    display help
 
 ## Build
