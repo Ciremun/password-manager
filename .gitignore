@@ -2,9 +2,9 @@
 build/
 
 *.obj
+*.exe
 
 .data
 pm
-pm.exe
 test
-test.exe
+update_help.py
