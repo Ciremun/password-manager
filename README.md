@@ -10,6 +10,7 @@
     -df --data-file               read data from file
     -l  --label                   add label for data
     -fl --find-label              find data by label
+    -c  --copy                    -fl helper, win32: copy to clipboard, posix: pipe with clip tools
     -gp --generate-password [N]   put random data
     -k  --key                     key
     -h  --help                    display help
