@@ -16,26 +16,11 @@
 
 ## Build
 
-### Unix
-
-    $ make
-
-### Windows
-
-[Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/downloads/)  
-
-In Visual Studio Installer:  
-Windows 10 SDK  
-MSVC Build Tools & Libraries  
-
-```console
-cmd.exe
-"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat"
-cd password-manager
-build_win.bat
-```
+    cc nobuild.c -o nobuild
+    ./nobuild
 
 ## Thank
 
 [Tiny AES](https://github.com/kokke/tiny-AES-c)  
 [b64.c](https://github.com/littlstar/b64.c)
+[nobuild](https://github.com/tsoding/nobuild)
