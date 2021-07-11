@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     int   test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
     if (test)
     {
-        PANIC_OVERWRITE_IF_FILE_EXISTS(DATA_STORE);
+        PANIC_OVERWRITE_IF_FILE_EXISTS(DEFAULT_DATA_STORE);
         PANIC_OVERWRITE_IF_FILE_EXISTS("test.txt");
     }
 #ifdef _WIN32
