@@ -5,6 +5,7 @@
 
 extern struct AES_ctx ctx;
 extern const char *help_s;
+extern char* data_store;
 
 int is_flag(char *arg, char *s, char *l)
 {
@@ -34,6 +35,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->copy;
         else if (!f->delete_label.exists       && is_flag(argv[i], "-dl", "--delete-label"))
             flag = &f->delete_label;
+        else if (!f->input.exists              && is_flag(argv[i], "-i", "--input"))
+            flag = &f->input;
 
         if (flag != NULL)
         {
@@ -70,6 +73,23 @@ int run(uint8_t *aes_key, int argc, char **argv)
             aes_key = calloc(1, 128);
         }
         memcpy(aes_key, f.key.value, aes_key_length);
+    }
+
+    if (f.input.exists)
+    {
+        if (f.input.value)
+        {
+            data_store = f.input.value;
+        }
+        else
+        {
+            printf("error: input flag called without file path\n");
+            return 1;
+        }
+    }
+    else
+    {
+        data_store = DEFAULT_DATA_STORE;
     }
 
     if (f.delete_label.exists)

@@ -2,6 +2,7 @@
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
+extern char* data_store;
 
 const char *help_s = "\n"
                      "./pm [flags]                  read or write data\n"
@@ -13,7 +14,6 @@ const char *help_s = "\n"
                      "-l  --label                   add label for data\n"
                      "-fl --find-label              find data by label\n"
                      "-dl --delete-label            delete label and its data\n"
-
 #ifdef _WIN32
                      "-c  --copy                    -fl helper, copy to clipboard\n"
 #else
@@ -21,6 +21,7 @@ const char *help_s = "\n"
 #endif
                      "-gp --generate-password [N]   put random data\n"
                      "-k  --key                     key\n"
+                     "-i  --input                   stored data path\n"
                      "-h  --help                    display help\n\n";
 
 void input_key(uint8_t **aes_key, Flags *f)
@@ -46,7 +47,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
 {
     size_t idx = 0;
     char **lines = NULL;
-    read_file(DATA_STORE, &lines, &idx);
+    read_file(data_store, &lines, &idx);
     input_key(&aes_key, f);
     int did_print = 0;
     for (size_t i = 0; i < idx; i++)
@@ -139,13 +140,13 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
     size_t idx = 0;
 
     FILE *f = NULL;
-    if (!(f = fopen(DATA_STORE, "r")))
+    if (!(f = fopen(data_store, "r")))
     {
-        f = fopen(DATA_STORE, "a");
+        f = fopen(data_store, "a");
     }
     fclose(f);
 
-    read_file(DATA_STORE, &lines, &idx);
+    read_file(data_store, &lines, &idx);
     input_key(&aes_key, NULL);
 
     size_t label_and_data_size = strlen(find_label) + strlen(data) + 2;
@@ -181,10 +182,10 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
 
             char *encoded_data = b64_encode(decoded_data, label_and_data_size);
 
-            FILE *f = fopen(DATA_STORE, "w");
+            FILE *f = fopen(data_store, "w");
             if (f == NULL)
             {
-                fprintf(stderr, "error opening file %s\n", DATA_STORE);
+                fprintf(stderr, "error opening file %s\n", data_store);
                 return;
             }
 
@@ -219,7 +220,7 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
     AES_CTR_xcrypt_buffer(&ctx, label_and_data, label_and_data_size);
 
     char *encoded_data = b64_encode(label_and_data, label_and_data_size);
-    write_file(DATA_STORE, "a", encoded_data);
+    write_file(data_store, "a", encoded_data);
 
     for (size_t i = 0; i < idx; i++)
     {
@@ -239,7 +240,7 @@ void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
     AES_CTR_xcrypt_buffer(&ctx, data, data_length);
 
     char *encoded_data = b64_encode(data, data_length);
-    write_file(DATA_STORE, "a", encoded_data);
+    write_file(data_store, "a", encoded_data);
     free(encoded_data);
     free(aes_key);
 }
@@ -405,7 +406,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
     int found_label = 0;
     size_t total_lines = 0;
     char **lines = NULL;
-    read_file(DATA_STORE, &lines, &total_lines);
+    read_file(data_store, &lines, &total_lines);
     input_key(&aes_key, NULL);
     size_t line_idx = 0;
     for (; line_idx < total_lines; ++line_idx)
@@ -438,9 +439,9 @@ void delete_label(char *find_label, uint8_t *aes_key)
     if (found_label)
     {
         FILE *f = 0;
-        if (!(f = fopen(DATA_STORE, "w")))
+        if (!(f = fopen(data_store, "w")))
         {
-            PANIC_OPEN_FILE(DATA_STORE);
+            PANIC_OPEN_FILE(data_store);
         }
         for (size_t i = 0; i < total_lines; ++i)
         {

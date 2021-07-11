@@ -17,6 +17,7 @@ typedef struct
     Flag key;
     Flag copy;
     Flag delete_label;
+    Flag input;
     Flag help;
 } Flags;
 

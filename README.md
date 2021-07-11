@@ -13,7 +13,8 @@
     -dl --delete-label            delete label and its data
     -c  --copy                    -fl helper, win32: copy to clipboard, posix: pipe with clip tools
     -gp --generate-password [N]   put random data
-    -k  --key                     key (optional flag)
+    -k  --key                     key              (optional flag)
+    -i  --input                   stored data path (optional flag)
     -h  --help                    display help
 
 ## Build

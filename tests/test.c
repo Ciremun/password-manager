@@ -2,6 +2,7 @@
 
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+char* data_store = 0;
 
 void (*tests[])(void) = {
     test_no_flag,
@@ -80,7 +81,7 @@ void test_data_flag(void)
 
     size_t nch = 0;
     char **lines = NULL;
-    read_file(DATA_STORE, &lines, &nch);
+    read_file(data_store, &lines, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
@@ -120,7 +121,7 @@ void test_data_file_flag(void)
     remove("test.txt");
 
     size_t nch = 0;
-    char *data = read_file_as_str(DATA_STORE, &nch);
+    char *data = read_file_as_str(data_store, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -158,13 +159,13 @@ void test_generate_password_flag(void)
     FILE *f = NULL;
     run(aes_key, argc, argv);
     reset_key(aes_key);
-    assert_t((f = fopen(DATA_STORE, "r")) != NULL, "-gp" TABS);
+    assert_t((f = fopen(data_store, "r")) != NULL, "-gp" TABS);
     if (f)
     {
         fclose(f);
     }
     free_argv(argc, argv);
-    remove(DATA_STORE);
+    remove(data_store);
 
     uint8_t *new_key = get_key();
 
@@ -176,7 +177,7 @@ void test_generate_password_flag(void)
     free_argv(argc, argv);
 
     size_t nch = 0;
-    char* data = read_file_as_str(DATA_STORE, &nch);
+    char* data = read_file_as_str(data_store, &nch);
 
     size_t decsize = 0;
     unsigned char* decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -198,7 +199,7 @@ void test_key_flag(void)
     free_argv(argc, argv);
 
     size_t nch = 0;
-    char* data = read_file_as_str(DATA_STORE, &nch);
+    char* data = read_file_as_str(data_store, &nch);
 
     size_t decsize = 0;
     unsigned char* decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -215,7 +216,7 @@ void setup_test(void)
 
 void exit_test(void)
 {
-    remove(DATA_STORE);
+    remove(data_store);
 }
 
 void run_test(void (*test)(void))
