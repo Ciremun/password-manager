@@ -32,6 +32,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->key;
         else if (!f->copy.exists               && is_flag(argv[i], "-c", "--copy"))
             flag = &f->copy;
+        else if (!f->delete_label.exists       && is_flag(argv[i], "-dl", "--delete-label"))
+            flag = &f->delete_label;
 
         if (flag != NULL)
         {
@@ -68,6 +70,20 @@ int run(uint8_t *aes_key, int argc, char **argv)
             aes_key = calloc(1, 128);
         }
         memcpy(aes_key, f.key.value, aes_key_length);
+    }
+
+    if (f.delete_label.exists)
+    {
+        if (f.delete_label.value)
+        {
+            delete_label(f.delete_label.value, aes_key);
+            return 0;
+        }
+        else
+        {
+            printf("error: delete-label flag called without label\n");
+            return 1;
+        }
     }
 
     if (!f.data.exists)

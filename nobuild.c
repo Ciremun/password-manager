@@ -1,4 +1,5 @@
 #include "src/io/common.h"
+#undef PANIC
 
 #define NOBUILD_IMPLEMENTATION
 #include "nobuild.h"

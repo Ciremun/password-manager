@@ -16,6 +16,7 @@ typedef struct
     Flag generate_password;
     Flag key;
     Flag copy;
+    Flag delete_label;
     Flag help;
 } Flags;
 
