@@ -23,6 +23,8 @@
 
 int main(int argc, char **argv)
 {
+    GO_REBUILD_URSELF(argc, argv);
+
     char *cc = getenv("cc");
     int   test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
     if (test)
