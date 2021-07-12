@@ -3,6 +3,7 @@ build/
 
 *.obj
 *.exe
+*.old
 
 .data
 pm
