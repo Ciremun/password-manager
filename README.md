@@ -11,8 +11,8 @@
     -l  --label                   add label for data
     -fl --find-label              find data by label
     -dl --delete-label            delete label and its data
-    -c  --copy                    -fl helper, win32: copy to clipboard, posix: pipe with clip tools
     -gp --generate-password [N]   put random data
+    -c  --copy                    -fl, -gp helper, win32: copy to clipboard, posix: pipe with clip tools
     -k  --key                     key              (optional flag)
     -i  --input                   stored data path (optional flag)
     -h  --help                    display help
