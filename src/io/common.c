@@ -15,9 +15,9 @@ const char *help_s = "\n"
                      "-fl --find-label              find data by label\n"
                      "-dl --delete-label            delete label and its data\n"
 #ifdef _WIN32
-                     "-c  --copy                    -fl helper, copy to clipboard\n"
+                     "-c  --copy                    -fl, -gp helper, copy to clipboard\n"
 #else
-                     "-c  --copy                    -fl helper, pipe with clip tools\n"
+                     "-c  --copy                    -fl, -gp helper, pipe with clip tools\n"
 #endif
                      "-gp --generate-password [N]   put random data\n"
                      "-k  --key                     key\n"
@@ -134,20 +134,20 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     exit_program(0);
 }
 
-void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
+void encrypt_and_replace(Flags *f, char *find_label, char *data, uint8_t *aes_key)
 {
     char **lines = NULL;
     size_t idx = 0;
 
-    FILE *f = NULL;
-    if (!(f = fopen(data_store, "r")))
+    FILE *fh = NULL;
+    if (!(fh = fopen(data_store, "r")))
     {
-        f = fopen(data_store, "a");
+        fh = fopen(data_store, "a");
     }
-    fclose(f);
+    fclose(fh);
 
     read_file(data_store, &lines, &idx);
-    input_key(&aes_key, NULL);
+    input_key(&aes_key, f);
 
     size_t label_and_data_size = strlen(find_label) + strlen(data) + 2;
 
@@ -233,9 +233,9 @@ void encrypt_and_replace(char *find_label, char *data, uint8_t *aes_key)
     free(aes_key);
 }
 
-void encrypt_and_write(uint8_t *data, uint8_t *aes_key, size_t data_length)
+void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key, size_t data_length)
 {
-    input_key(&aes_key, NULL);
+    input_key(&aes_key, f);
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, data, data_length);
 

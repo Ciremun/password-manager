@@ -128,11 +128,11 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
             if (f.label.exists)
             {
-                encrypt_and_replace(f.label.value, data, aes_key);
+                encrypt_and_replace(&f, f.label.value, data, aes_key);
             }
             else
             {
-                encrypt_and_write((uint8_t *)data, aes_key, nch);
+                encrypt_and_write(&f, (uint8_t *)data, aes_key, nch);
             }
 
             free(data);
@@ -160,16 +160,22 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
             char *password = malloc(password_length + 1);
             random_string((int)password_length, password);
-
             if (f.label.exists)
             {
-                encrypt_and_replace(f.label.value, password, aes_key);
+                encrypt_and_replace(&f, f.label.value, password, aes_key);
             }
             else
             {
-                encrypt_and_write((uint8_t *)password, aes_key, (int)password_length + 1);
+                encrypt_and_write(&f, (uint8_t *)password, aes_key, (int)password_length + 1);
             }
-
+            if (f.copy.exists)
+            {
+#ifdef _WIN32
+                copy_to_clipboard(password, password_length + 1);
+#else
+                printf("%s", password);
+#endif
+            }
             free(password);
             return 0;
         }
@@ -224,11 +230,11 @@ int run(uint8_t *aes_key, int argc, char **argv)
             printf("error: label flag called without name\n");
             return 1;
         }
-        encrypt_and_replace(f.label.value, f.data.value, aes_key);
+        encrypt_and_replace(&f, f.label.value, f.data.value, aes_key);
     }
     else
     {
-        encrypt_and_write((uint8_t *)f.data.value, aes_key, strlen(f.data.value) + 1);
+        encrypt_and_write(&f, (uint8_t *)f.data.value, aes_key, strlen(f.data.value) + 1);
     }
 
     return 0;
