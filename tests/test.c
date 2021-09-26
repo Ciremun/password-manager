@@ -15,6 +15,15 @@ void (*tests[])(void) = {
 
 size_t tests_count = sizeof(tests) / sizeof(tests[0]);
 
+void exit_program(int exit_code)
+{
+#ifdef _WIN32
+    ExitThread(exit_code);
+#else
+    exit(exit_code);
+#endif // _WIN32
+}
+
 uint8_t *get_key(void)
 {
     uint8_t *aes_key = calloc(1, 32);

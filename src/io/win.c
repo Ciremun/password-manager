@@ -4,11 +4,6 @@
 
 #include <windows.h>
 
-void exit_program(int exit_code)
-{
-    ExitThread(exit_code);
-}
-
 size_t getpasswd(char **pw)
 {
     int c;

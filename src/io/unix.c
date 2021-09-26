@@ -3,11 +3,6 @@
 #include <string.h>
 #include <termios.h>
 
-void exit_program(int exit_code)
-{
-    exit(exit_code);
-}
-
 size_t getpasswd(char **pw)
 {
     FILE *fp = stdin;
