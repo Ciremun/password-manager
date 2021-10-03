@@ -21,6 +21,7 @@ const char *help_s = "\n"
 #endif
                      "-gp --generate-password [N]   put random data\n"
                      "-k  --key                     key\n"
+                     "-kf --key-file                key file path\n"
                      "-i  --input                   stored data path\n"
                      "-h  --help                    display help\n\n";
 
@@ -354,39 +355,19 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
 
 char *read_file_as_str(const char *fp, size_t *nch)
 {
-    FILE *f = fopen(fp, "r");
+    FILE *f = fopen(fp, "rb");
     if (f == NULL)
-    {
-        printf("error opening file %s\n", fp);
-        exit_program(1);
-    }
-    int c;
-    size_t size = 1024;
-    char *buf = malloc(size);
-    if (buf == NULL)
-    {
-        fprintf(stderr, "error: memory allocation failed\n");
-        exit_program(1);
-    }
-
-    while ((c = getc(f)) != EOF)
-    {
-        if (*nch >= size - 1)
-        {
-            size *= 2;
-            buf = realloc(buf, size);
-            if (buf == NULL)
-            {
-                fprintf(stderr, "error: memory allocation failed\n");
-                exit_program(1);
-            }
-        }
-        buf[(*nch)++] = c;
-    }
-
-    buf[(*nch)++] = 0;
+        exit(1);
+    fseek(f, 0, SEEK_END);
+    size_t size = ftell(f);
+    char *str = (char *)malloc(size + 1);
+    fseek(f, 0, SEEK_SET);
+    fread(str, 1, size, f);
+    str[size] = '\0';
     fclose(f);
-    return buf;
+    if (nch != NULL)
+        *nch = size;
+    return str;
 }
 
 void write_file(const char *fp, const char *mode, void *data)

@@ -19,6 +19,7 @@ typedef struct
     Flag delete_label;
     Flag input;
     Flag help;
+    Flag key_file;
 } Flags;
 
 int is_flag(char *arg, char *s, char *l);

@@ -37,6 +37,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->delete_label;
         else if (!f->input.exists              && is_flag(argv[i], "-i", "--input"))
             flag = &f->input;
+        else if (!f->key_file.exists           && is_flag(argv[i], "-kf", "--key-file"))
+            flag = &f->key_file;
 
         if (flag != NULL)
         {
@@ -73,6 +75,27 @@ int run(uint8_t *aes_key, int argc, char **argv)
             aes_key = calloc(1, 128);
         }
         memcpy(aes_key, f.key.value, aes_key_length);
+    }
+
+    if (f.key_file.exists)
+    {
+        if (!f.key_file.value)
+        {
+            printf("error: key-file flag called without filename\n");
+            return 1;
+        }
+        size_t aes_key_length = 0;
+        char *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
+        if (aes_key_length > 128)
+        {
+            aes_key = malloc(aes_key_length);
+        }
+        else
+        {
+            aes_key = calloc(1, 128);
+        }
+        memcpy(aes_key, key_file, aes_key_length);
+        free(key_file);
     }
 
     if (f.input.exists)
