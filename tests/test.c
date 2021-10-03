@@ -118,7 +118,7 @@ void test_data_file_flag(void)
     assert_t(run_test_in_fork(&a) == 1, "-df test.txt (non-ex)\t");
     free_argv(a.argc, a.argv);
 
-    write_file("test.txt", "w", "test data file");
+    write_file("test.txt", "wb", "test data file");
 
     argc = 3;
     argv = fill_args(argc, "-df", "test.txt");
