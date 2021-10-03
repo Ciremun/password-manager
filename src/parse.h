@@ -20,6 +20,7 @@ typedef struct
     Flag input;
     Flag help;
     Flag key_file;
+    Flag version;
 } Flags;
 
 int is_flag(char *arg, char *s, char *l);

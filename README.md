@@ -16,6 +16,7 @@
     -k  --key                     key
     -kf --key-file                key file path
     -i  --input                   stored data path
+    -v  --version                 display version
     -h  --help                    display help
 
 ## Build

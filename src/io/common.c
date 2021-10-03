@@ -23,6 +23,7 @@ const char *help_s = "\n"
                      "-k  --key                     key\n"
                      "-kf --key-file                key file path\n"
                      "-i  --input                   stored data path\n"
+                     "-v  --version                 display version\n"
                      "-h  --help                    display help\n\n";
 
 void input_key(uint8_t **aes_key, Flags *f)

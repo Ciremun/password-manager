@@ -3,6 +3,8 @@
 #include "io/common.h"
 #include "rand.h"
 
+#define PM_VERSION "1.0"
+
 extern struct AES_ctx ctx;
 extern const char *help_s;
 extern char* data_store;
@@ -39,6 +41,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->input;
         else if (!f->key_file.exists           && is_flag(argv[i], "-kf", "--key-file"))
             flag = &f->key_file;
+        else if (!f->version.exists            && is_flag(argv[i], "-v", "--version"))
+            flag = &f->version;
 
         if (flag != NULL)
         {
@@ -56,6 +60,12 @@ int run(uint8_t *aes_key, int argc, char **argv)
 {
     Flags f = {0};
     parse_flags(&f, argc, argv);
+
+    if (f.version.exists)
+    {
+        printf("password-manager %s\n", PM_VERSION);
+        return 0;
+    }
 
     if (f.key.exists)
     {
