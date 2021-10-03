@@ -358,7 +358,10 @@ char *read_file_as_str(const char *fp, size_t *nch)
 {
     FILE *f = fopen(fp, "rb");
     if (f == NULL)
+    {
+        fprintf(stderr, "error opening file %s\n", fp);
         exit_program(1);
+    }
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
     char *str = (char *)malloc(size + 1);
