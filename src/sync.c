@@ -103,16 +103,15 @@ LPSTR GetLastErrorAsString(void)
 
     LPSTR messageBuffer = NULL;
 
-    DWORD size =
-        FormatMessage(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // DWORD   dwFlags,
-            NULL, // LPCVOID lpSource,
-            errorMessageId, // DWORD   dwMessageId,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // DWORD   dwLanguageId,
-            (LPSTR) &messageBuffer, // LPTSTR  lpBuffer,
-            0, // DWORD   nSize,
-            NULL // va_list *Arguments
-        );
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // DWORD   dwFlags,
+        NULL, // LPCVOID lpSource,
+        errorMessageId, // DWORD   dwMessageId,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // DWORD   dwLanguageId,
+        (LPSTR) &messageBuffer, // LPTSTR  lpBuffer,
+        0, // DWORD   nSize,
+        NULL // va_list *Arguments
+    );
 
     return messageBuffer;
 }
