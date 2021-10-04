@@ -109,6 +109,7 @@ void test_data_flag(void)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data" TABS);
+    free(aes_key);
 }
 
 void test_data_file_flag(void)
@@ -149,6 +150,7 @@ void test_data_file_flag(void)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     assert_t(strcmp("test data file\n", (char *)decoded_data) == 0, "-df test.txt\t\t");
+    free(aes_key);
 }
 
 void test_label_flag(void)
@@ -205,6 +207,7 @@ void test_generate_password_flag(void)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     assert_t(strlen((char *)decoded_data) == 128, "-gp 128" TABS);
+    free(aes_key);
 }
 
 void test_key_flag(void)
@@ -227,6 +230,7 @@ void test_key_flag(void)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     assert_t(strcmp((char *)decoded_data, "test_data") == 0, "-k -d" TABS);
+    free(aes_key);
 }
 
 void setup_test(void)
