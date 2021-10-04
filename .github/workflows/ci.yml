@@ -33,6 +33,12 @@ jobs:
       - name: build
         run: |
           cc nobuild.c -onobuild && ./nobuild
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm
+          path: |
+            pm*
         env:
           CC: gcc
   ubuntu-clang:
@@ -42,6 +48,12 @@ jobs:
       - name: build
         run: |
           cc nobuild.c -onobuild && ./nobuild
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm
+          path: |
+            pm*
         env:
           CC: clang
   macos-clang:
@@ -51,6 +63,12 @@ jobs:
       - name: build
         run: |
           cc nobuild.c -onobuild && ./nobuild
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm
+          path: |
+            pm*
         env:
           CC: clang
   windows-msvc:
@@ -62,3 +80,9 @@ jobs:
         shell: cmd
         run: |
           cl nobuild.c && nobuild.exe
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm
+          path: |
+            pm*
