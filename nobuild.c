@@ -8,7 +8,7 @@
 #include "stdlib.h"
 #include "string.h"
 
-#define SOURCES "src/aes.c", "src/b64/encode.c", "src/b64/decode.c", "src/b64/buffer.c", "src/io/common.c", "src/rand.c", "src/parse.c"
+#define SOURCES "src/sync.c", "src/aes.c", "src/b64/encode.c", "src/b64/decode.c", "src/b64/buffer.c", "src/io/common.c", "src/rand.c", "src/parse.c"
 #define FLAGS "-Wall", "-Wextra", "-pedantic"
 #define MSVC_FLAGS "/FC", "/nologo", "/link", "User32.lib"
 

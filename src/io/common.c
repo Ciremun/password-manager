@@ -1,8 +1,10 @@
 #include "common.h"
+#include "../sync.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 extern char* data_store;
+extern char* sync_remote_url;
 
 const char *help_s = "\n"
                      "./pm [flags]                  read or write data\n"
@@ -47,6 +49,7 @@ void input_key(uint8_t **aes_key, Flags *f)
 
 void decrypt_and_print(uint8_t *aes_key, Flags *f)
 {
+    pull_changes(sync_remote_url);
     size_t idx = 0;
     char **lines = NULL;
     read_file(data_store, &lines, &idx);
@@ -208,6 +211,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data, uint8_t *aes_ke
             free(decoded_data);
             free(aes_key);
 
+            upload_changes(sync_remote_url);
             return;
         }
 
@@ -233,6 +237,8 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data, uint8_t *aes_ke
     free(label_and_data);
     free(encoded_data);
     free(aes_key);
+
+    upload_changes(sync_remote_url);
 }
 
 void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key, size_t data_length)
@@ -245,6 +251,8 @@ void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key, size_t data_le
     write_file(data_store, "a", encoded_data);
     free(encoded_data);
     free(aes_key);
+
+    upload_changes(sync_remote_url);
 }
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream)
@@ -453,6 +461,8 @@ void delete_label(char *find_label, uint8_t *aes_key)
     }
     free(lines);
     free(aes_key);
+
+    upload_changes(sync_remote_url);
 }
 
 unsigned char *decode_line(const char *line, uint8_t *aes_key, size_t *decoded_line_length)

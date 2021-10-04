@@ -19,6 +19,7 @@ typedef SSIZE_T ssize_t;
 
 #define LMAX 255
 #define DEFAULT_DATA_STORE ".pm_data"
+#define CONFIG_STORE ".pm_cfg"
 
 #ifdef _WIN32
 int copy_to_clipboard(const char *password, size_t size);

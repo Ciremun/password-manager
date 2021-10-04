@@ -3,11 +3,13 @@
 #include "io/common.h"
 #include "rand.h"
 
-#define PM_VERSION "1.0"
+#define PM_VERSION "1.1"
 
 extern struct AES_ctx ctx;
 extern const char *help_s;
 extern char* data_store;
+
+char* sync_remote_url = 0;
 
 int is_flag(char *arg, char *s, char *l)
 {
@@ -58,6 +60,8 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
+    sync_remote_url = getenv("PM_SYNC_REMOTE_URL");
+
     Flags f = {0};
     parse_flags(&f, argc, argv);
 
