@@ -27,14 +27,9 @@ void exit_program(int exit_code)
 
 uint8_t *get_key(void)
 {
-    uint8_t *aes_key = calloc(1, 32);
-    reset_key(aes_key);
-    return aes_key;
-}
-
-void reset_key(uint8_t *aes_key)
-{
+    uint8_t *aes_key = calloc(1, 128);
     memcpy(aes_key, AES_KEY, 25);
+    return aes_key;
 }
 
 void assert_t(int check, const char *test)
@@ -93,14 +88,14 @@ void test_data_flag(void)
     char **argv = fill_args(argc, "-d");
 
     assert_t(run(aes_key, argc, argv) != 0, "-d" TABS);
-    reset_key(aes_key);
+    aes_key = get_key();
     free_argv(argc, argv);
 
     argc = 3;
     argv = fill_args(argc, "-d", "data");
 
     run(aes_key, argc, argv);
-    reset_key(aes_key);
+    aes_key = get_key();
     free_argv(argc, argv);
 
     size_t nch = 0;
@@ -113,7 +108,7 @@ void test_data_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    fprintf(stderr, "decoded data:%s", (char *)decoded_data);
+    fprintf(stderr, "decoded data:%s\n", (char *)decoded_data);
     assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data" TABS);
 }
 
@@ -140,7 +135,7 @@ void test_data_file_flag(void)
     argv = fill_args(argc, "-df", "test.txt");
 
     run(aes_key, argc, argv);
-    reset_key(aes_key);
+    aes_key = get_key();
     free_argv(argc, argv);
 
     remove("test.txt");
@@ -164,7 +159,7 @@ void test_label_flag(void)
     char **argv = fill_args(argc, "-l");
 
     assert_t(run(aes_key, argc, argv) == 1, "-l" TABS);
-    reset_key(aes_key);
+    aes_key = get_key();
     free_argv(argc, argv);
 
     argc = 3;
@@ -183,7 +178,7 @@ void test_generate_password_flag(void)
 
     FILE *f = NULL;
     run(aes_key, argc, argv);
-    reset_key(aes_key);
+    aes_key = get_key();
     assert_t((f = fopen(data_store, "rb")) != NULL, "-gp" TABS);
     if (f)
     {
@@ -192,13 +187,13 @@ void test_generate_password_flag(void)
     free_argv(argc, argv);
     remove(data_store);
 
-    uint8_t *new_key = get_key();
+    aes_key = get_key();
 
     argc = 3;
     argv = fill_args(argc, "-gp", "128");
 
-    run(new_key, argc, argv);
-    reset_key(new_key);
+    run(aes_key, argc, argv);
+    aes_key = get_key();
     free_argv(argc, argv);
 
     size_t nch = 0;
@@ -207,7 +202,7 @@ void test_generate_password_flag(void)
     size_t decsize = 0;
     unsigned char* decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, new_key, aes_iv);
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     assert_t(strlen((char *)decoded_data) == 128, "-gp 128" TABS);
@@ -220,7 +215,7 @@ void test_key_flag(void)
     char **argv = fill_args(argc, "-k", AES_KEY, "-d", "test_data");
 
     run(aes_key, argc, argv);
-    reset_key(aes_key);
+    aes_key = get_key();
     free_argv(argc, argv);
 
     size_t nch = 0;

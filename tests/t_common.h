@@ -25,7 +25,6 @@ void assert_t(int check, const char *test);
 void free_argv(int argc, char **argv);
 void setup_test(void);
 void exit_test(void);
-void reset_key();
 void run_test(void (*test)(void));
 void test_no_flag(void);
 void test_data_flag(void);
