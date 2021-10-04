@@ -200,29 +200,63 @@ void chain_echo(Chain chain);
         chain_run_sync(chain);                                          \
     } while(0)
 
-// TODO(#29): REBUILD_URSELF does not distinguish MSVC and MinGW setups on Windows
 #ifndef REBUILD_URSELF
 #  if _WIN32
-#    define REBUILD_URSELF(binary_path, source_path) CMD("cl.exe", source_path)
+#    if defined(__GNUC__)
+#       define REBUILD_URSELF(binary_path, source_path) CMD("gcc", "-o", binary_path, source_path)
+#    elif defined(__clang__)
+#       define REBUILD_URSELF(binary_path, source_path) CMD("clang", "-o", binary_path, source_path)
+#    elif defined(_MSC_VER)
+#       define REBUILD_URSELF(binary_path, source_path) CMD("cl.exe", source_path)
+#    endif
 #  else
 #    define REBUILD_URSELF(binary_path, source_path) CMD("cc", "-o", binary_path, source_path)
 #  endif
 #endif
 
-// NOTE: The implementation idea is stolen from https://github.com/zhiayang/nabs
-#define GO_REBUILD_URSELF(argc, argv)                           \
-    do {                                                        \
-        const char *source_path = __FILE__;                     \
-        assert(argc >= 1);                                      \
-        const char *binary_path = argv[0];                      \
-                                                                \
-        if (is_path1_modified_after_path2(source_path, binary_path)) {  \
-            RENAME(binary_path, CONCAT(binary_path, ".old"));   \
-            REBUILD_URSELF(binary_path, source_path);           \
-            CMD(binary_path);                                   \
-            exit(0);                                            \
-        }                                                       \
+// Go Rebuild Urself™ Technology
+//
+//   How to use it:
+//     int main(int argc, char** argv) {
+//         GO_REBUILD_URSELF(argc, argv);
+//         // actual work
+//         return 0;
+//     }
+//
+//   After your added this macro every time you run ./nobuild it will detect
+//   that you modified its original source code and will try to rebuild itself
+//   before doing any actual work. So you only need to bootstrap your build system
+//   once.
+//
+//   The modification is detected by comparing the last modified times of the executable
+//   and its source code. The same way the make utility usually does it.
+//
+//   The rebuilding is done by using the REBUILD_URSELF macro which you can redefine
+//   if you need a special way of bootstraping your build system. (which I personally
+//   do not recommend since the whole idea of nobuild is to keep the process of bootstrapping
+//   as simple as possible and doing all of the actual work inside of the nobuild)
+//
+#define GO_REBUILD_URSELF(argc, argv)                                  \
+    do {                                                               \
+        const char *source_path = __FILE__;                            \
+        assert(argc >= 1);                                             \
+        const char *binary_path = argv[0];                             \
+                                                                       \
+        if (is_path1_modified_after_path2(source_path, binary_path)) { \
+            RENAME(binary_path, CONCAT(binary_path, ".old"));          \
+            REBUILD_URSELF(binary_path, source_path);                  \
+            Cmd cmd = {                                                \
+                .line = {                                              \
+                    .elems = (Cstr*) argv,                             \
+                    .count = argc,                                     \
+                },                                                     \
+            };                                                         \
+            INFO("CMD: %s", cmd_show(cmd));                            \
+            cmd_run_sync(cmd);                                         \
+            exit(0);                                                   \
+        }                                                              \
     } while(0)
+// The implementation idea is stolen from https://github.com/zhiayang/nabs
 
 void rebuild_urself(const char *binary_path, const char *source_path);
 
@@ -909,6 +943,7 @@ int path_exists(Cstr path)
     struct stat statbuf = {0};
     if (stat(path, &statbuf) < 0) {
         if (errno == ENOENT) {
+            errno = 0;
             return 0;
         }
 
@@ -931,6 +966,7 @@ int path_is_dir(Cstr path)
     struct stat statbuf = {0};
     if (stat(path, &statbuf) < 0) {
         if (errno == ENOENT) {
+            errno = 0;
             return 0;
         }
 
@@ -989,6 +1025,7 @@ void path_mkdirs(Cstr_Array path)
 
         if (mkdir(result, 0755) < 0) {
             if (errno == EEXIST) {
+                errno = 0;
                 WARN("directory %s already exists", result);
             } else {
                 PANIC("could not create directory %s: %s", result, strerror(errno));
@@ -1009,6 +1046,7 @@ void path_rm(Cstr path)
 
         if (rmdir(path) < 0) {
             if (errno == ENOENT) {
+                errno = 0;
                 WARN("directory %s does not exist", path);
             } else {
                 PANIC("could not remove directory %s: %s", path, strerror(errno));
@@ -1017,6 +1055,7 @@ void path_rm(Cstr path)
     } else {
         if (unlink(path) < 0) {
             if (errno == ENOENT) {
+                errno = 0;
                 WARN("file %s does not exist", path);
             } else {
                 PANIC("could not remove file %s: %s", path, strerror(errno));
@@ -1071,7 +1110,7 @@ void INFO(Cstr fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    VLOG(stdout, "INFO", fmt, args);
+    VLOG(stderr, "INFO", fmt, args);
     va_end(args);
 }
 
