@@ -3,6 +3,7 @@
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 char* data_store = 0;
+int tests_exit_code = 0;
 
 void (*tests[])(void) = {
     test_no_flag,
@@ -39,9 +40,14 @@ void reset_key(uint8_t *aes_key)
 void assert_t(int check, const char *test)
 {
     if (!check)
+    {
+        tests_exit_code = 1;
         fprintf(stderr, "%s FAIL\n", test);
+    }
     else
+    {
         fprintf(stderr, "%s PASS\n", test);
+    }
 }
 
 char **fill_args(int argc, ...)
@@ -244,5 +250,5 @@ int main(void)
         run_test(tests[i]);
     }
 
-    exit_program(0);
+    exit_program(tests_exit_code);
 }
