@@ -2,8 +2,7 @@
 
 #include "io/common.h"
 #include "rand.h"
-
-#define PM_VERSION "1.1.1"
+#include "version.h"
 
 extern struct AES_ctx ctx;
 extern const char *help_s;
