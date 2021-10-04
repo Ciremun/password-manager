@@ -79,10 +79,10 @@ int main(int argc, char **argv)
     }
     FILE *version_header = fopen("src/version.h", "wb");
     if (version_header == 0)
-        printf("error opening src/version.h");
+        printf("error opening src/version.h\n");
     FILE *git_heads_master = fopen(".git/refs/heads/master", "rb");
     if (git_heads_master == 0)
-        printf("error opening .git/refs/heads/master");
+        printf("error opening .git/refs/heads/master\n");
     if (version_header && git_heads_master)
     {
         fprintf(version_header, "%s", "#define PM_VERSION \"");
