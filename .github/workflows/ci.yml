@@ -6,16 +6,104 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: run tests
+      - name: build
         run: cc nobuild.c -o nobuild && ./nobuild test
   build-test-win:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
-
-      - name: run tests
+      - name: build
         shell: cmd
         run: |
           cl.exe nobuild.c && nobuild.exe test
+  ubuntu-gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+          cc nobuild.c -onobuild && ./nobuild
+        env:
+          CC: gcc
+  ubuntu-clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+          cc nobuild.c -onobuild && ./nobuild
+        env:
+          CC: clang
+  macos-clang:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+          cc nobuild.c -onobuild && ./nobuild
+        env:
+          CC: clang
+  windows-msvc:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: seanmiddleditch/gha-setup-vsdevenv@master
+      - name: build
+        shell: cmd
+        run: |
+          cl nobuild.c && nobuild.exe
+  windows-gcc:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: [{ msystem: MINGW64, msystem_lower: mingw64, arch: x86_64 }]          
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          path: temp
+          fetch-depth: 0
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          install: mingw-w64-${{ matrix.arch }}-gcc
+          update: true
+      - name: update pkgs
+        run: |
+          msys2 -c 'pacman --noconfirm -Suuy'
+          msys2 -c 'pacman --noconfirm -Suu'
+      - name: build
+        run: |
+          gcc nobuild.c -onobuild && nobuild.exe
+        shell: cmd
+        env:
+          CC: gcc
+          PATH: D:\a\_temp\msys\msys64\usr\bin;D:\a\_temp\msys\msys64\${{ matrix.msystem_lower }}\bin;D:\a\_temp\msys
+  windows-clang:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: [{ msystem: MINGW64, msystem_lower: mingw64, arch: x86_64 }]          
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          path: temp
+          fetch-depth: 0
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          install: mingw-w64-${{ matrix.arch }}-clang
+          update: true
+      - name: update pkgs
+        run: |
+          msys2 -c 'pacman --noconfirm -Suuy'
+          msys2 -c 'pacman --noconfirm -Suu'
+      - name: build
+        run: |
+          clang nobuild.c -onobuild && nobuild.exe
+        shell: cmd
+        env:
+          CC: clang
+          PATH: D:\a\_temp\msys\msys64\usr\bin;D:\a\_temp\msys\msys64\${{ matrix.msystem_lower }}\bin;D:\a\_temp\msys
