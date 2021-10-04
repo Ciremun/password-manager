@@ -222,7 +222,7 @@ void test_key_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp((char *)decoded_data, "test_dat") == 0, "-k -d" TABS);
+    assert_t(strcmp((char *)decoded_data, "test_data") == 0, "-k -d" TABS);
 }
 
 void setup_test(void)
