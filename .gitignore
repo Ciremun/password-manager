@@ -6,6 +6,7 @@ build/
 *.old
 
 .data
+.pm_data
 pm
 test
 nobuild

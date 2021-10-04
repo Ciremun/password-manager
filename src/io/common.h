@@ -18,7 +18,7 @@ typedef SSIZE_T ssize_t;
 #include "../parse.h"
 
 #define LMAX 255
-#define DEFAULT_DATA_STORE ".data"
+#define DEFAULT_DATA_STORE ".pm_data"
 
 #ifdef _WIN32
 int copy_to_clipboard(const char *password, size_t size);
