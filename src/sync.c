@@ -87,7 +87,7 @@ int upload_changes(const char *remote)
 {
     if (!verify_remote(remote))
         return -1;
-    CMD("git", "add", "-A", "--quiet");
+    CMD("git", "add", "-A");
     CMD("git", "commit", "-m", "auto_upload", "--quiet");
     CMD("git", "push", remote, "master", "--quiet");
     return 0;
