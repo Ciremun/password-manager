@@ -19,11 +19,3 @@ int run_test_in_fork(Args *a)
         return WEXITSTATUS(status);
     }
 }
-
-void test_no_flag(void)
-{
-    int argc = 1;
-    char **argv = calloc(1, 256);
-    Args a = {.argc = argc, .argv = argv};
-    assert_t(run_test_in_fork(&a) == 1, "void" TABS);
-}

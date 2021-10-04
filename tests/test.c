@@ -77,6 +77,15 @@ void free_argv(int argc, char **argv)
     free(argv);
 }
 
+void test_no_flag(void)
+{
+    int argc = 1;
+    char **argv = calloc(1, 256);
+    Args a = {.argc = argc, .argv = argv};
+    assert_t(run_test_in_fork(&a) == 1, "void" TABS);
+    free_argv(argc, argv);
+}
+
 void test_data_flag(void)
 {
     uint8_t *aes_key = get_key();
