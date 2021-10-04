@@ -113,6 +113,7 @@ void test_data_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
+    printf("decoded data:%s", (char *)decoded_data);
     assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data" TABS);
 }
 
