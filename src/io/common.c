@@ -147,7 +147,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data, uint8_t *aes_ke
     size_t idx = 0;
 
     FILE *fh = NULL;
-    if (!(fh = fopen(data_store, "r")))
+    if (!(fh = fopen(data_store, "rb")))
     {
         fh = fopen(data_store, "a");
     }
@@ -189,7 +189,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data, uint8_t *aes_ke
 
             char *encoded_data = b64_encode(decoded_data, label_and_data_size);
 
-            FILE *f = fopen(data_store, "w");
+            FILE *f = fopen(data_store, "wb");
             if (f == NULL)
             {
                 fprintf(stderr, "error opening file %s\n", data_store);
@@ -324,7 +324,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
     size_t lmax = LMAX;
     FILE *f = NULL;
 
-    if (!(f = fopen(fp, "r")))
+    if (!(f = fopen(fp, "rb")))
     {
         printf("error opening file %s\n", fp);
         exit_program(1);
@@ -434,7 +434,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
     if (found_label)
     {
         FILE *f = 0;
-        if (!(f = fopen(data_store, "w")))
+        if (!(f = fopen(data_store, "wb")))
         {
             PANIC_OPEN_FILE(data_store);
         }
