@@ -79,16 +79,21 @@ int main(int argc, char **argv)
     }
     FILE *version_header = fopen("src/version.h", "wb");
     if (version_header == 0)
-        PANIC("error opening src/version.h");
+        printf("error opening src/version.h");
     FILE *git_heads_master = fopen(".git/refs/heads/master", "rb");
     if (git_heads_master == 0)
-        PANIC("error opening .git/refs/heads/master");
-    fprintf(version_header, "%s", "#define PM_VERSION \"");
-    for (int i = 0; i < 7; ++i)
-        fputc(fgetc(git_heads_master), version_header);
-    fprintf(version_header, "%c\n", '"');
-    fclose(version_header);
-    fclose(git_heads_master);
+        printf("error opening .git/refs/heads/master");
+    if (version_header && git_heads_master)
+    {
+        fprintf(version_header, "%s", "#define PM_VERSION \"");
+        for (int i = 0; i < 7; ++i)
+            fputc(fgetc(git_heads_master), version_header);
+        fprintf(version_header, "%c\n", '"');
+    }
+    if (version_header)
+        fclose(version_header);
+    if (git_heads_master)
+        fclose(git_heads_master);
 #ifdef _WIN32
     int msvc = cc == NULL || strcmp(cc, "cl") == 0 || strcmp(cc, "cl.exe") == 0;
     if (test)
