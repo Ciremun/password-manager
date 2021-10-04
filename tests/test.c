@@ -133,7 +133,7 @@ void test_data_file_flag(void)
     assert_t(run_test_in_fork(&a) == 1, "-df test.txt (non-ex)\t");
     free_argv(a.argc, a.argv);
 
-    write_file("test.txt", "wb", "test data file\n");
+    write_file("test.txt", "wb", "test data file");
 
     argc = 3;
     argv = fill_args(argc, "-df", "test.txt");
@@ -153,7 +153,7 @@ void test_data_file_flag(void)
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("test data file\n", (char *)decoded_data) == 0, "-df test.txt\t\t");
+    assert_t(strcmp("test data file\n", (char *)decoded_data) == 0 || strcmp("test data file", (char *)decoded_data) == 0, "-df test.txt\t\t");
 }
 
 void test_label_flag(void)
