@@ -2,13 +2,22 @@ name: CI
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build-test-ubuntu:
+  test-ubuntu:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: build
         run: cc nobuild.c -o nobuild && ./nobuild test
-  build-test-win:
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+          cc nobuild.c -onobuild && ./nobuild test
+        env:
+          CC: clang
+  test-win:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
