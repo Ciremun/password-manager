@@ -9,6 +9,8 @@ extern char* sync_remote_url;
 const char *help_s = "\n"
                      "./pm [flags]                  read or write data\n"
                      "\n"
+                     "sync:                         set PM_SYNC_REMOTE_URL env var\n"
+                     "\n"
                      "flags:\n"
                      "\n"
                      "-d  --data                    data to encrypt\n"

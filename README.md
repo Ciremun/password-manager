@@ -4,6 +4,8 @@
 
     ./pm [flags]                  read or write data
 
+    sync:                         set PM_SYNC_REMOTE_URL env var
+
     flags:
 
     -d  --data                    data to encrypt
