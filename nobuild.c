@@ -85,10 +85,10 @@ int main(int argc, char **argv)
         printf("error opening .git/refs/heads/master\n");
     if (version_header && git_heads_master)
     {
-        fprintf(version_header, "%s", "#define PM_VERSION \"");
+        fprintf(version_header, "%s", "#ifndef VERSION_H\n#define VERSION_H\n\n#define PM_VERSION \"");
         for (int i = 0; i < 7; ++i)
             fputc(fgetc(git_heads_master), version_header);
-        fprintf(version_header, "%c\n", '"');
+        fprintf(version_header, "%s", "\"\n\n#endif // VERSION_H\n");
     }
     if (version_header)
         fclose(version_header);
