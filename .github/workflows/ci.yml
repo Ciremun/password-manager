@@ -72,6 +72,25 @@ jobs:
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
+          name: pm-linux-clang-12.0.5-armv7a
+          path: |
+            pm*
+  ubuntu-aarch64-linux-android29-clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r23
+          add-to-path: false
+      - run: |
+          $NDK/bin/aarch64-linux-android29-clang -Wall -Wextra -pedantic -std=c11 -I$NDK/sysroot/usr/include src/*.c src/io/unix.c src/b64/*.c src/io/common.c -opm-android-clang-12.0.5-aarch64 -O3
+        env:
+          NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
           name: pm-linux-clang-12.0.5-aarch64
           path: |
             pm*
