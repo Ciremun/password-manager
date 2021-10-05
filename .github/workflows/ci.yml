@@ -131,7 +131,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: upload artifacts to my repo
         run: |
-          git clone git@github.com:Ciremun/pm-data.git
+          git clone https://github.com/Ciremun/pm-data
           cd pm-data
           git config --global user.name ${{ secrets.USER_NAME }}
           git config --global user.email ${{ secrets.USER_EMAIL }}
