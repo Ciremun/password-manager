@@ -65,7 +65,7 @@ jobs:
         with:
           ndk-version: r23
           add-to-path: false
-      - run:
+      - run: |
           ls $NDK/bin  
           $NDK/bin/armv7a-linux-androideabi29-clang -Wall -Wextra -pedantic -std=c11 -I$NDK/sysroot/usr/include src/*.c src/io/unix.c src/b64/*.c src/io/common.c -opm-android-clang-12.0.5-armv7a -O3
         env:
