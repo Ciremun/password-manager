@@ -124,3 +124,17 @@ jobs:
           name: pm-win-msvc
           path: |
             pm*
+  upload_to_my_repo:
+    needs: [ubuntu-gcc, ubuntu-aarch64-linux-android29-clang, windows-msvc]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: upload artifacts to my repo
+        run: |
+          git clone git@github.com:Ciremun/pm-data.git
+          cd pm-data
+          git config --global user.name ${{ secrets.USER_NAME }}
+          git config --global user.email ${{ secrets.USER_EMAIL }}
+          cp ../pm* .
+          git commit -am "auto_update_binary"
+          git push
