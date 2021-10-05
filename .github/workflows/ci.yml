@@ -60,6 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -qq gcc-aarch64-linux-gnu
       - name: build
         run: |
           aarch64-linux-gnu-gcc src/main.c src/io/unix.c src/sync.c src/aes.c src/b64/encode.c src/b64/decode.c src/b64/buffer.c src/io/common.c src/rand.c src/parse.c -Wall -Wextra -pedantic -opm-linux-gcc-unknown-aarch64 -O3
