@@ -56,6 +56,21 @@ jobs:
             pm*
         env:
           CC: clang
+    ubuntu-gcc-aarch64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+          cc src/main.c src/io/unix.c src/sync.c src/aes.c src/b64/encode.c src/b64/decode.c src/b64/buffer.c src/io/common.c src/rand.c src/parse.c -Wall -Wextra -pedantic -opm-linux-gcc-unknown-aarch64 -O3
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm-linux-gcc-unknown-aarch64
+          path: |
+            pm*
+        env:
+          CC: aarch64-linux-gnu-gcc
   macos-clang:
     runs-on: macos-latest
     steps:
