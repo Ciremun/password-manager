@@ -56,17 +56,20 @@ jobs:
             pm*
         env:
           CC: clang
-  ubuntu-gcc-aarch64:
+  ubuntu-aarch64-linux-android29-clang:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -qq gcc-aarch64-linux-gnu
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r23
+          add-to-path: false
       - name: build
-        run: |
-          aarch64-linux-gnu-gcc src/main.c src/io/unix.c src/sync.c src/aes.c src/b64/encode.c src/b64/decode.c src/b64/buffer.c src/io/common.c src/rand.c src/parse.c -Wall -Wextra -pedantic -opm-linux-gcc-unknown-aarch64 -O3
+      - run: 
+          ./$NDK/bin/armv7a-linux-androideabi29-clang -Wall -Wextra -pedantic -std=c11 -I./$NDK/sysroot/usr/include -L./$NDK/sysroot/usr/lib/armv7a-linux-android/29 src/*.c src/io/unix.c src/b64/*.c src/io/common.c -opm-android-clang-12.0.5-armv7a -O3
+        env:
+          NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
