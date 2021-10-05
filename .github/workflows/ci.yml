@@ -56,7 +56,7 @@ jobs:
             pm*
         env:
           CC: clang
-    ubuntu-gcc-aarch64:
+  ubuntu-gcc-aarch64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
