@@ -146,8 +146,8 @@ jobs:
           name: pm-linux-clang-12.0.5-aarch64
       - name: upload artifacts to my repo
         run: |
-          git clone git@github.com:Ciremun/pm-data.git
-          cd pm-data
+          git clone git@github.com:Ciremun/pm-data.git data
+          cd data
           ls ../
           git config --global user.name ${{ secrets.USER_NAME }}
           git config --global user.email ${{ secrets.USER_EMAIL }}
