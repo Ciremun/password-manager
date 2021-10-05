@@ -149,8 +149,8 @@ jobs:
           git clone git@github.com:Ciremun/pm-data.git
           cd pm-data
           ls ../
-          # git config --global user.name ${{ secrets.USER_NAME }}
-          # git config --global user.email ${{ secrets.USER_EMAIL }}
-          # cp ../pm* .
-          # git commit -am "auto_update_binary"
-          # git push
+          git config --global user.name ${{ secrets.USER_NAME }}
+          git config --global user.email ${{ secrets.USER_EMAIL }}
+          cp ../pm* .
+          git commit -am "auto_update_binary"
+          git push
