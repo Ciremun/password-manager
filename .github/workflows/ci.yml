@@ -2,60 +2,60 @@ name: CI
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  test-ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: cc nobuild.c -o nobuild && ./nobuild test
-  test-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild test
-        env:
-          CC: clang
-  test-win:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: seanmiddleditch/gha-setup-vsdevenv@master
-      - name: build
-        shell: cmd
-        run: |
-          cl.exe nobuild.c && nobuild.exe test
-  ubuntu-gcc:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-linux-gcc
-          path: |
-            pm*
-        env:
-          CC: gcc
-  ubuntu-clang:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-linux-clang
-          path: |
-            pm*
-        env:
-          CC: clang
+  # test-ubuntu:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: build
+  #       run: cc nobuild.c -o nobuild && ./nobuild test
+  # test-macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: build
+  #       run: |
+  #         cc nobuild.c -onobuild && ./nobuild test
+  #       env:
+  #         CC: clang
+  # test-win:
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: seanmiddleditch/gha-setup-vsdevenv@master
+  #     - name: build
+  #       shell: cmd
+  #       run: |
+  #         cl.exe nobuild.c && nobuild.exe test
+  # ubuntu-gcc:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: build
+  #       run: |
+  #         cc nobuild.c -onobuild && ./nobuild
+  #     - name: password-manager
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: pm-linux-gcc
+  #         path: |
+  #           pm*
+  #       env:
+  #         CC: gcc
+  # ubuntu-clang:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: build
+  #       run: |
+  #         cc nobuild.c -onobuild && ./nobuild
+  #     - name: password-manager
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: pm-linux-clang
+  #         path: |
+  #           pm*
+  #       env:
+  #         CC: clang
   ubuntu-armv7a-linux-android29-clang:
     runs-on: ubuntu-latest
     steps:
@@ -76,33 +76,33 @@ jobs:
           name: pm-linux-clang-12.0.5-aarch64
           path: |
             pm*
-  macos-clang:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-macos-clang
-          path: |
-            pm*
-        env:
-          CC: clang
-  windows-msvc:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: seanmiddleditch/gha-setup-vsdevenv@master
-      - name: build
-        shell: cmd
-        run: |
-          cl nobuild.c && nobuild.exe
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-win-msvc
-          path: |
-            pm*
+  # macos-clang:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: build
+  #       run: |
+  #         cc nobuild.c -onobuild && ./nobuild
+  #     - name: password-manager
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: pm-macos-clang
+  #         path: |
+  #           pm*
+  #       env:
+  #         CC: clang
+  # windows-msvc:
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: seanmiddleditch/gha-setup-vsdevenv@master
+  #     - name: build
+  #       shell: cmd
+  #       run: |
+  #         cl nobuild.c && nobuild.exe
+  #     - name: password-manager
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: pm-win-msvc
+  #         path: |
+  #           pm*
