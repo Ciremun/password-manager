@@ -43,7 +43,7 @@ typedef pid_t Pid;
 typedef int Fd;
 #endif // _WIN32
 
-typedef const char * Cstr;
+typedef char* Cstr;
 
 typedef struct {
     Cstr *elems;
@@ -66,6 +66,7 @@ LPSTR GetLastErrorAsString(void);
             .line = cstr_array_make(__VA_ARGS__, NULL)  \
         };                                              \
         return_code_if_error(cmd_run_sync(cmd));        \
+        free(cmd.line.elems);                           \
     } while (0)
 
 int verify_remote(const char *remote);
