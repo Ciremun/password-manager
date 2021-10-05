@@ -65,8 +65,8 @@ jobs:
         with:
           ndk-version: r23
           add-to-path: false
-      - run: 
-          .$NDK/bin/armv7a-linux-androideabi29-clang -Wall -Wextra -pedantic -std=c11 -I.$NDK/sysroot/usr/include -L.$NDK/sysroot/usr/lib/armv7a-linux-android/29 src/*.c src/io/unix.c src/b64/*.c src/io/common.c -opm-android-clang-12.0.5-armv7a -O3
+      - run:
+          tree -d $NDK
         env:
           NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
       - name: password-manager
