@@ -77,9 +77,9 @@ int main(int argc, char **argv)
         PANIC_OVERWRITE_IF_FILE_EXISTS(DEFAULT_DATA_STORE);
         PANIC_OVERWRITE_IF_FILE_EXISTS("test.txt");
     }
-    FILE *version_header = fopen("src/version.h", "wb");
+    FILE *version_header = fopen("src/include/version.h", "wb");
     if (version_header == 0)
-        printf("error opening src/version.h\n");
+        printf("error opening src/include/version.h\n");
     FILE *git_heads_master = fopen(".git/refs/heads/master", "rb");
     if (git_heads_master == 0)
         printf("error opening .git/refs/heads/master\n");
