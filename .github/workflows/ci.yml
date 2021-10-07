@@ -151,6 +151,5 @@ jobs:
           git config --global user.name ${{ secrets.USER_NAME }}
           git config --global user.email ${{ secrets.USER_EMAIL }}
           cp ../pm* .
-          git add -A
-          git commit -m "auto_update_binary"
+          git commit -am "auto_update_binary"
           git push
