@@ -1,5 +1,5 @@
 #include "common.h"
-#include "../sync.h"
+#include "sync.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];

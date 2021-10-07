@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "io/common.h"
+#include "common.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN

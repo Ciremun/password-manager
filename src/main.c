@@ -2,7 +2,7 @@
 #include <windows.h>
 #endif // _WIN32
 
-#include "io/common.h"
+#include "common.h"
 
 // TODO(#17): tests
 

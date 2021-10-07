@@ -12,10 +12,10 @@ typedef SSIZE_T ssize_t;
 #include <stdint.h>
 #include <string.h>
 
-#include "../b64/b64.h"
-#include "../aes.h"
+#include "b64.h"
+#include "aes.h"
 
-#include "../parse.h"
+#include "parse.h"
 
 #define LMAX 255
 #define DEFAULT_DATA_STORE ".pm_data"

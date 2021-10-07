@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 #endif
 
-#include "../src/io/common.h"
+#include "common.h"
 
 #define TABS "\t\t\t"
 #define AES_KEY "test_aes_key!@#$%^&*();'"

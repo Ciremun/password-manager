@@ -1,6 +1,6 @@
 #include <limits.h>
 
-#include "io/common.h"
+#include "common.h"
 #include "rand.h"
 #include "version.h"
 
