@@ -23,8 +23,6 @@ int run_test_in_fork(Args *a);
 char **fill_args(int argc, ...);
 void assert_t(int check, const char *test);
 void free_argv(int argc, char **argv);
-void setup_test(void);
-void exit_test(void);
 void run_test(void (*test)(void));
 void test_no_flag(void);
 void test_data_flag(void);
@@ -305,20 +303,10 @@ void test_key_flag(void)
     free(aes_key);
 }
 
-void setup_test(void)
-{
-}
-
-void exit_test(void)
-{
-    remove(data_store);
-}
-
 void run_test(void (*test)(void))
 {
-    setup_test();
     test();
-    exit_test();
+    remove(data_store);
 }
 
 int main(void)
