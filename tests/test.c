@@ -202,8 +202,8 @@ void test_data_flag_not_empty(Args *a)
     read_file(data_store, &lines, &nch);
 
     size_t decsize = 0;
-    unsigned char *decoded_data =
-        b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
+    unsigned char *decoded_data
+        = b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
 
     reset_key(a);
     AES_init_ctx_iv(&ctx, a->key, aes_iv);
@@ -317,39 +317,61 @@ void run_test(Test *t)
 int main(void)
 {
     Test tests[] = {
-        {.t = NO_FLAG,
-         .f = test_no_flag_pm_data_doesnt_exist,
-         .a = {.argc = 1, .argv = calloc(1, 256)}},
-        {.t = DATA,
-         .f = test_data_flag_empty,
-         .a = {.argc = 2, .argv = ARGV("-d")}},
-        {.t = DATA,
-         .f = test_data_flag_not_empty,
-         .a = {.argc = 3, .argv = ARGV("-d", "data")}},
-        {.t = DATA_FILE,
-         .f = test_data_file_flag_empty,
-         .a = {.argc = 2, .argv = ARGV("-df")}},
-        {.t = DATA_FILE,
-         .f = test_data_file_flag_non_existent_file,
-         .a = {.argc = 3, .argv = ARGV("-df", "test.txt")}},
-        {.t = DATA_FILE,
-         .f = test_data_file_flag_valid,
-         .a = {.argc = 3, .argv = ARGV("-df", "test.txt")}},
-        {.t = LABEL,
-         .f = test_label_flag_empty,
-         .a = {.argc = 2, .argv = ARGV("-l")}},
-        {.t = LABEL,
-         .f = test_label_flag_not_empty,
-         .a = {.argc = 3, .argv = ARGV("-l", "label")}},
-        {.t = GENERATE_PASSWORD,
-         .f = test_generate_password_flag_empty,
-         .a = {.argc = 2, .argv = ARGV("-gp")}},
-        {.t = GENERATE_PASSWORD,
-         .f = test_generate_password_flag_128_chars,
-         .a = {.argc = 3, .argv = ARGV("-gp", "128")}},
-        {.t = KEY,
-         .f = test_key_flag_valid,
-         .a = {.argc = 5, .argv = ARGV("-k", AES_KEY, "-d", "test_data")}},
+        {
+            .t = NO_FLAG,
+            .f = test_no_flag_pm_data_doesnt_exist,
+            .a = {.argc = 1, .argv = calloc(1, 256)},
+        },
+        {
+            .t = DATA,
+            .f = test_data_flag_empty,
+            .a = {.argc = 2, .argv = ARGV("-d")},
+        },
+        {
+            .t = DATA,
+            .f = test_data_flag_not_empty,
+            .a = {.argc = 3, .argv = ARGV("-d", "data")},
+        },
+        {
+            .t = DATA_FILE,
+            .f = test_data_file_flag_empty,
+            .a = {.argc = 2, .argv = ARGV("-df")},
+        },
+        {
+            .t = DATA_FILE,
+            .f = test_data_file_flag_non_existent_file,
+            .a = {.argc = 3, .argv = ARGV("-df", "test.txt")},
+        },
+        {
+            .t = DATA_FILE,
+            .f = test_data_file_flag_valid,
+            .a = {.argc = 3, .argv = ARGV("-df", "test.txt")},
+        },
+        {
+            .t = LABEL,
+            .f = test_label_flag_empty,
+            .a = {.argc = 2, .argv = ARGV("-l")},
+        },
+        {
+            .t = LABEL,
+            .f = test_label_flag_not_empty,
+            .a = {.argc = 3, .argv = ARGV("-l", "label")},
+        },
+        {
+            .t = GENERATE_PASSWORD,
+            .f = test_generate_password_flag_empty,
+            .a = {.argc = 2, .argv = ARGV("-gp")},
+        },
+        {
+            .t = GENERATE_PASSWORD,
+            .f = test_generate_password_flag_128_chars,
+            .a = {.argc = 3, .argv = ARGV("-gp", "128")},
+        },
+        {
+            .t = KEY,
+            .f = test_key_flag_valid,
+            .a = {.argc = 5, .argv = ARGV("-k", AES_KEY, "-d", "test_data")},
+        },
     };
 
     size_t tests_count = sizeof(tests) / sizeof(tests[0]);
