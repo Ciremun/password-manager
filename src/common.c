@@ -341,7 +341,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
 
     if (!(*lines = calloc(LMAX, sizeof(**lines))))
     {
-        error(stderr, "error: memory allocation failed\n");
+        error(stderr, "%s\n", "error: memory allocation failed");
         exit(1);
     }
 
@@ -357,7 +357,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
             char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
             if (!tmp)
             {
-                error(stderr, "error: memory allocation failed\n");
+                error(stderr, "%s\n", "error: memory allocation failed");
                 exit(1);
             }
             *lines = tmp;
