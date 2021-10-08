@@ -1,4 +1,37 @@
-#include "t_common.h"
+#include <stdarg.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <sys/wait.h>
+#endif
+
+#include "common.h"
+
+#define TABS "\t\t\t"
+#define AES_KEY "test_aes_key!@#$%^&*();'"
+
+typedef struct 
+{
+    int argc;
+    char **argv;
+} Args;
+
+uint8_t *get_key(void);
+int run_test_in_fork(Args *a);
+char **fill_args(int argc, ...);
+void assert_t(int check, const char *test);
+void free_argv(int argc, char **argv);
+void setup_test(void);
+void exit_test(void);
+void run_test(void (*test)(void));
+void test_no_flag(void);
+void test_data_flag(void);
+void test_data_file_flag(void);
+void test_label_flag(void);
+void test_generate_password_flag(void);
+void test_key_flag(void);
 
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
@@ -15,6 +48,45 @@ void (*tests[])(void) = {
 };
 
 size_t tests_count = sizeof(tests) / sizeof(tests[0]);
+
+#ifdef _WIN32
+void run_from_win_thread(Args *a)
+{
+    uint8_t *aes_key = get_key();
+    run(aes_key, a->argc, a->argv);
+    free(aes_key);
+}
+
+int run_test_in_fork(Args *a)
+{
+    HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)run_from_win_thread, a, 0, NULL);
+    DWORD exit_status;
+    WaitForSingleObject(hThread, INFINITE);
+    GetExitCodeThread(hThread, &exit_status);
+    CloseHandle(hThread);
+    return (int)exit_status;
+}
+#else
+int run_test_in_fork(Args *a)
+{
+    uint8_t *aes_key = get_key();
+    pid_t pid = 0;
+    int status;
+
+    pid = fork();
+    if (pid == 0)
+    {
+        run(aes_key, a->argc, a->argv);
+        free(aes_key);
+        exit(0);
+    }
+    else
+    {
+        wait(&status);
+        return WEXITSTATUS(status);
+    }
+}
+#endif // _WIN32
 
 void exit_program(int exit_code)
 {
