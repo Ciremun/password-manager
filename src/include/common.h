@@ -26,7 +26,11 @@ void exit_test_case(int exit_code);
 #define exit exit_test_case
 #define error(stdout, fmt, ...)
 #else
-#define error(stdout, fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
+    #if defined(_WIN32) && defined(_MSC_VER)
+        #define error(stdout, fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
+    #else
+        #define error(stdout, fmt, ...) fprintf(stdout, fmt __VA_OPT__(,) __VA_ARGS__)
+    #endif // _WIN32 && _MSC_VER
 #endif // TEST
 
 #ifdef _WIN32
