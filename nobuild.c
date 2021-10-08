@@ -8,47 +8,55 @@
 #include "stdlib.h"
 #include "string.h"
 
-#define SOURCES "src/aes.c", "src/b64.c", "src/common.c", "src/parse.c", "src/rand.c", "src/sync.c"
+#define SOURCES                                                                \
+    "src/aes.c", "src/b64.c", "src/common.c", "src/parse.c", "src/rand.c",     \
+        "src/sync.c"
 #define FLAGS "-Wall", "-Wextra", "-pedantic", "-Isrc/include/"
 #define MSVC_FLAGS "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#if   defined(_WIN32)
-    #define OS "win"
+#if defined(_WIN32)
+#define OS "win"
 #elif defined(__ANDROID__)
-    #define OS "android"
+#define OS "android"
 #elif defined(__APPLE__)
-    #define OS "macos"
+#define OS "macos"
 #elif defined(__linux__)
-    #define OS "linux"
+#define OS "linux"
 #elif defined(__unix__)
-    #define OS "unix"
+#define OS "unix"
 #else
-    #define OS "unknown"
+#define OS "unknown"
 #endif // OS
 
-#if   defined(__GNUC__) && defined(__llvm__) && defined(__clang__)
-    #define CC "clang-" STR(__clang_major__) "." STR(__clang_minor__) "." STR(__clang_patchlevel__)
+#if defined(__GNUC__) && defined(__llvm__) && defined(__clang__)
+#define CC                                                                     \
+    "clang-" STR(__clang_major__) "." STR(__clang_minor__) "." STR(            \
+        __clang_patchlevel__)
 #elif defined(_MSC_VER) && !defined(__clang__)
-    #define CC "msvc-" STR(_MSC_VER)
+#define CC "msvc-" STR(_MSC_VER)
 #elif defined(__GNUC__) && !defined(__llvm__) && !defined(__INTEL_COMPILER)
-    #define CC "gcc-" STR(__GNUC__) "." STR(__GNUC_MINOR__) "." STR(__GNUC_PATCHLEVEL__)
+#define CC                                                                     \
+    "gcc-" STR(__GNUC__) "." STR(__GNUC_MINOR__) "." STR(__GNUC_PATCHLEVEL__)
 #else
-    #define CC "unknown"
+#define CC "unknown"
 #endif // CC
 
-#if   defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
-    #define ARCH "x86_64"
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) ||           \
+    defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+#define ARCH "x86_64"
 #elif defined(__aarch64__)
-    #define ARCH "aarch64"
+#define ARCH "aarch64"
 #elif defined(__arm__) || defined(_M_ARM)
-    #define ARCH "arm"
-#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) || defined(_M_IX86) || defined(_X86_)
-    #define ARCH "intel_x86"
+#define ARCH "arm"
+#elif defined(i386) || defined(__i386) || defined(__i386__) ||                 \
+    defined(__i386__) || defined(__i486__) || defined(__i586__) ||             \
+    defined(__i686__) || defined(_M_IX86) || defined(_X86_)
+#define ARCH "intel_x86"
 #else
-    #define ARCH "unknown"
+#define ARCH "unknown"
 #endif // ARCH
 
 #if defined(_WIN32)
@@ -57,13 +65,14 @@
 #define OUTPUT "pm-" OS "-" CC "-" ARCH
 #endif // _WIN32
 
-#define PANIC_OVERWRITE_IF_FILE_EXISTS(PATH)                                                                     \
-    do                                                                                                           \
-    {                                                                                                            \
-        if (PATH_EXISTS(PATH))                                                                                   \
-        {                                                                                                        \
-            PANIC("file '" PATH "' will be overwritten by tests, please move it outside of the root directory"); \
-        }                                                                                                        \
+#define PANIC_OVERWRITE_IF_FILE_EXISTS(PATH)                                   \
+    do                                                                         \
+    {                                                                          \
+        if (PATH_EXISTS(PATH))                                                 \
+        {                                                                      \
+            PANIC("file '" PATH "' will be overwritten by tests, please move " \
+                                "it outside of the root directory");           \
+        }                                                                      \
     } while (0)
 
 int main(int argc, char **argv)
@@ -71,7 +80,7 @@ int main(int argc, char **argv)
     GO_REBUILD_URSELF(argc, argv);
 
     char *cc = getenv("cc");
-    int   test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
+    int test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
     if (test)
     {
         PANIC_OVERWRITE_IF_FILE_EXISTS(DEFAULT_DATA_STORE);
@@ -85,7 +94,9 @@ int main(int argc, char **argv)
         printf("error opening .git/refs/heads/master\n");
     if (version_header && git_heads_master)
     {
-        fprintf(version_header, "%s", "#ifndef VERSION_H\n#define VERSION_H\n\n#define PM_VERSION \"");
+        fprintf(
+            version_header, "%s",
+            "#ifndef VERSION_H\n#define VERSION_H\n\n#define PM_VERSION \"");
         for (int i = 0; i < 7; ++i)
             fputc(fgetc(git_heads_master), version_header);
         fprintf(version_header, "%s", "\"\n\n#endif // VERSION_H\n");
@@ -100,11 +111,13 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
-            CMD("cl.exe", "/Fetest.exe", "/Od", "tests/test.c", "src/platform/win.c", SOURCES, MSVC_FLAGS);
+            CMD("cl.exe", "/DTEST", "/DEBUG", "/ZI", "/Fetest.exe", "/Od",
+                "tests/test.c", "src/platform/win.c", SOURCES, MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, "tests/test.c", "src/platform/win.c", SOURCES, FLAGS, "-lUser32", "-otest", "-O0", "-ggdb");
+            CMD(cc, "-DTEST", "tests/test.c", "src/platform/win.c", SOURCES,
+                FLAGS, "-lUser32", "-otest", "-O0", "-ggdb");
         }
         CMD(".\\test.exe");
     }
@@ -112,11 +125,13 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
-            CMD("cl.exe", "/Fe"OUTPUT, "/O2", "src/main.c", "src/platform/win.c", SOURCES, MSVC_FLAGS);
+            CMD("cl.exe", "/Fe" OUTPUT, "/O2", "src/main.c",
+                "src/platform/win.c", SOURCES, MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, "src/main.c", "src/platform/win.c", SOURCES, FLAGS, "-lUser32", "-o"OUTPUT, "-O3");
+            CMD(cc, "src/main.c", "src/platform/win.c", SOURCES, FLAGS,
+                "-lUser32", "-o" OUTPUT, "-O3");
         }
     }
 #else
@@ -126,12 +141,14 @@ int main(int argc, char **argv)
     }
     if (test)
     {
-        CMD(cc, "tests/test.c", "src/platform/unix.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
+        CMD(cc, "-DTEST", "tests/test.c", "src/platform/unix.c", SOURCES, FLAGS,
+            "-otest", "-O0", "-ggdb");
         CMD("./test");
     }
     else
     {
-        CMD(cc, "src/main.c", "src/platform/unix.c", SOURCES, FLAGS, "-o"OUTPUT, "-O3");
+        CMD(cc, "src/main.c", "src/platform/unix.c", SOURCES, FLAGS,
+            "-o" OUTPUT, "-O3");
     }
 #endif
     return 0;

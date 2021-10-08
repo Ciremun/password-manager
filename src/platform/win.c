@@ -1,6 +1,6 @@
+#include <conio.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <conio.h>
 
 #include <windows.h>
 
@@ -40,9 +40,10 @@ size_t getpasswd(char **pw)
     return idx;
 }
 
-int copy_to_clipboard(const char* password, size_t size)
+int copy_to_clipboard(const char *password, size_t size)
 {
-    if (!OpenClipboard(0)) {
+    if (!OpenClipboard(0))
+    {
         return 0;
     }
     HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);

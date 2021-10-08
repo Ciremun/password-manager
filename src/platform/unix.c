@@ -3,6 +3,8 @@
 #include <string.h>
 #include <termios.h>
 
+#include "common.h"
+
 size_t getpasswd(char **pw)
 {
     FILE *fp = stdin;
@@ -21,7 +23,7 @@ size_t getpasswd(char **pw)
 
     if (tcgetattr(0, &old_kbd_mode))
     {
-        fprintf(stderr, "%s() error: tcgetattr failed\n", __func__);
+        error(stderr, "%s() error: tcgetattr failed\n", __func__);
         return -1;
     }
     memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
@@ -31,7 +33,7 @@ size_t getpasswd(char **pw)
     new_kbd_mode.c_cc[VMIN] = 1;
     if (tcsetattr(0, TCSANOW, &new_kbd_mode))
     {
-        fprintf(stderr, "%s() error: tcsetattr failed\n", __func__);
+        error(stderr, "%s() error: tcsetattr failed\n", __func__);
         return -1;
     }
 
@@ -59,7 +61,7 @@ size_t getpasswd(char **pw)
 
     if (tcsetattr(0, TCSANOW, &old_kbd_mode))
     {
-        fprintf(stderr, "%s() error: tcsetattr failed\n", __func__);
+        error(stderr, "%s() error: tcsetattr failed\n", __func__);
         return -1;
     }
 

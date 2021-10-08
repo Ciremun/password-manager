@@ -6,9 +6,9 @@
 
 extern struct AES_ctx ctx;
 extern const char *help_s;
-extern char* data_store;
+extern char *data_store;
 
-char* sync_remote_url = 0;
+char *sync_remote_url = 0;
 
 int is_flag(char *arg, char *s, char *l)
 {
@@ -20,29 +20,32 @@ void parse_flags(Flags *f, int argc, char **argv)
     for (int i = 1; i < argc; i++)
     {
         Flag *flag = NULL;
-        if      (!f->data.exists               && is_flag(argv[i], "-d", "--data"))
+        if (!f->data.exists && is_flag(argv[i], "-d", "--data"))
             flag = &f->data;
-        else if (!f->label.exists              && is_flag(argv[i], "-l", "--label"))
+        else if (!f->label.exists && is_flag(argv[i], "-l", "--label"))
             flag = &f->label;
-        else if (!f->find_label.exists         && is_flag(argv[i], "-fl", "--find-label"))
+        else if (!f->find_label.exists &&
+                 is_flag(argv[i], "-fl", "--find-label"))
             flag = &f->find_label;
-        else if (!f->help.exists               && is_flag(argv[i], "-h", "--help"))
+        else if (!f->help.exists && is_flag(argv[i], "-h", "--help"))
             flag = &f->help;
-        else if (!f->data_file.exists          && is_flag(argv[i], "-df", "--data-file"))
+        else if (!f->data_file.exists && is_flag(argv[i], "-df", "--data-file"))
             flag = &f->data_file;
-        else if (!f->generate_password.exists  && is_flag(argv[i], "-gp", "--generate-password"))
+        else if (!f->generate_password.exists &&
+                 is_flag(argv[i], "-gp", "--generate-password"))
             flag = &f->generate_password;
-        else if (!f->key.exists                && is_flag(argv[i], "-k", "--key"))
+        else if (!f->key.exists && is_flag(argv[i], "-k", "--key"))
             flag = &f->key;
-        else if (!f->copy.exists               && is_flag(argv[i], "-c", "--copy"))
+        else if (!f->copy.exists && is_flag(argv[i], "-c", "--copy"))
             flag = &f->copy;
-        else if (!f->delete_label.exists       && is_flag(argv[i], "-dl", "--delete-label"))
+        else if (!f->delete_label.exists &&
+                 is_flag(argv[i], "-dl", "--delete-label"))
             flag = &f->delete_label;
-        else if (!f->input.exists              && is_flag(argv[i], "-i", "--input"))
+        else if (!f->input.exists && is_flag(argv[i], "-i", "--input"))
             flag = &f->input;
-        else if (!f->key_file.exists           && is_flag(argv[i], "-kf", "--key-file"))
+        else if (!f->key_file.exists && is_flag(argv[i], "-kf", "--key-file"))
             flag = &f->key_file;
-        else if (!f->version.exists            && is_flag(argv[i], "-v", "--version"))
+        else if (!f->version.exists && is_flag(argv[i], "-v", "--version"))
             flag = &f->version;
 
         if (flag != NULL)
@@ -74,7 +77,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.key.value)
         {
-            printf("error: key flag called without key value\n");
+            error(stderr, "error: key flag called without key value\n");
             return 1;
         }
 
@@ -94,7 +97,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.key_file.value)
         {
-            printf("error: key-file flag called without filename\n");
+            error(stderr, "error: key-file flag called without filename\n");
             return 1;
         }
         size_t aes_key_length = 0;
@@ -119,7 +122,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         else
         {
-            printf("error: input flag called without file path\n");
+            error(stderr, "error: input flag called without file path\n");
             return 1;
         }
     }
@@ -137,7 +140,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         else
         {
-            printf("error: delete-label flag called without label\n");
+            error(stderr, "error: delete-label flag called without label\n");
             return 1;
         }
     }
@@ -149,13 +152,15 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
             if (f.generate_password.exists)
             {
-                printf("error: can't combine data-file and generate-password flags\n");
+                error(stderr, "error: can't combine data-file and "
+                              "generate-password flags\n");
                 return 1;
             }
 
             if (!f.data_file.value)
             {
-                printf("error: data-file flag called without filename\n");
+                error(stderr,
+                      "error: data-file flag called without filename\n");
                 return 1;
             }
 
@@ -186,7 +191,8 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 }
                 else if (!(password_length <= INT_MAX))
                 {
-                    printf("error: length %s is out of range 1-%d\n", f.generate_password.value, INT_MAX);
+                    error(stderr, "error: length %s is out of range 1-%d\n",
+                          f.generate_password.value, INT_MAX);
                     return 1;
                 }
             }
@@ -202,7 +208,8 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
             else
             {
-                encrypt_and_write(&f, (uint8_t *)password, aes_key, (int)password_length + 1);
+                encrypt_and_write(&f, (uint8_t *)password, aes_key,
+                                  (int)password_length + 1);
             }
             if (f.copy.exists)
             {
@@ -217,14 +224,15 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         if (f.label.exists)
         {
-            printf("error: label flag called without --data or --data-file or --generate-password\n");
+            error(stderr, "error: label flag called without --data or "
+                          "--data-file or --generate-password\n");
             return 1;
         }
         if (f.find_label.exists)
         {
             if (!f.find_label.value)
             {
-                printf("error: find label flag called without name\n");
+                error(stderr, "error: find label flag called without name\n");
                 return 1;
             }
             decrypt_and_print(aes_key, &f);
@@ -243,19 +251,20 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
     if (!f.data.value)
     {
-        printf("error: data flag called without data\n");
+        error(stderr, "error: data flag called without data\n");
         return 1;
     }
 
     if (f.data_file.exists)
     {
-        printf("error: can't combine data and data-file flags\n");
+        error(stderr, "error: can't combine data and data-file flags\n");
         return 1;
     }
 
     if (f.generate_password.exists)
     {
-        printf("error: can't combine data and generate-password flags\n");
+        error(stderr,
+              "error: can't combine data and generate-password flags\n");
         return 1;
     }
 
@@ -263,14 +272,15 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.label.value)
         {
-            printf("error: label flag called without name\n");
+            error(stderr, "error: label flag called without name\n");
             return 1;
         }
         encrypt_and_replace(&f, f.label.value, f.data.value, aes_key);
     }
     else
     {
-        encrypt_and_write(&f, (uint8_t *)f.data.value, aes_key, strlen(f.data.value) + 1);
+        encrypt_and_write(&f, (uint8_t *)f.data.value, aes_key,
+                          strlen(f.data.value) + 1);
     }
 
     return 0;

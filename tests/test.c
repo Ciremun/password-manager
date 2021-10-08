@@ -3,61 +3,112 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
-#include <unistd.h>
 #include <sys/wait.h>
+#include <unistd.h>
 #endif
 
 #include "common.h"
+#undef exit
 
-#define TABS "\t\t\t"
 #define AES_KEY "test_aes_key!@#$%^&*();'"
+#define ARGV(...) fill_args(__VA_ARGS__, NULL)
 
-typedef struct 
+typedef enum
 {
+    NO_FLAG = 0,
+    DATA,
+    DATA_FILE,
+    LABEL,
+    FIND_LABEL,
+    DELETE_LABEL,
+    GENERATE_PASSWORD,
+    COPY_TO_CLIPBOARD,
+    KEY,
+    KEY_FILE,
+    INPUT_
+} Type;
+
+typedef struct
+{
+    uint8_t *key;
     int argc;
     char **argv;
 } Args;
 
-uint8_t *get_key(void);
-int run_test_in_fork(Args *a);
-char **fill_args(int argc, ...);
-void assert_t(int check, const char *test);
-void free_argv(int argc, char **argv);
-void run_test(void (*test)(void));
-void test_no_flag(void);
-void test_data_flag(void);
-void test_data_file_flag(void);
-void test_label_flag(void);
-void test_generate_password_flag(void);
-void test_key_flag(void);
-
-struct AES_ctx ctx;
-uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
-char* data_store = 0;
-int tests_exit_code = 0;
-
-void (*tests[])(void) = {
-    test_no_flag,
-    test_data_flag,
-    test_data_file_flag,
-    test_label_flag,
-    test_generate_password_flag,
-    test_key_flag,
-};
-
-size_t tests_count = sizeof(tests) / sizeof(tests[0]);
+typedef struct
+{
+    void (*f)(Args *a);
+    Args a;
+    Type t;
+} Test;
 
 #ifdef _WIN32
-void run_from_win_thread(Args *a)
+int run_from_win_thread(Args *a);
+#endif // _WIN32
+int run_test_in_fork(Args *a);
+void test(int check, const char *test);
+void test_no_flag_pm_data_doesnt_exist(Args *a);
+void test_data_flag_empty(Args *a);
+void test_data_file_flag_empty(Args *a);
+void test_label_flag_empty(Args *a);
+void test_generate_password_flag_empty(Args *a);
+void test_key_flag_valid(Args *a);
+void run_test(Test *t);
+char **fill_args(char *first, ...);
+void free_argv(Args *a);
+const char *test_catergory(Type t);
+void reset_key(Args *a);
+
+struct AES_ctx ctx;
+uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+                    0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+char *data_store = 0;
+size_t failed_tests_count = 0;
+
+void reset_key(Args *a)
 {
-    uint8_t *aes_key = get_key();
-    run(aes_key, a->argc, a->argv);
-    free(aes_key);
+    a->key = calloc(1, 128);
+    memcpy(a->key, AES_KEY, sizeof(AES_KEY));
 }
+
+const char *test_catergory(Type t)
+{
+    switch (t)
+    {
+    case NO_FLAG:
+        return "No Flag:";
+    case DATA:
+        return "Data:";
+    case DATA_FILE:
+        return "Data File:";
+    case LABEL:
+        return "Label:";
+    case FIND_LABEL:
+        return "Find Label:";
+    case DELETE_LABEL:
+        return "Delete Label:";
+    case GENERATE_PASSWORD:
+        return "Generate Password:";
+    case COPY_TO_CLIPBOARD:
+        return "Copy To Clipboard:";
+    case KEY:
+        return "Key:";
+    case KEY_FILE:
+        return "Key File:";
+    case INPUT_:
+        return "Input:";
+    default:
+        exit(1);
+    }
+}
+
+#ifdef _WIN32
+int run_from_win_thread(Args *a) { return run(a->key, a->argc, a->argv); }
 
 int run_test_in_fork(Args *a)
 {
-    HANDLE hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)run_from_win_thread, a, 0, NULL);
+    HANDLE hThread = CreateThread(
+        NULL, 0, (LPTHREAD_START_ROUTINE)run_from_win_thread, a, 0, NULL);
     DWORD exit_status;
     WaitForSingleObject(hThread, INFINITE);
     GetExitCodeThread(hThread, &exit_status);
@@ -67,15 +118,13 @@ int run_test_in_fork(Args *a)
 #else
 int run_test_in_fork(Args *a)
 {
-    uint8_t *aes_key = get_key();
     pid_t pid = 0;
     int status;
 
     pid = fork();
     if (pid == 0)
     {
-        run(aes_key, a->argc, a->argv);
-        free(aes_key);
+        run(a->key, a->argc, a->argv);
         exit(0);
     }
     else
@@ -83,10 +132,35 @@ int run_test_in_fork(Args *a)
         wait(&status);
         return WEXITSTATUS(status);
     }
+
+    return 0;
 }
 #endif // _WIN32
 
-void exit_program(int exit_code)
+char **fill_args(char *first, ...)
+{
+    va_list args;
+    char **argv = calloc(1, 256);
+    argv[1] = strdup(first);
+
+    int n = 2;
+    va_start(args, first);
+    for (char *next = va_arg(args, char *); next != 0;
+         next = va_arg(args, char *), n++)
+        argv[n] = strdup(next);
+    va_end(args);
+
+    return argv;
+}
+
+void free_argv(Args *a)
+{
+    for (int i = 0; i < a->argc; i++)
+        free(a->argv[i]);
+    free(a->argv);
+}
+
+void exit_test_case(int exit_code)
 {
 #ifdef _WIN32
     ExitThread(exit_code);
@@ -95,120 +169,67 @@ void exit_program(int exit_code)
 #endif // _WIN32
 }
 
-uint8_t *get_key(void)
-{
-    uint8_t *aes_key = calloc(1, 128);
-    memcpy(aes_key, AES_KEY, 25);
-    return aes_key;
-}
-
-void assert_t(int check, const char *test)
+void test(int check, const char *test)
 {
     if (!check)
     {
-        tests_exit_code = 1;
-        fprintf(stderr, "%s FAIL\n", test);
+        failed_tests_count++;
+        fprintf(stderr, "   %-25.25s FAIL\n", test);
     }
     else
-    {
-        fprintf(stderr, "%s PASS\n", test);
-    }
+        fprintf(stderr, "   %-25.25s PASS\n", test);
 }
 
-char **fill_args(int argc, ...)
+void test_no_flag_pm_data_doesnt_exist(Args *a)
 {
-    va_list ap;
-    int n = 1;
-    char **argv = calloc(1, 256);
-    argc--;
-
-    va_start(ap, argc);
-    while (argc--)
-    {
-        argv[n] = strdup(va_arg(ap, char *));
-        n++;
-    }
-    va_end(ap);
-
-    return argv;
+    test(run_test_in_fork(a) == 1, ".pm_data doesn't exist");
+    free(a->key);
 }
 
-void free_argv(int argc, char **argv)
+void test_data_flag_empty(Args *a)
 {
-    for (int i = 0; i < argc; i++)
-    {
-        free(argv[i]);
-    }
-    free(argv);
+    test(run(a->key, a->argc, a->argv) != 0, "empty");
+    free(a->key);
+    remove(data_store);
 }
 
-void test_no_flag(void)
+void test_data_flag_not_empty(Args *a)
 {
-    int argc = 1;
-    char **argv = calloc(1, 256);
-    Args a = {.argc = argc, .argv = argv};
-    assert_t(run_test_in_fork(&a) == 1, "void" TABS);
-    free_argv(argc, argv);
-}
-
-void test_data_flag(void)
-{
-    uint8_t *aes_key = get_key();
-    int argc = 2;
-    char **argv = fill_args(argc, "-d");
-
-    assert_t(run(aes_key, argc, argv) != 0, "-d" TABS);
-    aes_key = get_key();
-    free_argv(argc, argv);
-
-    argc = 3;
-    argv = fill_args(argc, "-d", "data");
-
-    run(aes_key, argc, argv);
-    aes_key = get_key();
-    free_argv(argc, argv);
+    run(a->key, a->argc, a->argv);
 
     size_t nch = 0;
     char **lines = NULL;
     read_file(data_store, &lines, &nch);
 
     size_t decsize = 0;
-    unsigned char *decoded_data = b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
+    unsigned char *decoded_data =
+        b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
 
-    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    reset_key(a);
+    AES_init_ctx_iv(&ctx, a->key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("data", (char *)decoded_data) == 0, "-d data" TABS);
-    free(aes_key);
+    test(strcmp("data", (char *)decoded_data) == 0, "not empty");
+
+    remove(data_store);
 }
 
-void test_data_file_flag(void)
+void test_data_file_flag_empty(Args *a)
 {
-    uint8_t *aes_key = get_key();
-    int argc = 2;
-    char **argv = fill_args(argc, "-df");
+    test(run(a->key, a->argc, a->argv) == 1, "empty");
+    free(a->key);
+    remove(data_store);
+}
 
-    assert_t(run(aes_key, argc, argv) == 1, "-df" TABS);
-    free_argv(argc, argv);
+void test_data_file_flag_non_existent_file(Args *a)
+{
+    test(run_test_in_fork(a) == 1, "non-existent");
+}
 
-    Args a = {
-        .argc = 3,
-        .argv = fill_args(3, "-df", "test.txt")
-    };
-
-    assert_t(run_test_in_fork(&a) == 1, "-df test.txt (non-ex)\t");
-    free_argv(a.argc, a.argv);
-
+void test_data_file_flag_valid(Args *a)
+{
     write_file("test.txt", "wb", "test data file");
-
-    argc = 3;
-    argv = fill_args(argc, "-df", "test.txt");
-
-    run(aes_key, argc, argv);
-    aes_key = get_key();
-    free_argv(argc, argv);
-
-    remove("test.txt");
+    run(a->key, a->argc, a->argv);
 
     size_t nch = 0;
     char *data = read_file_as_str(data_store, &nch);
@@ -216,107 +237,137 @@ void test_data_file_flag(void)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    reset_key(a);
+    AES_init_ctx_iv(&ctx, a->key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp("test data file\n", (char *)decoded_data) == 0, "-df test.txt\t\t");
-    free(aes_key);
+    test(strcmp("test data file\n", (char *)decoded_data) == 0, "valid");
+
+    remove(data_store);
+    remove("test.txt");
 }
 
-void test_label_flag(void)
+void test_label_flag_empty(Args *a)
 {
-    uint8_t *aes_key = get_key();
-    int argc = 2;
-    char **argv = fill_args(argc, "-l");
-
-    assert_t(run(aes_key, argc, argv) == 1, "-l" TABS);
-    aes_key = get_key();
-    free_argv(argc, argv);
-
-    argc = 3;
-    argv = fill_args(argc, "-l", "label");
-
-    assert_t(run(aes_key, argc, argv) == 1, "-l label\t\t");
-    free_argv(argc, argv);
-    free(aes_key);
+    test(run(a->key, a->argc, a->argv) == 1, "empty");
+    free(a->key);
 }
 
-void test_generate_password_flag(void)
+void test_label_flag_not_empty(Args *a)
 {
-    uint8_t *aes_key = get_key();
-    int argc = 2;
-    char **argv = fill_args(argc, "-gp");
+    test(run(a->key, a->argc, a->argv) == 1, "not empty");
+    free(a->key);
+}
 
+void test_generate_password_flag_empty(Args *a)
+{
     FILE *f = NULL;
-    run(aes_key, argc, argv);
-    aes_key = get_key();
-    assert_t((f = fopen(data_store, "rb")) != NULL, "-gp" TABS);
+    run(a->key, a->argc, a->argv);
+    test((f = fopen(data_store, "rb")) != NULL, "empty");
     if (f)
-    {
         fclose(f);
-    }
-    free_argv(argc, argv);
     remove(data_store);
-
-    aes_key = get_key();
-
-    argc = 3;
-    argv = fill_args(argc, "-gp", "128");
-
-    run(aes_key, argc, argv);
-    aes_key = get_key();
-    free_argv(argc, argv);
-
-    size_t nch = 0;
-    char* data = read_file_as_str(data_store, &nch);
-
-    size_t decsize = 0;
-    unsigned char* decoded_data = b64_decode_ex(data, nch, &decsize);
-
-    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
-
-    assert_t(strlen((char *)decoded_data) == 128, "-gp 128" TABS);
-    free(aes_key);
 }
 
-void test_key_flag(void)
+void test_generate_password_flag_128_chars(Args *a)
 {
-    uint8_t *aes_key = get_key();
-    int argc = 5;
-    char **argv = fill_args(argc, "-k", AES_KEY, "-d", "test_data");
-
-    run(aes_key, argc, argv);
-    aes_key = get_key();
-    free_argv(argc, argv);
+    run(a->key, a->argc, a->argv);
 
     size_t nch = 0;
-    char* data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(data_store, &nch);
 
     size_t decsize = 0;
-    unsigned char* decoded_data = b64_decode_ex(data, nch, &decsize);
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    reset_key(a);
+    AES_init_ctx_iv(&ctx, a->key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    assert_t(strcmp((char *)decoded_data, "test_data") == 0, "-k -d" TABS);
-    free(aes_key);
+    test(strlen((char *)decoded_data) == 128, "128 chars");
+    free(a->key);
+
+    remove(data_store);
 }
 
-void run_test(void (*test)(void))
+void test_key_flag_valid(Args *a)
 {
-    test();
+    run(a->key, a->argc, a->argv);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(data_store, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    AES_init_ctx_iv(&ctx, a->key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp((char *)decoded_data, "test_data") == 0, "valid");
+
+    free(a->key);
     remove(data_store);
+}
+
+void run_test(Test *t)
+{
+    reset_key(&t->a);
+    t->f(&t->a);
 }
 
 int main(void)
 {
-    close(1);
+    Test tests[] = {
+        {.t = NO_FLAG,
+         .f = test_no_flag_pm_data_doesnt_exist,
+         .a = {.argc = 1, .argv = calloc(1, 256)}},
+        {.t = DATA,
+         .f = test_data_flag_empty,
+         .a = {.argc = 2, .argv = ARGV("-d")}},
+        {.t = DATA,
+         .f = test_data_flag_not_empty,
+         .a = {.argc = 3, .argv = ARGV("-d", "data")}},
+        {.t = DATA_FILE,
+         .f = test_data_file_flag_empty,
+         .a = {.argc = 2, .argv = ARGV("-df")}},
+        {.t = DATA_FILE,
+         .f = test_data_file_flag_non_existent_file,
+         .a = {.argc = 3, .argv = ARGV("-df", "test.txt")}},
+        {.t = DATA_FILE,
+         .f = test_data_file_flag_valid,
+         .a = {.argc = 3, .argv = ARGV("-df", "test.txt")}},
+        {.t = LABEL,
+         .f = test_label_flag_empty,
+         .a = {.argc = 2, .argv = ARGV("-l")}},
+        {.t = LABEL,
+         .f = test_label_flag_not_empty,
+         .a = {.argc = 3, .argv = ARGV("-l", "label")}},
+        {.t = GENERATE_PASSWORD,
+         .f = test_generate_password_flag_empty,
+         .a = {.argc = 2, .argv = ARGV("-gp")}},
+        {.t = GENERATE_PASSWORD,
+         .f = test_generate_password_flag_128_chars,
+         .a = {.argc = 3, .argv = ARGV("-gp", "128")}},
+        {.t = KEY,
+         .f = test_key_flag_valid,
+         .a = {.argc = 5, .argv = ARGV("-k", AES_KEY, "-d", "test_data")}},
+    };
+
+    size_t tests_count = sizeof(tests) / sizeof(tests[0]);
+    Type current_category = tests[0].t;
+    printf("%s\n", test_catergory(current_category));
 
     for (size_t i = 0; i < tests_count; i++)
     {
-        run_test(tests[i]);
+        if (tests[i].t != current_category)
+        {
+            current_category = tests[i].t;
+            printf("%s\n", test_catergory(current_category));
+        }
+        run_test(&tests[i]);
+        free_argv(&tests[i].a);
     }
 
-    exit_program(tests_exit_code);
+    printf("\n(%zu / %zu) tests passed\n", tests_count - failed_tests_count,
+           tests_count);
+    return failed_tests_count >= 1;
 }

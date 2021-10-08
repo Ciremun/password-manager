@@ -4,6 +4,9 @@ build/
 *.obj
 *.exe
 *.old
+*.ilk
+*.pdb
+*.idb
 
 .data
 .pm_data

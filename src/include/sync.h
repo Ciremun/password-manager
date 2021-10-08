@@ -21,13 +21,13 @@
 #ifndef SYNC_H
 #define SYNC_H
 
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 
@@ -43,14 +43,16 @@ typedef pid_t Pid;
 typedef int Fd;
 #endif // _WIN32
 
-typedef char* Cstr;
+typedef char *Cstr;
 
-typedef struct {
+typedef struct
+{
     Cstr *elems;
     size_t count;
 } Cstr_Array;
 
-typedef struct {
+typedef struct
+{
     Cstr_Array line;
 } Cmd;
 
@@ -58,15 +60,16 @@ typedef struct {
 LPSTR GetLastErrorAsString(void);
 #endif // _WIN32
 
-#define return_code_if_error(code) if (code != 0) return code
+#define return_code_if_error(code)                                             \
+    if (code != 0)                                                             \
+    return code
 
-#define CMD(...)                                        \
-    do {                                                \
-        Cmd cmd = {                                     \
-            .line = cstr_array_make(__VA_ARGS__, NULL)  \
-        };                                              \
-        return_code_if_error(cmd_run_sync(cmd));        \
-        free(cmd.line.elems);                           \
+#define CMD(...)                                                               \
+    do                                                                         \
+    {                                                                          \
+        Cmd cmd = {.line = cstr_array_make(__VA_ARGS__, NULL)};                \
+        return_code_if_error(cmd_run_sync(cmd));                               \
+        free(cmd.line.elems);                                                  \
     } while (0)
 
 int verify_remote(const char *remote);
