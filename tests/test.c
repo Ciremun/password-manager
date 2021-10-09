@@ -189,7 +189,6 @@ void test_no_flag_pm_data_exists(Test *t)
 {
     write_file(DEFAULT_DATA_STORE, "wb", "");
     test(run_test_in_fork(&t->a) == 0, t);
-    free(t->a.key);
     remove(DEFAULT_DATA_STORE);
 }
 
