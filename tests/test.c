@@ -11,7 +11,7 @@
 #undef exit
 
 #define AES_KEY "test_aes_key!@#$%^&*();'"
-#define ARGV(...) fill_args(__VA_ARGS__, NULL)
+#define ARGS(...) fill_args(__VA_ARGS__, NULL)
 
 typedef enum
 {
@@ -54,7 +54,7 @@ void test_label_flag_empty(Args *a);
 void test_generate_password_flag_empty(Args *a);
 void test_key_flag_valid(Args *a);
 void run_test(Test *t);
-char **fill_args(char *first, ...);
+Args fill_args(char *first, ...);
 void free_argv(Args *a);
 const char *test_catergory(Type t);
 void reset_key(Args *a);
@@ -137,20 +137,19 @@ int run_test_in_fork(Args *a)
 }
 #endif // _WIN32
 
-char **fill_args(char *first, ...)
+Args fill_args(char *first, ...)
 {
-    va_list args;
-    char **argv = calloc(1, 256);
-    argv[1] = strdup(first);
+    va_list args_list;
+    Args args = {.argc = 2, .argv = calloc(1, 256)};
+    args.argv[1] = strdup(first);
 
-    int n = 2;
-    va_start(args, first);
-    for (char *next = va_arg(args, char *); next != 0;
-         next = va_arg(args, char *), n++)
-        argv[n] = strdup(next);
-    va_end(args);
+    va_start(args_list, first);
+    for (char *next = va_arg(args_list, char *); next != 0;
+         next = va_arg(args_list, char *), args.argc++)
+        args.argv[args.argc] = strdup(next);
+    va_end(args_list);
 
-    return argv;
+    return args;
 }
 
 void free_argv(Args *a)
@@ -325,52 +324,52 @@ int main(void)
         {
             .t = DATA,
             .f = test_data_flag_empty,
-            .a = {.argc = 2, .argv = ARGV("-d")},
+            .a = ARGS("-d"),
         },
         {
             .t = DATA,
             .f = test_data_flag_not_empty,
-            .a = {.argc = 3, .argv = ARGV("-d", "data")},
+            .a = ARGS("-d", "data"),
         },
         {
             .t = DATA_FILE,
             .f = test_data_file_flag_empty,
-            .a = {.argc = 2, .argv = ARGV("-df")},
+            .a = ARGS("-df"),
         },
         {
             .t = DATA_FILE,
             .f = test_data_file_flag_non_existent_file,
-            .a = {.argc = 3, .argv = ARGV("-df", "test.txt")},
+            .a = ARGS("-df", "test.txt"),
         },
         {
             .t = DATA_FILE,
             .f = test_data_file_flag_valid,
-            .a = {.argc = 3, .argv = ARGV("-df", "test.txt")},
+            .a = ARGS("-df", "test.txt"),
         },
         {
             .t = LABEL,
             .f = test_label_flag_empty,
-            .a = {.argc = 2, .argv = ARGV("-l")},
+            .a = ARGS("-l"),
         },
         {
             .t = LABEL,
             .f = test_label_flag_not_empty,
-            .a = {.argc = 3, .argv = ARGV("-l", "label")},
+            .a = ARGS("-l", "label"),
         },
         {
             .t = GENERATE_PASSWORD,
             .f = test_generate_password_flag_empty,
-            .a = {.argc = 2, .argv = ARGV("-gp")},
+            .a = ARGS("-gp"),
         },
         {
             .t = GENERATE_PASSWORD,
             .f = test_generate_password_flag_128_chars,
-            .a = {.argc = 3, .argv = ARGV("-gp", "128")},
+            .a = ARGS("-gp", "128"),
         },
         {
             .t = KEY,
             .f = test_key_flag_valid,
-            .a = {.argc = 5, .argv = ARGV("-k", AES_KEY, "-d", "test_data")},
+            .a = ARGS("-k", AES_KEY, "-d", "test_data"),
         },
     };
 
