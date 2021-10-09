@@ -50,6 +50,7 @@ int run_from_win_thread(Args *a);
 #endif // _WIN32
 int run_test_in_fork(Args *a);
 void test(int check, Test *t);
+void test_no_flag_pm_data_exists(Test *t);
 void test_no_flag_pm_data_doesnt_exist(Test *t);
 void test_data_flag_empty(Test *t);
 void test_data_file_flag_empty(Test *t);
@@ -176,10 +177,20 @@ void test(int check, Test *t)
     if (!check)
     {
         failed_tests_count++;
-        fprintf(stderr, "[%-17.17s] %-25.25s FAIL\n", test_catergory(t->t), t->desc);
+        fprintf(stderr, "%-17.17s %-25.25s FAIL\n", test_catergory(t->t),
+                t->desc);
     }
     else
-        fprintf(stderr, "[%-17.17s] %-25.25s PASS\n", test_catergory(t->t), t->desc);
+        fprintf(stderr, "%-17.17s %-25.25s PASS\n", test_catergory(t->t),
+                t->desc);
+}
+
+void test_no_flag_pm_data_exists(Test *t)
+{
+    write_file(DEFAULT_DATA_STORE, "wb", "");
+    test(run_test_in_fork(&t->a) == 0, t);
+    free(t->a.key);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_no_flag_pm_data_doesnt_exist(Test *t)
@@ -319,6 +330,12 @@ void run_test(Test *t)
 int main(void)
 {
     Test tests[] = {
+        {
+            .t = NO_FLAG,
+            .f = test_no_flag_pm_data_exists,
+            .a = {.argc = 1, .argv = calloc(1, 256)},
+            .desc = ".pm_data exists",
+        },
         {
             .t = NO_FLAG,
             .f = test_no_flag_pm_data_doesnt_exist,
