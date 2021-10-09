@@ -200,7 +200,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             if (f == NULL)
             {
                 error(stderr, "error opening file %s\n", data_store);
-                return;
+                exit(1);
             }
 
             memset(lines[i], 0, line_length);
@@ -365,8 +365,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
         }
     }
 
-    if (f)
-        fclose(f);
+    fclose(f);
     if (ln)
         free(ln);
 
