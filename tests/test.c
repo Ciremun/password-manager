@@ -54,6 +54,7 @@ void test_no_flag_pm_data_exists(Test *t);
 void test_no_flag_pm_data_doesnt_exist(Test *t);
 void test_data_flag_empty(Test *t);
 void test_data_file_flag_empty(Test *t);
+void test_data_file_flag_empty_file(Test *t);
 void test_label_flag_empty(Test *t);
 void test_generate_password_flag_empty(Test *t);
 void test_key_flag_valid(Test *t);
@@ -233,6 +234,27 @@ void test_data_file_flag_empty(Test *t)
     remove(data_store);
 }
 
+void test_data_file_flag_empty_file(Test *t)
+{
+    write_file("test.txt", "wb", "");
+    run(t->a.key, t->a.argc, t->a.argv);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(data_store, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    reset_key(&t->a);
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp("\n", (char *)decoded_data) == 0, t);
+
+    remove(data_store);
+    remove("test.txt");
+}
+
 void test_data_file_flag_non_existent_file(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
@@ -358,6 +380,12 @@ int main(void)
             .f = test_data_file_flag_empty,
             .a = ARGS("-df"),
             .desc = "empty",
+        },
+        {
+            .t = DATA_FILE,
+            .f = test_data_file_flag_empty_file,
+            .a = ARGS("-df", "test.txt"),
+            .desc = "empty file",
         },
         {
             .t = DATA_FILE,
