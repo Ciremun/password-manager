@@ -1,6 +1,7 @@
 .vs/
 .vscode/
 build/
+password-manager/
 
 *.obj
 *.exe
