@@ -307,6 +307,18 @@ void test_label_flag_not_empty(Test *t)
     free(t->a.key);
 }
 
+void test_find_label_flag_empty(Test *t)
+{
+    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
+}
+
+void test_delete_label_flag_empty(Test *t)
+{
+    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
+}
+
 void test_generate_password_flag_empty(Test *t)
 {
     FILE *f = NULL;
@@ -385,6 +397,18 @@ void test_key_flag_invalid(Test *t)
     free(decoded_data);
     free(t->a.key);
     remove(data_store);
+}
+
+void test_key_file_flag_empty(Test *t)
+{
+    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
+}
+
+void test_input_flag_empty(Test *t)
+{
+    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
 }
 
 void run_test(Test *t)
@@ -475,6 +499,18 @@ int main(void)
             .desc = "not empty",
         },
         {
+            .t = FIND_LABEL,
+            .f = test_find_label_flag_empty,
+            .a = ARGS("-fl"),
+            .desc = "empty",
+        },
+        {
+            .t = DELETE_LABEL,
+            .f = test_delete_label_flag_empty,
+            .a = ARGS("-dl"),
+            .desc = "empty",
+        },
+        {
             .t = GENERATE_PASSWORD,
             .f = test_generate_password_flag_empty,
             .a = ARGS("-gp"),
@@ -503,6 +539,18 @@ int main(void)
             .f = test_key_flag_invalid,
             .a = ARGS("-k", "invalid_key", "-d", "test_data"),
             .desc = "invalid",
+        },
+        {
+            .t = KEY_FILE,
+            .f = test_key_file_flag_empty,
+            .a = ARGS("-kf"),
+            .desc = "empty",
+        },
+                {
+            .t = INPUT_,
+            .f = test_input_flag_empty,
+            .a = ARGS("-i"),
+            .desc = "empty",
         },
     };
 
