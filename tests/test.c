@@ -172,7 +172,9 @@ void test_no_flag_pm_data_exists(Test *t)
     write_file(DEFAULT_DATA_STORE, "wb", "");
     test(run_test_in_fork(&t->a) == 0, t);
     remove(DEFAULT_DATA_STORE);
+#ifndef _WIN32
     free(t->a.key);
+#endif // _WIN32
 }
 
 void test_no_flag_pm_data_doesnt_exist(Test *t)
