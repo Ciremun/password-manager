@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <stdio.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -16,6 +17,7 @@
 #define TEST_KEY_FILE "key_file.txt"
 #define TEST_KEY_FLAG_DATA "test_key_flag_data"
 #define TEST_KEY_FILE_FLAG_DATA "test_key_file_flag_data"
+#define TEST_INPUT_FLAG_DATA "test_input_flag_data"
 
 typedef struct Test Test;
 
@@ -191,7 +193,7 @@ void test_data_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) != 0, t);
     free(t->a.key);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_data_flag_not_empty(Test *t)
@@ -200,7 +202,7 @@ void test_data_flag_not_empty(Test *t)
 
     size_t nch = 0;
     char **lines = NULL;
-    read_file(data_store, &lines, &nch);
+    read_file(DEFAULT_DATA_STORE, &lines, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data
@@ -217,7 +219,7 @@ void test_data_flag_not_empty(Test *t)
     free(lines);
     free(decoded_data);
     free(t->a.key);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_data_flag_with_generate_password(Test *t)
@@ -236,7 +238,7 @@ void test_data_file_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
     free(t->a.key);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_data_file_flag_empty_file(Test *t)
@@ -245,7 +247,7 @@ void test_data_file_flag_empty_file(Test *t)
     run(t->a.key, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -259,7 +261,7 @@ void test_data_file_flag_empty_file(Test *t)
     free(t->a.key);
     free(decoded_data);
     free(data);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
     remove(TEST_DATA_FILE);
 }
 
@@ -275,7 +277,7 @@ void test_data_file_flag_valid(Test *t)
     run(t->a.key, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -289,7 +291,7 @@ void test_data_file_flag_valid(Test *t)
     free(t->a.key);
     free(decoded_data);
     free(data);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
     remove(TEST_DATA_FILE);
 }
 
@@ -328,7 +330,7 @@ void test_generate_password_flag_empty(Test *t)
     run(t->a.key, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -337,7 +339,7 @@ void test_generate_password_flag_empty(Test *t)
 
     free(data);
     free(decoded_data);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_generate_password_flag_128_chars(Test *t)
@@ -345,7 +347,7 @@ void test_generate_password_flag_128_chars(Test *t)
     run(t->a.key, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -359,7 +361,7 @@ void test_generate_password_flag_128_chars(Test *t)
     free(decoded_data);
     free(data);
     free(t->a.key);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_key_flag_empty(Test *t)
@@ -373,7 +375,7 @@ void test_key_flag_valid(Test *t)
     run(NULL, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -386,7 +388,7 @@ void test_key_flag_valid(Test *t)
     free(data);
     free(decoded_data);
     free(t->a.key);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_key_flag_invalid(Test *t)
@@ -394,7 +396,7 @@ void test_key_flag_invalid(Test *t)
     run(NULL, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -407,7 +409,7 @@ void test_key_flag_invalid(Test *t)
     free(data);
     free(decoded_data);
     free(t->a.key);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_key_file_flag_empty(Test *t)
@@ -436,7 +438,7 @@ void test_key_file_flag_valid(Test *t)
     run(NULL, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -450,7 +452,7 @@ void test_key_file_flag_valid(Test *t)
     free(data);
     free(t->a.key);
     remove(TEST_KEY_FILE);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_key_file_flag_invalid(Test *t)
@@ -467,7 +469,7 @@ void test_key_file_flag_invalid(Test *t)
     run(NULL, t->a.argc, t->a.argv);
 
     size_t nch = 0;
-    char *data = read_file_as_str(data_store, &nch);
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -481,7 +483,7 @@ void test_key_file_flag_invalid(Test *t)
     free(data);
     free(t->a.key);
     remove(TEST_KEY_FILE);
-    remove(data_store);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_input_flag_empty(Test *t)
@@ -494,6 +496,26 @@ void test_input_flag_non_existent_file(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
     free(t->a.key);
+}
+
+void test_input_flag_write_data(Test *t)
+{
+    run(t->a.key, t->a.argc, t->a.argv);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(TEST_DATA_FILE, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    reset_key(&t->a);
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp((char *)decoded_data, TEST_INPUT_FLAG_DATA) == 0, t);
+
+    free(data);
+    free(decoded_data);
 }
 
 void run_test(Test *t)
@@ -661,7 +683,12 @@ int main(void)
             .a = ARGS("-i", "input_file_that_doesnt_exist.txt"),
             .desc = "non-existent",
         },
-
+        {
+            .t = INPUT_,
+            .f = test_input_flag_write_data,
+            .a = ARGS("-i", TEST_DATA_FILE, "-d", TEST_INPUT_FLAG_DATA),
+            .desc = "write data",
+        },
     };
 
     size_t tests_count = sizeof(tests) / sizeof(tests[0]);
