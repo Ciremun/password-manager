@@ -262,6 +262,11 @@ void test_data_file_flag_valid(Test *t)
     remove("test.txt");
 }
 
+void test_data_file_flag_with_generate_password(Test *t)
+{
+    test(run_test_in_fork(&t->a) == 1, t);
+}
+
 void test_label_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
@@ -379,6 +384,12 @@ int main(void)
             .f = test_data_file_flag_valid,
             .a = ARGS("-df", "test.txt"),
             .desc = "valid",
+        },
+        {
+            .t = DATA_FILE,
+            .f = test_data_file_flag_with_generate_password,
+            .a = ARGS("-df", "test.txt", "-gp"),
+            .desc = "with generate password",
         },
         {
             .t = LABEL,
