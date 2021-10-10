@@ -405,9 +405,21 @@ void test_key_file_flag_empty(Test *t)
     free(t->a.key);
 }
 
+void test_key_file_flag_non_existent_file(Test *t)
+{
+    test(run_test_in_fork(&t->a) == 1, t);
+    free(t->a.key);
+}
+
 void test_input_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
+}
+
+void test_input_flag_non_existent_file(Test *t)
+{
+    test(run_test_in_fork(&t->a) == 1, t);
     free(t->a.key);
 }
 
@@ -546,12 +558,25 @@ int main(void)
             .a = ARGS("-kf"),
             .desc = "empty",
         },
-                {
+        {
+            .t = KEY_FILE,
+            .f = test_key_file_flag_non_existent_file,
+            .a = ARGS("-kf", "keyfile_that_doesnt_exist.txt"),
+            .desc = "non-existent",
+        },
+        {
             .t = INPUT_,
             .f = test_input_flag_empty,
             .a = ARGS("-i"),
             .desc = "empty",
         },
+        {
+            .t = INPUT_,
+            .f = test_input_flag_non_existent_file,
+            .a = ARGS("-i", "input_file_that_doesnt_exist.txt"),
+            .desc = "non-existent",
+        },
+
     };
 
     size_t tests_count = sizeof(tests) / sizeof(tests[0]);
