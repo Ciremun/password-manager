@@ -321,11 +321,18 @@ void test_delete_label_flag_empty(Test *t)
 
 void test_generate_password_flag_empty(Test *t)
 {
-    FILE *f = NULL;
     run(t->a.key, t->a.argc, t->a.argv);
-    test((f = fopen(data_store, "rb")) != NULL, t);
-    if (f)
-        fclose(f);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(data_store, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    test(decsize >= 15, t);
+
+    free(data);
+    free(decoded_data);
     remove(data_store);
 }
 

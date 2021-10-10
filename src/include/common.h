@@ -24,9 +24,9 @@ typedef SSIZE_T ssize_t;
 #ifdef TEST
 void exit_test_case(int exit_code);
 #define exit exit_test_case
-#define error(stdout, fmt, ...)
+#define error(f, fmt, ...)
 #else
-#define error(stdout, fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
+#define error(f, fmt, ...) fprintf(f, fmt, __VA_ARGS__)
 #endif // TEST
 
 #ifdef _WIN32
