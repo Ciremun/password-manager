@@ -339,9 +339,15 @@ void test_generate_password_flag_128_chars(Test *t)
     remove(data_store);
 }
 
+void test_key_flag_empty(Test *t)
+{
+    test(run(NULL, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
+}
+
 void test_key_flag_valid(Test *t)
 {
-    run(t->a.key, t->a.argc, t->a.argv);
+    run(NULL, t->a.argc, t->a.argv);
 
     size_t nch = 0;
     char *data = read_file_as_str(data_store, &nch);
@@ -353,6 +359,27 @@ void test_key_flag_valid(Test *t)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp((char *)decoded_data, "test_data") == 0, t);
+
+    free(data);
+    free(decoded_data);
+    free(t->a.key);
+    remove(data_store);
+}
+
+void test_key_flag_invalid(Test *t)
+{
+    run(NULL, t->a.argc, t->a.argv);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(data_store, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp((char *)decoded_data, "test_data") != 0, t);
 
     free(data);
     free(decoded_data);
@@ -461,9 +488,21 @@ int main(void)
         },
         {
             .t = KEY,
+            .f = test_key_flag_empty,
+            .a = ARGS("-k"),
+            .desc = "empty",
+        },
+        {
+            .t = KEY,
             .f = test_key_flag_valid,
             .a = ARGS("-k", AES_KEY, "-d", "test_data"),
             .desc = "valid",
+        },
+        {
+            .t = KEY,
+            .f = test_key_flag_invalid,
+            .a = ARGS("-k", "invalid_key", "-d", "test_data"),
+            .desc = "invalid",
         },
     };
 
