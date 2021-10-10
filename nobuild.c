@@ -85,6 +85,7 @@ int main(int argc, char **argv)
     {
         PANIC_OVERWRITE_IF_FILE_EXISTS(DEFAULT_DATA_STORE);
         PANIC_OVERWRITE_IF_FILE_EXISTS("test.txt");
+        PANIC_OVERWRITE_IF_FILE_EXISTS("key_file.txt");
     }
     FILE *version_header = fopen("src/include/version.h", "wb");
     if (version_header == 0)

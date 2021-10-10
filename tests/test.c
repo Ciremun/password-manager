@@ -12,6 +12,10 @@
 
 #define AES_KEY "test_aes_key!@#$%^&*();'"
 #define ARGS(...) fill_args(__VA_ARGS__, NULL)
+#define TEST_DATA_FILE "test.txt"
+#define TEST_KEY_FILE "key_file.txt"
+#define TEST_KEY_FLAG_DATA "test_key_flag_data"
+#define TEST_KEY_FILE_FLAG_DATA "test_key_file_flag_data"
 
 typedef struct Test Test;
 
@@ -237,7 +241,7 @@ void test_data_file_flag_empty(Test *t)
 
 void test_data_file_flag_empty_file(Test *t)
 {
-    write_file("test.txt", "wb", "");
+    write_file(TEST_DATA_FILE, "wb", "");
     run(t->a.key, t->a.argc, t->a.argv);
 
     size_t nch = 0;
@@ -256,7 +260,7 @@ void test_data_file_flag_empty_file(Test *t)
     free(decoded_data);
     free(data);
     remove(data_store);
-    remove("test.txt");
+    remove(TEST_DATA_FILE);
 }
 
 void test_data_file_flag_non_existent_file(Test *t)
@@ -267,7 +271,7 @@ void test_data_file_flag_non_existent_file(Test *t)
 
 void test_data_file_flag_valid(Test *t)
 {
-    write_file("test.txt", "wb", "test data file");
+    write_file(TEST_DATA_FILE, "wb", "test data file");
     run(t->a.key, t->a.argc, t->a.argv);
 
     size_t nch = 0;
@@ -286,7 +290,7 @@ void test_data_file_flag_valid(Test *t)
     free(decoded_data);
     free(data);
     remove(data_store);
-    remove("test.txt");
+    remove(TEST_DATA_FILE);
 }
 
 void test_data_file_flag_with_generate_password(Test *t)
@@ -377,7 +381,7 @@ void test_key_flag_valid(Test *t)
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    test(strcmp((char *)decoded_data, "test_data") == 0, t);
+    test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) == 0, t);
 
     free(data);
     free(decoded_data);
@@ -398,7 +402,7 @@ void test_key_flag_invalid(Test *t)
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    test(strcmp((char *)decoded_data, "test_data") != 0, t);
+    test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) != 0, t);
 
     free(data);
     free(decoded_data);
@@ -416,6 +420,68 @@ void test_key_file_flag_non_existent_file(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
     free(t->a.key);
+}
+
+void test_key_file_flag_valid(Test *t)
+{
+    FILE *f = fopen(TEST_KEY_FILE, "wb");
+    if (f == NULL)
+    {
+        error(stderr, "error opening file %s\n", TEST_KEY_FILE);
+        exit(1);
+    }
+    fprintf(f, "%s", AES_KEY);
+    fclose(f);
+
+    run(NULL, t->a.argc, t->a.argv);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(data_store, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) == 0, t);
+
+    free(decoded_data);
+    free(data);
+    free(t->a.key);
+    remove(TEST_KEY_FILE);
+    remove(data_store);
+}
+
+void test_key_file_flag_invalid(Test *t)
+{
+    FILE *f = fopen(TEST_KEY_FILE, "wb");
+    if (f == NULL)
+    {
+        error(stderr, "error opening file %s\n", TEST_KEY_FILE);
+        exit(1);
+    }
+    fprintf(f, "%s", "invalid_key");
+    fclose(f);
+
+    run(NULL, t->a.argc, t->a.argv);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(data_store, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) != 0, t);
+
+    free(decoded_data);
+    free(data);
+    free(t->a.key);
+    remove(TEST_KEY_FILE);
+    remove(data_store);
 }
 
 void test_input_flag_empty(Test *t)
@@ -472,7 +538,7 @@ int main(void)
         {
             .t = DATA,
             .f = test_data_flag_with_data_file,
-            .a = ARGS("-d", "data", "-df", "test.txt"),
+            .a = ARGS("-d", "data", "-df", TEST_DATA_FILE),
             .desc = "with data file",
         },
         {
@@ -484,25 +550,25 @@ int main(void)
         {
             .t = DATA_FILE,
             .f = test_data_file_flag_empty_file,
-            .a = ARGS("-df", "test.txt"),
+            .a = ARGS("-df", TEST_DATA_FILE),
             .desc = "empty file",
         },
         {
             .t = DATA_FILE,
             .f = test_data_file_flag_non_existent_file,
-            .a = ARGS("-df", "test.txt"),
+            .a = ARGS("-df", TEST_DATA_FILE),
             .desc = "non-existent",
         },
         {
             .t = DATA_FILE,
             .f = test_data_file_flag_valid,
-            .a = ARGS("-df", "test.txt"),
+            .a = ARGS("-df", TEST_DATA_FILE),
             .desc = "valid",
         },
         {
             .t = DATA_FILE,
             .f = test_data_file_flag_with_generate_password,
-            .a = ARGS("-df", "test.txt", "-gp"),
+            .a = ARGS("-df", TEST_DATA_FILE, "-gp"),
             .desc = "with generate password",
         },
         {
@@ -550,13 +616,13 @@ int main(void)
         {
             .t = KEY,
             .f = test_key_flag_valid,
-            .a = ARGS("-k", AES_KEY, "-d", "test_data"),
+            .a = ARGS("-k", AES_KEY, "-d", TEST_KEY_FLAG_DATA),
             .desc = "valid",
         },
         {
             .t = KEY,
             .f = test_key_flag_invalid,
-            .a = ARGS("-k", "invalid_key", "-d", "test_data"),
+            .a = ARGS("-k", "invalid_key", "-d", TEST_KEY_FLAG_DATA),
             .desc = "invalid",
         },
         {
@@ -570,6 +636,18 @@ int main(void)
             .f = test_key_file_flag_non_existent_file,
             .a = ARGS("-kf", "keyfile_that_doesnt_exist.txt"),
             .desc = "non-existent",
+        },
+        {
+            .t = KEY_FILE,
+            .f = test_key_file_flag_valid,
+            .a = ARGS("-kf", TEST_KEY_FILE, "-d", TEST_KEY_FILE_FLAG_DATA),
+            .desc = "valid",
+        },
+        {
+            .t = KEY_FILE,
+            .f = test_key_file_flag_invalid,
+            .a = ARGS("-kf", TEST_KEY_FILE, "-d", TEST_KEY_FILE_FLAG_DATA),
+            .desc = "invalid",
         },
         {
             .t = INPUT_,
