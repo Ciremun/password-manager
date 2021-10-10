@@ -45,25 +45,6 @@ struct Test
     const char *desc;
 };
 
-#ifdef _WIN32
-int run_from_win_thread(Args *a);
-#endif // _WIN32
-int run_test_in_fork(Args *a);
-void test(int check, Test *t);
-void test_no_flag_pm_data_exists(Test *t);
-void test_no_flag_pm_data_doesnt_exist(Test *t);
-void test_data_flag_empty(Test *t);
-void test_data_file_flag_empty(Test *t);
-void test_data_file_flag_empty_file(Test *t);
-void test_label_flag_empty(Test *t);
-void test_generate_password_flag_empty(Test *t);
-void test_key_flag_valid(Test *t);
-void run_test(Test *t);
-Args fill_args(char *first, ...);
-void free_argv(Args *a);
-const char *test_catergory(Type t);
-void reset_key(Args *a);
-
 struct AES_ctx ctx;
 uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
                     0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
