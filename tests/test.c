@@ -172,6 +172,7 @@ void test_no_flag_pm_data_exists(Test *t)
     write_file(DEFAULT_DATA_STORE, "wb", "");
     test(run_test_in_fork(&t->a) == 0, t);
     remove(DEFAULT_DATA_STORE);
+    free(t->a.key);
 }
 
 void test_no_flag_pm_data_doesnt_exist(Test *t)
@@ -205,7 +206,24 @@ void test_data_flag_not_empty(Test *t)
 
     test(strcmp("data", (char *)decoded_data) == 0, t);
 
+    for (size_t i = 0; i < nch; ++i)
+        free(lines[i]);
+    free(lines);
+    free(decoded_data);
+    free(t->a.key);
     remove(data_store);
+}
+
+void test_data_flag_with_generate_password(Test *t)
+{
+    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
+}
+
+void test_data_flag_with_data_file(Test *t)
+{
+    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
 }
 
 void test_data_file_flag_empty(Test *t)
@@ -232,6 +250,9 @@ void test_data_file_flag_empty_file(Test *t)
 
     test(strcmp("\n", (char *)decoded_data) == 0, t);
 
+    free(t->a.key);
+    free(decoded_data);
+    free(data);
     remove(data_store);
     remove("test.txt");
 }
@@ -239,6 +260,7 @@ void test_data_file_flag_empty_file(Test *t)
 void test_data_file_flag_non_existent_file(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
+    free(t->a.key);
 }
 
 void test_data_file_flag_valid(Test *t)
@@ -258,6 +280,9 @@ void test_data_file_flag_valid(Test *t)
 
     test(strcmp("test data file\n", (char *)decoded_data) == 0, t);
 
+    free(t->a.key);
+    free(decoded_data);
+    free(data);
     remove(data_store);
     remove("test.txt");
 }
@@ -265,6 +290,7 @@ void test_data_file_flag_valid(Test *t)
 void test_data_file_flag_with_generate_password(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    free(t->a.key);
 }
 
 void test_label_flag_empty(Test *t)
@@ -304,8 +330,10 @@ void test_generate_password_flag_128_chars(Test *t)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strlen((char *)decoded_data) == 128, t);
-    free(t->a.key);
 
+    free(decoded_data);
+    free(data);
+    free(t->a.key);
     remove(data_store);
 }
 
@@ -324,6 +352,8 @@ void test_key_flag_valid(Test *t)
 
     test(strcmp((char *)decoded_data, "test_data") == 0, t);
 
+    free(data);
+    free(decoded_data);
     free(t->a.key);
     remove(data_store);
 }
@@ -360,6 +390,18 @@ int main(void)
             .f = test_data_flag_not_empty,
             .a = ARGS("-d", "data"),
             .desc = "not empty",
+        },
+        {
+            .t = DATA,
+            .f = test_data_flag_with_generate_password,
+            .a = ARGS("-d", "data", "-gp"),
+            .desc = "with generate password",
+        },
+        {
+            .t = DATA,
+            .f = test_data_flag_with_data_file,
+            .a = ARGS("-d", "data", "-df", "test.txt"),
+            .desc = "with data file",
         },
         {
             .t = DATA_FILE,
