@@ -6,30 +6,30 @@ extern uint8_t aes_iv[];
 extern char *data_store;
 extern char *sync_remote_url;
 
-const char *help_s =
-    "\n"
-    "./pm [flags]                  read or write data\n"
-    "\n"
-    "sync:                         set PM_SYNC_REMOTE_URL env var\n"
-    "\n"
-    "flags:\n"
-    "\n"
-    "-d  --data                    data to encrypt\n"
-    "-df --data-file               read data from file\n"
-    "-l  --label                   add label for data\n"
-    "-fl --find-label              find data by label\n"
-    "-dl --delete-label            delete label and its data\n"
+const char *help_s
+    = "\n"
+      "./pm [flags]                  read or write data\n"
+      "\n"
+      "sync:                         set PM_SYNC_REMOTE_URL env var\n"
+      "\n"
+      "flags:\n"
+      "\n"
+      "-d  --data                    data to encrypt\n"
+      "-df --data-file               read data from file\n"
+      "-l  --label                   add label for data\n"
+      "-fl --find-label              find data by label\n"
+      "-dl --delete-label            delete label and its data\n"
 #ifdef _WIN32
-    "-c  --copy                    -fl, -gp helper, copy to clipboard\n"
+      "-c  --copy                    -fl, -gp helper, copy to clipboard\n"
 #else
-    "-c  --copy                    -fl, -gp helper, pipe with clip tools\n"
+      "-c  --copy                    -fl, -gp helper, pipe with clip tools\n"
 #endif
-    "-gp --generate-password [N]   put random data\n"
-    "-k  --key                     key\n"
-    "-kf --key-file                key file path\n"
-    "-i  --input                   stored data path\n"
-    "-v  --version                 display version\n"
-    "-h  --help                    display help\n\n";
+      "-gp --generate-password [N]   put random data\n"
+      "-k  --key                     key\n"
+      "-kf --key-file                key file path\n"
+      "-i  --input                   stored data path\n"
+      "-v  --version                 display version\n"
+      "-h  --help                    display help\n\n";
 
 void input_key(uint8_t **aes_key, Flags *f)
 {
@@ -39,12 +39,12 @@ void input_key(uint8_t **aes_key, Flags *f)
         {
             if (!f->copy.exists)
             {
-                printf("key?\n");
+                fprintf(stdout, "%s\n", "key?");
             }
         }
         else
         {
-            printf("key?\n");
+            fprintf(stdout, "%s\n", "key?");
         }
         getpasswd((char **)aes_key);
     }
@@ -62,8 +62,8 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     {
         size_t decsize = 0;
         size_t line_length = strlen(lines[i]);
-        unsigned char *decoded_data =
-            b64_decode_ex(lines[i], line_length, &decsize);
+        unsigned char *decoded_data
+            = b64_decode_ex(lines[i], line_length, &decsize);
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
         if (f->find_label.value != NULL)
@@ -112,14 +112,14 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
             }
             if (f->copy.exists)
             {
-                const char *password =
-                    (const char *)decoded_data + label_length + 1;
+                const char *password
+                    = (const char *)decoded_data + label_length + 1;
 #ifdef _WIN32
                 if (copy_to_clipboard(password, strlen(password) + 1))
                 {
 #else
                 {
-                    printf("%s", password);
+                    fprintf(stdout, "%s", password);
 #endif
                     did_print = 1;
                     free(decoded_data);
@@ -127,13 +127,13 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
                 }
             }
         }
-        printf("%s\n", decoded_data);
+        fprintf(stdout, "%s\n", decoded_data);
         did_print = 1;
         free(decoded_data);
     }
     if (!did_print)
     {
-        printf("info: no results\n");
+        error(stdout, "%s\n", "info: no results");
     }
     for (size_t it = 0; it < idx; it++)
     {
@@ -166,8 +166,8 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
     {
         size_t decsize = 0;
         size_t line_length = strlen(lines[i]);
-        unsigned char *decoded_data =
-            b64_decode_ex(lines[i], line_length, &decsize);
+        unsigned char *decoded_data
+            = b64_decode_ex(lines[i], line_length, &decsize);
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
@@ -415,8 +415,8 @@ void delete_label(char *find_label, uint8_t *aes_key)
     for (; line_idx < total_lines; ++line_idx)
     {
         size_t decoded_line_length = 0;
-        unsigned char *decoded_line =
-            decode_line(lines[line_idx], aes_key, &decoded_line_length);
+        unsigned char *decoded_line
+            = decode_line(lines[line_idx], aes_key, &decoded_line_length);
         char *label = malloc(decoded_line_length * sizeof(decoded_line) + 1);
         if (!label)
         {
@@ -464,7 +464,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
     }
     else
     {
-        printf("info: no results\n");
+        error(stdout, "%s\n", "info: no results");
     }
     for (size_t i = 0; i < total_lines; i++)
     {
@@ -479,8 +479,8 @@ void delete_label(char *find_label, uint8_t *aes_key)
 unsigned char *decode_line(const char *line, uint8_t *aes_key,
                            size_t *decoded_line_length)
 {
-    unsigned char *decoded_line =
-        b64_decode_ex(line, strlen(line), decoded_line_length);
+    unsigned char *decoded_line
+        = b64_decode_ex(line, strlen(line), decoded_line_length);
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_line, *decoded_line_length);
     return decoded_line;

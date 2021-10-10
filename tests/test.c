@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <assert.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -18,6 +19,8 @@
 #define TEST_KEY_FLAG_DATA "test_key_flag_data"
 #define TEST_KEY_FILE_FLAG_DATA "test_key_file_flag_data"
 #define TEST_INPUT_FLAG_DATA "test_input_flag_data"
+#define TEST_LABEL_FLAG_LABEL "test_label_flag_label"
+#define TEST_LABEL_FLAG_DATA "test_label_flag_data"
 
 typedef struct Test Test;
 
@@ -196,9 +199,9 @@ void test_data_flag_empty(Test *t)
     remove(DEFAULT_DATA_STORE);
 }
 
-void test_data_flag_not_empty(Test *t)
+void test_data_flag_valid(Test *t)
 {
-    run(t->a.key, t->a.argc, t->a.argv);
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char **lines = NULL;
@@ -244,7 +247,7 @@ void test_data_file_flag_empty(Test *t)
 void test_data_file_flag_empty_file(Test *t)
 {
     write_file(TEST_DATA_FILE, "wb", "");
-    run(t->a.key, t->a.argc, t->a.argv);
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -274,7 +277,7 @@ void test_data_file_flag_non_existent_file(Test *t)
 void test_data_file_flag_valid(Test *t)
 {
     write_file(TEST_DATA_FILE, "wb", "test data file");
-    run(t->a.key, t->a.argc, t->a.argv);
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -307,10 +310,74 @@ void test_label_flag_empty(Test *t)
     free(t->a.key);
 }
 
-void test_label_flag_not_empty(Test *t)
+void test_label_flag_valid(Test *t)
 {
-    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    reset_key(&t->a);
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_DATA,
+                (char *)decoded_data)
+             == 0,
+         t);
+
     free(t->a.key);
+    free(decoded_data);
+    free(data);
+}
+
+void test_delete_label_flag_doesnt_exist(Test *t)
+{
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    reset_key(&t->a);
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_DATA,
+                (char *)decoded_data)
+             == 0,
+         t);
+
+    free(t->a.key);
+    free(decoded_data);
+    free(data);
+}
+
+void test_delete_label_flag_exists(Test *t)
+{
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
+
+    size_t nch = 0;
+    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+
+    size_t decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    reset_key(&t->a);
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp("", (char *)decoded_data) == 0, t);
+
+    free(t->a.key);
+    free(decoded_data);
+    free(data);
+    remove(DEFAULT_DATA_STORE);
 }
 
 void test_find_label_flag_empty(Test *t)
@@ -327,7 +394,7 @@ void test_delete_label_flag_empty(Test *t)
 
 void test_generate_password_flag_empty(Test *t)
 {
-    run(t->a.key, t->a.argc, t->a.argv);
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -344,7 +411,7 @@ void test_generate_password_flag_empty(Test *t)
 
 void test_generate_password_flag_128_chars(Test *t)
 {
-    run(t->a.key, t->a.argc, t->a.argv);
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -372,7 +439,7 @@ void test_key_flag_empty(Test *t)
 
 void test_key_flag_valid(Test *t)
 {
-    run(NULL, t->a.argc, t->a.argv);
+    assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -393,7 +460,7 @@ void test_key_flag_valid(Test *t)
 
 void test_key_flag_invalid(Test *t)
 {
-    run(NULL, t->a.argc, t->a.argv);
+    assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -435,7 +502,7 @@ void test_key_file_flag_valid(Test *t)
     fprintf(f, "%s", AES_KEY);
     fclose(f);
 
-    run(NULL, t->a.argc, t->a.argv);
+    assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -466,7 +533,7 @@ void test_key_file_flag_invalid(Test *t)
     fprintf(f, "%s", "invalid_key");
     fclose(f);
 
-    run(NULL, t->a.argc, t->a.argv);
+    assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
@@ -500,7 +567,7 @@ void test_input_flag_non_existent_file(Test *t)
 
 void test_input_flag_write_data(Test *t)
 {
-    run(t->a.key, t->a.argc, t->a.argv);
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
     char *data = read_file_as_str(TEST_DATA_FILE, &nch);
@@ -516,6 +583,8 @@ void test_input_flag_write_data(Test *t)
 
     free(data);
     free(decoded_data);
+    free(t->a.key);
+    remove(TEST_DATA_FILE);
 }
 
 void run_test(Test *t)
@@ -547,9 +616,9 @@ int main(void)
         },
         {
             .t = DATA,
-            .f = test_data_flag_not_empty,
+            .f = test_data_flag_valid,
             .a = ARGS("-d", "data"),
-            .desc = "not empty",
+            .desc = "valid",
         },
         {
             .t = DATA,
@@ -601,9 +670,21 @@ int main(void)
         },
         {
             .t = LABEL,
-            .f = test_label_flag_not_empty,
-            .a = ARGS("-l", "label"),
-            .desc = "not empty",
+            .f = test_label_flag_valid,
+            .a = ARGS("-l", TEST_LABEL_FLAG_LABEL, "-d", TEST_LABEL_FLAG_DATA),
+            .desc = "valid",
+        },
+        {
+            .t = DELETE_LABEL,
+            .f = test_delete_label_flag_doesnt_exist,
+            .a = ARGS("-dl", "label_that_doesnt_exist"),
+            .desc = "doesn't exist",
+        },
+        {
+            .t = DELETE_LABEL,
+            .f = test_delete_label_flag_exists,
+            .a = ARGS("-dl", TEST_LABEL_FLAG_LABEL),
+            .desc = "exists",
         },
         {
             .t = FIND_LABEL,

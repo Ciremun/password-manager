@@ -69,7 +69,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
     if (f.version.exists)
     {
-        printf("password-manager %s\n", PM_VERSION);
+        fprintf(stdout, "%s %s\n", "password-manager", PM_VERSION);
         return 0;
     }
 
@@ -219,7 +219,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
 #ifdef _WIN32
                 copy_to_clipboard(password, password_length + 1);
 #else
-                printf("%s", password);
+                fprintf(stdout, "%s", password);
 #endif
             }
             free(password);
@@ -246,7 +246,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         {
             if (f.help.exists)
             {
-                printf("%s\n", help_s);
+                fprintf(stdout, "%s\n", help_s);
                 return 0;
             }
 
