@@ -264,7 +264,7 @@ void test_data_file_flag_valid(Test *t)
 
 void test_data_file_flag_with_generate_password(Test *t)
 {
-    test(run_test_in_fork(&t->a) == 1, t);
+    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
 }
 
 void test_label_flag_empty(Test *t)
