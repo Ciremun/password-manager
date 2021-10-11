@@ -53,17 +53,23 @@ void input_key(uint8_t **aes_key, Flags *f)
 void decrypt_and_print(uint8_t *aes_key, Flags *f)
 {
     pull_changes(sync_remote_url);
-    size_t idx = 0;
-    char **lines = NULL;
-    read_file(data_store, &lines, &idx);
+    char *str = read_file_as_str(data_store, NULL);
     input_key(&aes_key, f);
     int did_print = 0;
-    for (size_t i = 0; i < idx; i++)
+    size_t i = 0;
+    while (str[i] != '\0')
     {
+        size_t start = i;
+        do
+        {
+            i++;
+        } while(str[i] != '\n' && str[i] != '\0');
+        size_t line_length = i - start - 1;
+        if (str[i] == '\n')
+            i++;
         size_t decsize = 0;
-        size_t line_length = strlen(lines[i]);
         unsigned char *decoded_data
-            = b64_decode_ex(lines[i], line_length, &decsize);
+            = b64_decode_ex(str + start, line_length, &decsize);
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
         if (f->find_label.value != NULL)
@@ -135,11 +141,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     {
         error(stdout, "%s\n", "info: no results");
     }
-    for (size_t it = 0; it < idx; it++)
-    {
-        free(lines[it]);
-    }
-    free(lines);
+    free(str);
     free(aes_key);
     exit(0);
 }
