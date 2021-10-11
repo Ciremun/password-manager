@@ -9,9 +9,12 @@ password-manager/
 *.ilk
 *.pdb
 *.idb
+callgrind*
+output*.svg
 
 .data
 .pm_data
-pm
+pm-*
 test
 nobuild
+gprof2dot.py
