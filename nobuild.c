@@ -44,16 +44,16 @@
 #define CC "unknown"
 #endif // CC
 
-#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) ||           \
-    defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__)              \
+    || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
 #define ARCH "x86_64"
 #elif defined(__aarch64__)
 #define ARCH "aarch64"
 #elif defined(__arm__) || defined(_M_ARM)
 #define ARCH "arm"
-#elif defined(i386) || defined(__i386) || defined(__i386__) ||                 \
-    defined(__i386__) || defined(__i486__) || defined(__i586__) ||             \
-    defined(__i686__) || defined(_M_IX86) || defined(_X86_)
+#elif defined(i386) || defined(__i386) || defined(__i386__)                    \
+    || defined(__i386__) || defined(__i486__) || defined(__i586__)             \
+    || defined(__i686__) || defined(_M_IX86) || defined(_X86_)
 #define ARCH "intel_x86"
 #else
 #define ARCH "unknown"
@@ -71,7 +71,7 @@
         if (PATH_EXISTS(PATH))                                                 \
         {                                                                      \
             PANIC("file '" PATH "' will be overwritten by tests, please move " \
-                                "it outside of the root directory");           \
+                  "it outside of the root directory");                         \
         }                                                                      \
     } while (0)
 
@@ -117,8 +117,8 @@ int main(int argc, char **argv)
         }
         else
         {
-            CMD(cc, "-DTEST", "tests/test.c", SOURCES,
-                FLAGS, "-lUser32", "-otest", "-O0", "-ggdb");
+            CMD(cc, "-DTEST", "tests/test.c", SOURCES, FLAGS, "-lUser32",
+                "-otest", "-O0", "-ggdb");
         }
         CMD(".\\test.exe");
     }
@@ -126,12 +126,13 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
-            CMD("cl.exe", "/Fe" OUTPUT, "/O2", "src/main.c", SOURCES, MSVC_FLAGS);
+            CMD("cl.exe", "/Fe" OUTPUT, "/O2", "src/main.c", SOURCES,
+                MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, "src/main.c", SOURCES, FLAGS,
-                "-lUser32", "-o" OUTPUT, "-O3");
+            CMD(cc, "src/main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
+                "-O3");
         }
     }
 #else
@@ -141,14 +142,13 @@ int main(int argc, char **argv)
     }
     if (test)
     {
-        CMD(cc, "-DTEST", "tests/test.c", SOURCES, FLAGS,
-            "-otest", "-O0", "-ggdb");
+        CMD(cc, "-DTEST", "tests/test.c", SOURCES, FLAGS, "-otest", "-O0",
+            "-ggdb");
         CMD("./test");
     }
     else
     {
-        CMD(cc, "src/main.c", SOURCES, FLAGS,
-            "-o" OUTPUT, "-O3");
+        CMD(cc, "src/main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
     }
 #endif
     return 0;

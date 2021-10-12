@@ -46,8 +46,8 @@ int verify_remote(const char *remote)
     fclose(f);
     for (size_t i = 0; i + 5 < size; ++i)
     {
-        if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l' &&
-            str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
+        if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l'
+            && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
         {
             i += 6;
             size_t start = i;
@@ -102,8 +102,8 @@ LPSTR GetLastErrorAsString(void)
     LPSTR messageBuffer = NULL;
 
     FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,         // DWORD   dwFlags,
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM
+            | FORMAT_MESSAGE_IGNORE_INSERTS,       // DWORD   dwFlags,
         NULL,                                      // LPCVOID lpSource,
         errorMessageId,                            // DWORD   dwMessageId,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // DWORD   dwLanguageId,
@@ -266,9 +266,9 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
     PROCESS_INFORMATION piProcInfo;
     ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
 
-    BOOL bSuccess =
-        CreateProcess(NULL, (char *)cstr_array_join(" ", cmd.line), NULL, NULL,
-                      TRUE, 0, NULL, NULL, &siStartInfo, &piProcInfo);
+    BOOL bSuccess
+        = CreateProcess(NULL, (char *)cstr_array_join(" ", cmd.line), NULL,
+                        NULL, TRUE, 0, NULL, NULL, &siStartInfo, &piProcInfo);
 
     if (!bSuccess)
     {

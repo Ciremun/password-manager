@@ -24,22 +24,22 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->data;
         else if (!f->label.exists && is_flag(argv[i], "-l", "--label"))
             flag = &f->label;
-        else if (!f->find_label.exists &&
-                 is_flag(argv[i], "-fl", "--find-label"))
+        else if (!f->find_label.exists
+                 && is_flag(argv[i], "-fl", "--find-label"))
             flag = &f->find_label;
         else if (!f->help.exists && is_flag(argv[i], "-h", "--help"))
             flag = &f->help;
         else if (!f->data_file.exists && is_flag(argv[i], "-df", "--data-file"))
             flag = &f->data_file;
-        else if (!f->generate_password.exists &&
-                 is_flag(argv[i], "-gp", "--generate-password"))
+        else if (!f->generate_password.exists
+                 && is_flag(argv[i], "-gp", "--generate-password"))
             flag = &f->generate_password;
         else if (!f->key.exists && is_flag(argv[i], "-k", "--key"))
             flag = &f->key;
         else if (!f->copy.exists && is_flag(argv[i], "-c", "--copy"))
             flag = &f->copy;
-        else if (!f->delete_label.exists &&
-                 is_flag(argv[i], "-dl", "--delete-label"))
+        else if (!f->delete_label.exists
+                 && is_flag(argv[i], "-dl", "--delete-label"))
             flag = &f->delete_label;
         else if (!f->input.exists && is_flag(argv[i], "-i", "--input"))
             flag = &f->input;
