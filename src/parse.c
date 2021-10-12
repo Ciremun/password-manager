@@ -5,8 +5,8 @@
 #include "version.h"
 
 extern struct AES_ctx ctx;
-extern const char *help_s;
-extern char *data_store;
+extern const char *   help_s;
+extern char *         data_store;
 
 char *sync_remote_url = 0;
 
@@ -102,7 +102,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             return 1;
         }
         size_t aes_key_length = 0;
-        char *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
+        char * key_file = read_file_as_str(f.key_file.value, &aes_key_length);
         if (aes_key_length > 128)
         {
             aes_key = malloc(aes_key_length);
@@ -168,7 +168,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
 
             size_t nch = 0;
-            char *data = read_file_as_str(f.data_file.value, &nch);
+            char * data = read_file_as_str(f.data_file.value, &nch);
 
             if (f.label.exists)
             {

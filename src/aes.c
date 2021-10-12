@@ -162,7 +162,7 @@ static uint8_t getSBoxValue(uint8_t num)
 static void KeyExpansion(uint8_t *RoundKey, const uint8_t *Key)
 {
     unsigned i, j, k;
-    uint8_t tempa[4]; // Used for the column/row operations
+    uint8_t  tempa[4]; // Used for the column/row operations
 
     // The first round key is the key itself.
     for (i = 0; i < Nk; ++i)
@@ -372,7 +372,7 @@ static uint8_t getSBoxInvert(uint8_t num)
 // inexperienced. Please use the references to gain more information.
 static void InvMixColumns(state_t *state)
 {
-    int i;
+    int     i;
     uint8_t a, b, c, d;
     for (i = 0; i < 4; ++i)
     {
@@ -523,7 +523,7 @@ static void XorWithIv(uint8_t *buf, const uint8_t *Iv)
 
 void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t *buf, size_t length)
 {
-    size_t i;
+    size_t   i;
     uint8_t *Iv = ctx->Iv;
     for (i = 0; i < length; i += AES_BLOCKLEN)
     {
@@ -538,7 +538,7 @@ void AES_CBC_encrypt_buffer(struct AES_ctx *ctx, uint8_t *buf, size_t length)
 
 void AES_CBC_decrypt_buffer(struct AES_ctx *ctx, uint8_t *buf, size_t length)
 {
-    size_t i;
+    size_t  i;
     uint8_t storeNextIv[AES_BLOCKLEN];
     for (i = 0; i < length; i += AES_BLOCKLEN)
     {
@@ -561,7 +561,7 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx *ctx, uint8_t *buf, size_t length)
     uint8_t buffer[AES_BLOCKLEN];
 
     size_t i;
-    int bi;
+    int    bi;
     for (i = 0, bi = AES_BLOCKLEN; i < length; ++i, ++bi)
     {
         if (bi == AES_BLOCKLEN) /* we need to regen xor compliment in buffer */

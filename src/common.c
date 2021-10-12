@@ -2,9 +2,9 @@
 #include "sync.h"
 
 extern struct AES_ctx ctx;
-extern uint8_t aes_iv[];
-extern char *data_store;
-extern char *sync_remote_url;
+extern uint8_t        aes_iv[];
+extern char *         data_store;
+extern char *         sync_remote_url;
 
 const char *help_s
     = "\n"
@@ -51,7 +51,7 @@ int copy_to_clipboard(const char *password, size_t size)
 
 int getpasswd(char **pw)
 {
-    int c = 0;
+    int    c = 0;
     size_t idx = 0;
     size_t buf = 128;
 
@@ -143,7 +143,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     pull_changes(sync_remote_url);
     char *str = read_file_as_str(data_store, NULL);
     input_key(&aes_key, f);
-    int did_print = 0;
+    int    did_print = 0;
     size_t i = 0;
     while (str[i] != '\0')
     {
@@ -155,16 +155,16 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
         size_t line_length = i - start - 1;
         if (str[i] == '\n')
             i++;
-        size_t decsize = 0;
+        size_t         decsize = 0;
         unsigned char *decoded_data
             = b64_decode_ex(str + start, line_length, &decsize);
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
         if (f->find_label.value != NULL)
         {
-            char *label = malloc(decsize);
+            char * label = malloc(decsize);
             size_t label_length = 0;
-            int found_label = 0;
+            int    found_label = 0;
             for (size_t j = 0; j < decsize; j++)
             {
                 if (decoded_data[j] == ' ')
@@ -254,8 +254,8 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
 
     for (size_t i = 0; i < idx; i++)
     {
-        size_t decsize = 0;
-        size_t line_length = strlen(lines[i]);
+        size_t         decsize = 0;
+        size_t         line_length = strlen(lines[i]);
         unsigned char *decoded_data
             = b64_decode_ex(lines[i], line_length, &decsize);
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
@@ -359,7 +359,7 @@ void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
 ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 {
     size_t pos;
-    int c;
+    int    c;
 
     if (lineptr == NULL || stream == NULL || n == NULL)
     {
@@ -416,12 +416,12 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 
 void read_file(const char *fp, char ***lines, size_t *lsize)
 {
-    char *ln = NULL;
-    size_t n = 0;
+    char *  ln = NULL;
+    size_t  n = 0;
     ssize_t nchr = 0;
-    size_t idx = 0;
-    size_t lmax = LMAX;
-    FILE *f = NULL;
+    size_t  idx = 0;
+    size_t  lmax = LMAX;
+    FILE *  f = NULL;
 
     if (!(f = fopen(fp, "rb")))
     {
@@ -472,7 +472,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
     }
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
-    char *str = (char *)malloc(size + 1);
+    char * str = (char *)malloc(size + 1);
     fseek(f, 0, SEEK_SET);
     fread(str, 1, size, f);
     str[size] = '\0';
@@ -496,7 +496,7 @@ void write_file(const char *fp, const char *mode, void *data)
 
 void delete_label(char *find_label, uint8_t *aes_key)
 {
-    int found_label = 0;
+    int    found_label = 0;
     size_t total_lines = 0;
     char **lines = NULL;
     read_file(data_store, &lines, &total_lines);
@@ -504,7 +504,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
     size_t line_idx = 0;
     for (; line_idx < total_lines; ++line_idx)
     {
-        size_t decoded_line_length = 0;
+        size_t         decoded_line_length = 0;
         unsigned char *decoded_line
             = decode_line(lines[line_idx], aes_key, &decoded_line_length);
         char *label = malloc(decoded_line_length * sizeof(decoded_line) + 1);

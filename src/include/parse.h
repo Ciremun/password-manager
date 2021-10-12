@@ -4,7 +4,7 @@
 typedef struct
 {
     char *value;
-    int exists;
+    int   exists;
 } Flag;
 
 typedef struct
@@ -23,8 +23,8 @@ typedef struct
     Flag version;
 } Flags;
 
-int is_flag(char *arg, char *s, char *l);
+int  is_flag(char *arg, char *s, char *l);
 void parse_flags(Flags *f, int argc, char **argv);
-int run(uint8_t *aes_key, int argc, char **argv);
+int  run(uint8_t *aes_key, int argc, char **argv);
 
 #endif // PARSE_H

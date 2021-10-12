@@ -11,7 +11,7 @@
 #include <unistd.h>
 #define PATH_SEP "/"
 typedef pid_t Pid;
-typedef int Fd;
+typedef int   Fd;
 #else
 #define WIN32_MEAN_AND_LEAN
 #include "windows.h"
@@ -66,9 +66,9 @@ struct dirent
 
 typedef struct DIR DIR;
 
-DIR *opendir(const char *dirpath);
+DIR *          opendir(const char *dirpath);
 struct dirent *readdir(DIR *dirp);
-int closedir(DIR *dirp);
+int            closedir(DIR *dirp);
 
 #endif // MINIRENT_H_
 // minirent.h HEADER END ////////////////////////////////////////
@@ -102,13 +102,13 @@ Cstr cstr_no_ext(Cstr path);
 
 typedef struct
 {
-    Cstr *elems;
+    Cstr * elems;
     size_t count;
 } Cstr_Array;
 
 Cstr_Array cstr_array_make(Cstr first, ...);
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr);
-Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs);
+Cstr       cstr_array_join(Cstr sep, Cstr_Array cstrs);
 
 #define JOIN(sep, ...) cstr_array_join(sep, cstr_array_make(__VA_ARGS__, NULL))
 #define CONCAT(...) JOIN("", __VA_ARGS__)
@@ -127,17 +127,17 @@ typedef struct
     Cstr_Array line;
 } Cmd;
 
-Fd fd_open_for_read(Cstr path);
-Fd fd_open_for_write(Cstr path);
+Fd   fd_open_for_read(Cstr path);
+Fd   fd_open_for_write(Cstr path);
 void fd_close(Fd fd);
 void pid_wait(Pid pid);
 Cstr cmd_show(Cmd cmd);
-Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
+Pid  cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
 void cmd_run_sync(Cmd cmd);
 
 typedef struct
 {
-    Cmd *elems;
+    Cmd *  elems;
     size_t count;
 } Cmd_Array;
 
@@ -163,7 +163,7 @@ typedef enum
 typedef struct
 {
     Chain_Token_Type type;
-    Cstr_Array args;
+    Cstr_Array       args;
 } Chain_Token;
 
 // TODO(#17): IN and OUT are already taken by WinAPI
@@ -188,14 +188,14 @@ typedef struct
 // TODO(#20): pipes do not allow redirecting stderr
 typedef struct
 {
-    Cstr input_filepath;
+    Cstr      input_filepath;
     Cmd_Array cmds;
-    Cstr output_filepath;
+    Cstr      output_filepath;
 } Chain;
 
 Chain chain_build_from_tokens(Chain_Token first, ...);
-void chain_run_sync(Chain chain);
-void chain_echo(Chain chain);
+void  chain_run_sync(Chain chain);
+void  chain_echo(Chain chain);
 
 // TODO(#15): PIPE does not report where exactly a syntactic error has happened
 #define CHAIN(...)                                                             \
@@ -308,7 +308,7 @@ void path_rm(Cstr path);
     do                                                                         \
     {                                                                          \
         struct dirent *dp = NULL;                                              \
-        DIR *dir = opendir(dirpath);                                           \
+        DIR *          dir = opendir(dirpath);                                 \
         if (dir == NULL)                                                       \
         {                                                                      \
             PANIC("could not open directory %s: %s", dirpath,                  \
@@ -379,9 +379,9 @@ LPSTR GetLastErrorAsString(void)
 // minirent.h IMPLEMENTATION BEGIN ////////////////////////////////////////
 struct DIR
 {
-    HANDLE hFind;
+    HANDLE          hFind;
     WIN32_FIND_DATA data;
-    struct dirent *dirent;
+    struct dirent * dirent;
 };
 
 DIR *opendir(const char *dirpath)
@@ -548,14 +548,14 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t sep_len = strlen(sep);
-    size_t len = 0;
+    size_t       len = 0;
     for (size_t i = 0; i < cstrs.count; ++i)
     {
         len += strlen(cstrs.elems[i]);
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char *result = malloc(sizeof(char) * result_len);
+    char *       result = malloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -820,7 +820,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
 
 void cmd_run_sync(Cmd cmd) { pid_wait(cmd_run_async(cmd, NULL, NULL)); }
 
-static void chain_set_input_output_files_or_count_cmds(Chain *chain,
+static void chain_set_input_output_files_or_count_cmds(Chain *     chain,
                                                        Chain_Token token)
 {
     switch (token.type)
@@ -917,8 +917,8 @@ void chain_run_sync(Chain chain)
     Pid *cpids = malloc(sizeof(Pid) * chain.cmds.count);
 
     Pipe pip = {0};
-    Fd fdin = 0;
-    Fd *fdprev = NULL;
+    Fd   fdin = 0;
+    Fd * fdprev = NULL;
 
     if (chain.input_filepath)
     {
@@ -945,7 +945,7 @@ void chain_run_sync(Chain chain)
     }
 
     {
-        Fd fdout = 0;
+        Fd  fdout = 0;
         Fd *fdnext = NULL;
 
         if (chain.output_filepath)
@@ -1070,7 +1070,7 @@ void path_mkdirs(Cstr_Array path)
         len += strlen(path.elems[i]);
     }
 
-    size_t seps_count = path.count - 1;
+    size_t       seps_count = path.count - 1;
     const size_t sep_len = strlen(PATH_SEP);
 
     char *result = malloc(len + seps_count * sep_len + 1);

@@ -26,7 +26,7 @@ int verify_remote(const char *remote)
     if (remote == NULL)
         return 0;
     const char *git_config = ".git/config";
-    FILE *f = fopen(git_config, "rb");
+    FILE *      f = fopen(git_config, "rb");
     if (f == NULL)
     {
         error(stderr, "error opening file %s\n", git_config);
@@ -34,7 +34,7 @@ int verify_remote(const char *remote)
     }
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
-    char *str = (char *)malloc(size + 1);
+    char * str = (char *)malloc(size + 1);
     if (str == NULL)
     {
         error(stderr, "%s:%d memory allocation failed\n", __FILE__, __LINE__);
@@ -173,14 +173,14 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t sep_len = strlen(sep);
-    size_t len = 0;
+    size_t       len = 0;
     for (size_t i = 0; i < cstrs.count; ++i)
     {
         len += strlen(cstrs.elems[i]);
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char *result = malloc(sizeof(char) * result_len);
+    char *       result = malloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));

@@ -42,23 +42,23 @@ typedef enum
 typedef struct
 {
     uint8_t *key;
-    int argc;
-    char **argv;
+    int      argc;
+    char **  argv;
 } Args;
 
 struct Test
 {
     void (*f)(Test *t);
-    Args a;
-    Type t;
+    Args        a;
+    Type        t;
     const char *desc;
 };
 
 struct AES_ctx ctx;
-uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+uint8_t        aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
                     0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
-char *data_store = 0;
-size_t failed_tests_count = 0;
+char *         data_store = 0;
+size_t         failed_tests_count = 0;
 
 void reset_key(Args *a)
 {
@@ -114,7 +114,7 @@ int run_test_in_fork(Args *a)
 int run_test_in_fork(Args *a)
 {
     pid_t pid = 0;
-    int status;
+    int   status;
 
     pid = fork();
     if (pid == 0)
@@ -135,7 +135,7 @@ int run_test_in_fork(Args *a)
 Args fill_args(char *first, ...)
 {
     va_list args_list;
-    Args args = {.argc = 2, .argv = calloc(1, 256)};
+    Args    args = {.argc = 2, .argv = calloc(1, 256)};
     args.argv[1] = strdup(first);
 
     va_start(args_list, first);
@@ -207,7 +207,7 @@ void test_data_flag_valid(Test *t)
     char **lines = NULL;
     read_file(DEFAULT_DATA_STORE, &lines, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data
         = b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
 
@@ -250,9 +250,9 @@ void test_data_file_flag_empty_file(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     reset_key(&t->a);
@@ -280,9 +280,9 @@ void test_data_file_flag_valid(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     reset_key(&t->a);
@@ -315,9 +315,9 @@ void test_label_flag_valid(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     reset_key(&t->a);
@@ -339,9 +339,9 @@ void test_delete_label_flag_doesnt_exist(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     reset_key(&t->a);
@@ -363,9 +363,9 @@ void test_delete_label_flag_exists(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     reset_key(&t->a);
@@ -397,9 +397,9 @@ void test_generate_password_flag_empty(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     test(decsize >= 15, t);
@@ -414,9 +414,9 @@ void test_generate_password_flag_128_chars(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     reset_key(&t->a);
@@ -442,9 +442,9 @@ void test_key_flag_valid(Test *t)
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
@@ -463,9 +463,9 @@ void test_key_flag_invalid(Test *t)
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
@@ -505,9 +505,9 @@ void test_key_file_flag_valid(Test *t)
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
@@ -536,9 +536,9 @@ void test_key_file_flag_invalid(Test *t)
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char * data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
@@ -570,9 +570,9 @@ void test_input_flag_write_data(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char *data = read_file_as_str(TEST_DATA_FILE, &nch);
+    char * data = read_file_as_str(TEST_DATA_FILE, &nch);
 
-    size_t decsize = 0;
+    size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     reset_key(&t->a);
