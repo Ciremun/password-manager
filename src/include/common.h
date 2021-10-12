@@ -12,9 +12,15 @@ typedef SSIZE_T ssize_t;
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <conio.h>
+#include <windows.h>
+#else
+#include <termios.h>
+#endif // _WIN32
+
 #include "aes.h"
 #include "b64.h"
-
 #include "parse.h"
 
 #define LMAX 255
@@ -33,7 +39,7 @@ void exit_test_case(int exit_code);
 int copy_to_clipboard(const char *password, size_t size);
 #endif
 
-size_t getpasswd(char **pw);
+int getpasswd(char **pw);
 ssize_t getline(char **lineptr, size_t *n, FILE *stream);
 void read_file(const char *fp, char ***lines, size_t *lsize);
 char *read_file_as_str(const char *fp, size_t *nch);

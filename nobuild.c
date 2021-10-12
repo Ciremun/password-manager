@@ -113,11 +113,11 @@ int main(int argc, char **argv)
         if (msvc)
         {
             CMD("cl.exe", "/DTEST", "/DEBUG", "/ZI", "/Fetest.exe", "/Od",
-                "tests/test.c", "src/platform/win.c", SOURCES, MSVC_FLAGS);
+                "tests/test.c", SOURCES, MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, "-DTEST", "tests/test.c", "src/platform/win.c", SOURCES,
+            CMD(cc, "-DTEST", "tests/test.c", SOURCES,
                 FLAGS, "-lUser32", "-otest", "-O0", "-ggdb");
         }
         CMD(".\\test.exe");
@@ -126,12 +126,11 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
-            CMD("cl.exe", "/Fe" OUTPUT, "/O2", "src/main.c",
-                "src/platform/win.c", SOURCES, MSVC_FLAGS);
+            CMD("cl.exe", "/Fe" OUTPUT, "/O2", "src/main.c", SOURCES, MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, "src/main.c", "src/platform/win.c", SOURCES, FLAGS,
+            CMD(cc, "src/main.c", SOURCES, FLAGS,
                 "-lUser32", "-o" OUTPUT, "-O3");
         }
     }
@@ -142,13 +141,13 @@ int main(int argc, char **argv)
     }
     if (test)
     {
-        CMD(cc, "-DTEST", "tests/test.c", "src/platform/unix.c", SOURCES, FLAGS,
+        CMD(cc, "-DTEST", "tests/test.c", SOURCES, FLAGS,
             "-otest", "-O0", "-ggdb");
         CMD("./test");
     }
     else
     {
-        CMD(cc, "src/main.c", "src/platform/unix.c", SOURCES, FLAGS,
+        CMD(cc, "src/main.c", SOURCES, FLAGS,
             "-o" OUTPUT, "-O3");
     }
 #endif

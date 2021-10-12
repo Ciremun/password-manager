@@ -31,6 +31,94 @@ const char *help_s
       "-v  --version                 display version\n"
       "-h  --help                    display help\n\n";
 
+#ifdef _WIN32
+int copy_to_clipboard(const char *password, size_t size)
+{
+    if (!OpenClipboard(0))
+    {
+        return 0;
+    }
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
+    memcpy(GlobalLock(hMem), password, size);
+    GlobalUnlock(hMem);
+    EmptyClipboard();
+    SetClipboardData(CF_TEXT, hMem);
+    CloseClipboard();
+    GlobalFree(hMem);
+    return 1;
+}
+#endif // _WIN32
+
+int getpasswd(char **pw)
+{
+    int c = 0;
+    size_t idx = 0;
+    size_t buf = 128;
+
+    if (*pw == NULL)
+    {
+        *pw = calloc(1, buf);
+    }
+
+#ifndef _WIN32
+    struct termios old_kbd_mode;
+    struct termios new_kbd_mode;
+
+    if (tcgetattr(0, &old_kbd_mode))
+    {
+        error(stderr, "%s() error: tcgetattr failed\n", __func__);
+        return 0;
+    }
+    memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
+
+    new_kbd_mode.c_lflag &= ~(ICANON | ECHO);
+    new_kbd_mode.c_cc[VTIME] = 0;
+    new_kbd_mode.c_cc[VMIN] = 1;
+    if (tcsetattr(0, TCSANOW, &new_kbd_mode))
+    {
+        error(stderr, "%s() error: tcsetattr failed\n", __func__);
+        return 0;
+    }
+#endif // _WIN32
+    while (
+#ifdef _WIN32
+        (c = _getch()) != 13
+#else
+        (c = fgetc(stdin)) != '\n'
+#endif // _WIN32
+        && c != EOF)
+    {
+        if (c != 127)
+        {
+            if (idx >= buf)
+            {
+                buf *= 2;
+                *pw = realloc(*pw, buf);
+            }
+            (*pw)[idx++] = c;
+        }
+        else if (idx > 0)
+        {
+            (*pw)[--idx] = 0;
+        }
+    }
+
+    if (buf != 128)
+    {
+        *pw = realloc(*pw, idx);
+    }
+
+#ifndef _WIN32
+    if (tcsetattr(0, TCSANOW, &old_kbd_mode))
+    {
+        error(stderr, "%s() error: tcsetattr failed\n", __func__);
+        return 0;
+    }
+#endif // _WIN32
+
+    return 1;
+}
+
 void input_key(uint8_t **aes_key, Flags *f)
 {
     if (!*aes_key)
@@ -63,7 +151,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
         do
         {
             i++;
-        } while(str[i] != '\n' && str[i] != '\0');
+        } while (str[i] != '\n' && str[i] != '\0');
         size_t line_length = i - start - 1;
         if (str[i] == '\n')
             i++;
