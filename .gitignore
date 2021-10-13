@@ -10,8 +10,8 @@ cov-int/
 *.ilk
 *.pdb
 *.idb
+*.svg
 callgrind*
-output*.svg
 
 .data
 .pm_data
