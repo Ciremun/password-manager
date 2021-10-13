@@ -25,7 +25,6 @@ typedef SSIZE_T ssize_t;
 
 #define LMAX 255
 #define DEFAULT_DATA_STORE ".pm_data"
-#define CONFIG_STORE ".pm_cfg"
 
 #ifdef TEST
 void exit_test_case(int exit_code);
