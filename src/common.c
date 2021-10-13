@@ -242,10 +242,9 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
 
     FILE *fh = NULL;
     if (!(fh = fopen(data_store, "rb")))
-    {
         fh = fopen(data_store, "a");
-    }
-    fclose(fh);
+    if (fh)
+        fclose(fh);
 
     read_file(data_store, &lines, &idx);
     input_key(&aes_key, f);
