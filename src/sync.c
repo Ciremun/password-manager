@@ -21,6 +21,17 @@
 
 #include "sync.h"
 
+#ifndef _WIN32
+Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
+{
+    Cstr_Array result = {.count = cstrs.count + 1};
+    result.elems = malloc(sizeof(result.elems[0]) * result.count);
+    memcpy(result.elems, cstrs.elems, cstrs.count * sizeof(result.elems[0]));
+    result.elems[cstrs.count] = cstr;
+    return result;
+}
+#endif // _WIN32
+
 int verify_remote(const char *remote)
 {
     if (remote == NULL)
