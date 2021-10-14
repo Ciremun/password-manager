@@ -111,8 +111,8 @@ Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr);
 Cstr       cstr_array_join(Cstr sep, Cstr_Array cstrs);
 
 #define JOIN(sep, ...) cstr_array_join(sep, cstr_array_make(__VA_ARGS__, NULL))
-#define CONCAT(...) JOIN("", __VA_ARGS__)
-#define PATH(...) JOIN(PATH_SEP, __VA_ARGS__)
+#define CONCAT(...)    JOIN("", __VA_ARGS__)
+#define PATH(...)      JOIN(PATH_SEP, __VA_ARGS__)
 
 typedef struct
 {

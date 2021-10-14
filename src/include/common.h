@@ -23,7 +23,7 @@ typedef SSIZE_T ssize_t;
 #include "b64.h"
 #include "parse.h"
 
-#define LMAX 255
+#define LMAX               255
 #define DEFAULT_DATA_STORE ".pm_data"
 
 #ifdef TEST

@@ -11,11 +11,11 @@
 #define SOURCES                                                                \
     "src/aes.c", "src/b64.c", "src/common.c", "src/parse.c", "src/rand.c",     \
         "src/sync.c"
-#define FLAGS "-Wall", "-Wextra", "-pedantic", "-Isrc/include/"
+#define FLAGS      "-Wall", "-Wextra", "-pedantic", "-Isrc/include/"
 #define MSVC_FLAGS "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
 
 #define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+#define STR(x)        STR_HELPER(x)
 
 #if defined(_WIN32)
 #define OS "win"
