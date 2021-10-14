@@ -12,8 +12,8 @@
 #include "common.h"
 #undef exit
 
-#define AES_KEY                         "test_aes_key!@#$%^&*();'"
 #define ARGS(...)                       fill_args(__VA_ARGS__, NULL)
+#define AES_KEY                         "test_aes_key!@#$%^&*();'"
 #define TEST_DATA_FILE                  "test.txt"
 #define TEST_KEY_FILE                   "key_file.txt"
 #define TEST_KEY_FLAG_DATA              "test_key_flag_data"
