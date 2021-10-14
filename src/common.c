@@ -509,11 +509,9 @@ void delete_label(char *find_label, uint8_t *aes_key)
         size_t         decoded_line_length = 0;
         unsigned char *decoded_line
             = decode_line(lines[line_idx], aes_key, &decoded_line_length);
-        char *label = malloc(decoded_line_length * sizeof(decoded_line) + 1);
-        if (!label)
-        {
+        char *label = calloc(1, decoded_line_length * sizeof(decoded_line) + 1);
+        if (label == NULL)
             PANIC_MALLOC();
-        }
         for (size_t j = 0; j < decoded_line_length; j++)
         {
             if (decoded_line[j] == ' ')
