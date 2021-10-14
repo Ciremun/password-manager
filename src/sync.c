@@ -38,6 +38,7 @@ int verify_remote(const char *remote)
     if (str == NULL)
     {
         error(stderr, "%s:%d memory allocation failed\n", __FILE__, __LINE__);
+        fclose(f);
         return 0;
     }
     fseek(f, 0, SEEK_SET);
