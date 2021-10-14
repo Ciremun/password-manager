@@ -3,8 +3,8 @@
 
 extern struct AES_ctx ctx;
 extern uint8_t        aes_iv[];
-extern char *         data_store;
-extern char *         sync_remote_url;
+extern char          *data_store;
+extern char          *sync_remote_url;
 
 const char *help_s
     = "\n"
@@ -162,7 +162,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
         if (f->find_label.value != NULL)
         {
-            char * label = malloc(decsize);
+            char  *label = malloc(decsize);
             size_t label_length = 0;
             int    found_label = 0;
             for (size_t j = 0; j < decsize; j++)
@@ -260,7 +260,10 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-        char *label = malloc(decsize);
+        char *label = calloc(1, decsize);
+        if (label == NULL)
+            PANIC_MALLOC();
+
         for (size_t j = 0; j < decsize; j++)
         {
             if (decoded_data[j] == ' ')
@@ -415,12 +418,12 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 
 void read_file(const char *fp, char ***lines, size_t *lsize)
 {
-    char *  ln = NULL;
+    char   *ln = NULL;
     size_t  n = 0;
     ssize_t nchr = 0;
     size_t  idx = 0;
     size_t  lmax = LMAX;
-    FILE *  f = NULL;
+    FILE   *f = NULL;
 
     if (!(f = fopen(fp, "rb")))
     {
@@ -471,7 +474,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
     }
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
-    char * str = (char *)malloc(size + 1);
+    char  *str = (char *)malloc(size + 1);
     fseek(f, 0, SEEK_SET);
     fread(str, 1, size, f);
     str[size] = '\0';

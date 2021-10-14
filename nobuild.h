@@ -66,7 +66,7 @@ struct dirent
 
 typedef struct DIR DIR;
 
-DIR *          opendir(const char *dirpath);
+DIR           *opendir(const char *dirpath);
 struct dirent *readdir(DIR *dirp);
 int            closedir(DIR *dirp);
 
@@ -102,7 +102,7 @@ Cstr cstr_no_ext(Cstr path);
 
 typedef struct
 {
-    Cstr * elems;
+    Cstr  *elems;
     size_t count;
 } Cstr_Array;
 
@@ -137,7 +137,7 @@ void cmd_run_sync(Cmd cmd);
 
 typedef struct
 {
-    Cmd *  elems;
+    Cmd   *elems;
     size_t count;
 } Cmd_Array;
 
@@ -308,7 +308,7 @@ void path_rm(Cstr path);
     do                                                                         \
     {                                                                          \
         struct dirent *dp = NULL;                                              \
-        DIR *          dir = opendir(dirpath);                                 \
+        DIR           *dir = opendir(dirpath);                                 \
         if (dir == NULL)                                                       \
         {                                                                      \
             PANIC("could not open directory %s: %s", dirpath,                  \
@@ -381,7 +381,7 @@ struct DIR
 {
     HANDLE          hFind;
     WIN32_FIND_DATA data;
-    struct dirent * dirent;
+    struct dirent  *dirent;
 };
 
 DIR *opendir(const char *dirpath)
@@ -555,7 +555,7 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char *       result = malloc(sizeof(char) * result_len);
+    char        *result = malloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -820,7 +820,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
 
 void cmd_run_sync(Cmd cmd) { pid_wait(cmd_run_async(cmd, NULL, NULL)); }
 
-static void chain_set_input_output_files_or_count_cmds(Chain *     chain,
+static void chain_set_input_output_files_or_count_cmds(Chain      *chain,
                                                        Chain_Token token)
 {
     switch (token.type)
@@ -918,7 +918,7 @@ void chain_run_sync(Chain chain)
 
     Pipe pip = {0};
     Fd   fdin = 0;
-    Fd * fdprev = NULL;
+    Fd  *fdprev = NULL;
 
     if (chain.input_filepath)
     {
@@ -1111,14 +1111,12 @@ void path_rm(Cstr path)
 {
     if (IS_DIR(path))
     {
-        FOREACH_FILE_IN_DIR(file, path,
-                            {
-                                if (strcmp(file, ".") != 0
-                                    && strcmp(file, "..") != 0)
-                                {
-                                    path_rm(PATH(path, file));
-                                }
-                            });
+        FOREACH_FILE_IN_DIR(file, path, {
+            if (strcmp(file, ".") != 0 && strcmp(file, "..") != 0)
+            {
+                path_rm(PATH(path, file));
+            }
+        });
 
         if (rmdir(path) < 0)
         {

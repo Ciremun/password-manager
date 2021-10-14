@@ -47,7 +47,7 @@ typedef char *Cstr;
 
 typedef struct
 {
-    Cstr * elems;
+    Cstr  *elems;
     size_t count;
 } Cstr_Array;
 
