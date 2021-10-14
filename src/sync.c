@@ -232,9 +232,9 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
     PROCESS_INFORMATION piProcInfo;
     ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
 
-    BOOL bSuccess
-        = CreateProcess(NULL, (char *)cstr_array_join(" ", cmd.line), NULL,
-                        NULL, TRUE, 0, NULL, NULL, &siStartInfo, &piProcInfo);
+    char *lpCommandLine = (char *)cstr_array_join(" ", cmd.line);
+    BOOL  bSuccess = CreateProcess(NULL, lpCommandLine, NULL, NULL, TRUE, 0,
+                                   NULL, NULL, &siStartInfo, &piProcInfo);
 
     if (!bSuccess)
     {
@@ -243,6 +243,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
     }
 
     CloseHandle(piProcInfo.hThread);
+    free(lpCommandLine);
 
     return piProcInfo.hProcess;
 #else
