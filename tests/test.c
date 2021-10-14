@@ -12,15 +12,26 @@
 #include "common.h"
 #undef exit
 
-#define AES_KEY "test_aes_key!@#$%^&*();'"
-#define ARGS(...) fill_args(__VA_ARGS__, NULL)
-#define TEST_DATA_FILE "test.txt"
-#define TEST_KEY_FILE "key_file.txt"
-#define TEST_KEY_FLAG_DATA "test_key_flag_data"
-#define TEST_KEY_FILE_FLAG_DATA "test_key_file_flag_data"
-#define TEST_INPUT_FLAG_DATA "test_input_flag_data"
-#define TEST_LABEL_FLAG_LABEL "test_label_flag_label"
-#define TEST_LABEL_FLAG_DATA "test_label_flag_data"
+#define AES_KEY                         "test_aes_key!@#$%^&*();'"
+#define ARGS(...)                       fill_args(__VA_ARGS__, NULL)
+#define TEST_DATA_FILE                  "test.txt"
+#define TEST_KEY_FILE                   "key_file.txt"
+#define TEST_KEY_FLAG_DATA              "test_key_flag_data"
+#define TEST_KEY_FILE_FLAG_DATA         "test_key_file_flag_data"
+#define TEST_INPUT_FLAG_DATA            "test_input_flag_data"
+#define TEST_LABEL_FLAG_LABEL           "test_label_flag_label"
+#define TEST_LABEL_FLAG_DATA            "test_label_flag_data"
+#define NO_FLAG_CATEGORY_NAME           "No Flag"
+#define DATA_CATEGORY_NAME              "Data"
+#define DATA_FILE_CATEGORY_NAME         "Data File"
+#define LABEL_CATEGORY_NAME             "Label"
+#define FIND_LABEL_CATEGORY_NAME        "Find Label"
+#define DELETE_LABEL_CATEGORY_NAME      "Delete Label"
+#define GENERATE_PASSWORD_CATEGORY_NAME "Generate Password"
+#define COPY_CATEGORY_NAME              "Copy To Clipboard"
+#define KEY_CATEGORY_NAME               "Key"
+#define KEY_FILE_CATEGORY_NAME          "Key File"
+#define INPUT_CATEGORY_NAME             "Input"
 
 typedef struct Test Test;
 
@@ -41,6 +52,12 @@ typedef enum
 
 typedef struct
 {
+    Type        t;
+    const char *n;
+} Category;
+
+typedef struct
+{
     uint8_t *key;
     int      argc;
     char **  argv;
@@ -48,10 +65,10 @@ typedef struct
 
 struct Test
 {
-    void (*f)(Test *t);
     Args        a;
-    Type        t;
-    const char *desc;
+    Category    c;
+    const char *d;
+    void (*f)(Test *t);
 };
 
 struct AES_ctx ctx;
@@ -64,37 +81,6 @@ void reset_key(Args *a)
 {
     a->key = calloc(1, 128);
     memcpy(a->key, AES_KEY, sizeof(AES_KEY));
-}
-
-const char *test_catergory(Type t)
-{
-    switch (t)
-    {
-    case NO_FLAG:
-        return "No Flag";
-    case DATA:
-        return "Data";
-    case DATA_FILE:
-        return "Data File";
-    case LABEL:
-        return "Label";
-    case FIND_LABEL:
-        return "Find Label";
-    case DELETE_LABEL:
-        return "Delete Label";
-    case GENERATE_PASSWORD:
-        return "Generate Password";
-    case COPY_TO_CLIPBOARD:
-        return "Copy To Clipboard";
-    case KEY:
-        return "Key";
-    case KEY_FILE:
-        return "Key File";
-    case INPUT_:
-        return "Input";
-    default:
-        exit(1);
-    }
 }
 
 #ifdef _WIN32
@@ -168,12 +154,10 @@ void test(int check, Test *t)
     if (!check)
     {
         failed_tests_count++;
-        fprintf(stderr, "%-17.17s %-25.25s FAIL\n", test_catergory(t->t),
-                t->desc);
+        fprintf(stderr, "%-17.17s %-25.25s FAIL\n", t->c.n, t->d);
     }
     else
-        fprintf(stderr, "%-17.17s %-25.25s PASS\n", test_catergory(t->t),
-                t->desc);
+        fprintf(stderr, "%-17.17s %-25.25s PASS\n", t->c.n, t->d);
 }
 
 void test_no_flag_pm_data_exists(Test *t)
@@ -597,178 +581,178 @@ int main(void)
 {
     Test tests[] = {
         {
-            .t = NO_FLAG,
+            .a = {.argc = 1, .argv = calloc(1, 256)},
+            .c = {.t = NO_FLAG, .n = NO_FLAG_CATEGORY_NAME},
+            .d = ".pm_data exists",
             .f = test_no_flag_pm_data_exists,
-            .a = {.argc = 1, .argv = calloc(1, 256)},
-            .desc = ".pm_data exists",
         },
         {
-            .t = NO_FLAG,
+            .a = {.argc = 1, .argv = calloc(1, 256)},
+            .c = {.t = NO_FLAG, .n = NO_FLAG_CATEGORY_NAME},
+            .d = ".pm_data doesn't exist",
             .f = test_no_flag_pm_data_doesnt_exist,
-            .a = {.argc = 1, .argv = calloc(1, 256)},
-            .desc = ".pm_data doesn't exist",
         },
         {
-            .t = DATA,
-            .f = test_data_flag_empty,
             .a = ARGS("-d"),
-            .desc = "empty",
+            .c = {.t = DATA, .n = DATA_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_data_flag_empty,
         },
         {
-            .t = DATA,
-            .f = test_data_flag_valid,
             .a = ARGS("-d", "data"),
-            .desc = "valid",
+            .c = {.t = DATA, .n = DATA_CATEGORY_NAME},
+            .d = "valid",
+            .f = test_data_flag_valid,
         },
         {
-            .t = DATA,
-            .f = test_data_flag_with_generate_password,
             .a = ARGS("-d", "data", "-gp"),
-            .desc = "with generate password",
+            .c = {.t = DATA, .n = DATA_CATEGORY_NAME},
+            .d = "with generate password",
+            .f = test_data_flag_with_generate_password,
         },
         {
-            .t = DATA,
-            .f = test_data_flag_with_data_file,
             .a = ARGS("-d", "data", "-df", TEST_DATA_FILE),
-            .desc = "with data file",
+            .c = {.t = DATA, .n = DATA_CATEGORY_NAME},
+            .d = "with data file",
+            .f = test_data_flag_with_data_file,
         },
         {
-            .t = DATA_FILE,
-            .f = test_data_file_flag_empty,
             .a = ARGS("-df"),
-            .desc = "empty",
+            .c = {.t = DATA_FILE, .n = DATA_FILE_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_data_file_flag_empty,
         },
         {
-            .t = DATA_FILE,
+            .a = ARGS("-df", TEST_DATA_FILE),
+            .c = {.t = DATA_FILE, .n = DATA_FILE_CATEGORY_NAME},
+            .d = "empty file",
             .f = test_data_file_flag_empty_file,
-            .a = ARGS("-df", TEST_DATA_FILE),
-            .desc = "empty file",
         },
         {
-            .t = DATA_FILE,
+            .a = ARGS("-df", TEST_DATA_FILE),
+            .c = {.t = DATA_FILE, .n = DATA_FILE_CATEGORY_NAME},
+            .d = "non-existent",
             .f = test_data_file_flag_non_existent_file,
-            .a = ARGS("-df", TEST_DATA_FILE),
-            .desc = "non-existent",
         },
         {
-            .t = DATA_FILE,
+            .a = ARGS("-df", TEST_DATA_FILE),
+            .c = {.t = DATA_FILE, .n = DATA_FILE_CATEGORY_NAME},
+            .d = "valid",
             .f = test_data_file_flag_valid,
-            .a = ARGS("-df", TEST_DATA_FILE),
-            .desc = "valid",
         },
         {
-            .t = DATA_FILE,
-            .f = test_data_file_flag_with_generate_password,
             .a = ARGS("-df", TEST_DATA_FILE, "-gp"),
-            .desc = "with generate password",
+            .c = {.t = DATA_FILE, .n = DATA_FILE_CATEGORY_NAME},
+            .d = "with generate password",
+            .f = test_data_file_flag_with_generate_password,
         },
         {
-            .t = LABEL,
-            .f = test_label_flag_empty,
             .a = ARGS("-l"),
-            .desc = "empty",
+            .c = {.t = LABEL, .n = LABEL_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_label_flag_empty,
         },
         {
-            .t = LABEL,
-            .f = test_label_flag_valid,
             .a = ARGS("-l", TEST_LABEL_FLAG_LABEL, "-d", TEST_LABEL_FLAG_DATA),
-            .desc = "valid",
+            .c = {.t = LABEL, .n = LABEL_CATEGORY_NAME},
+            .d = "valid",
+            .f = test_label_flag_valid,
         },
         {
-            .t = DELETE_LABEL,
-            .f = test_delete_label_flag_doesnt_exist,
             .a = ARGS("-dl", "label_that_doesnt_exist"),
-            .desc = "doesn't exist",
+            .c = {.t = DELETE_LABEL, .n = DELETE_LABEL_CATEGORY_NAME},
+            .d = "doesn't exist",
+            .f = test_delete_label_flag_doesnt_exist,
         },
         {
-            .t = DELETE_LABEL,
-            .f = test_delete_label_flag_exists,
             .a = ARGS("-dl", TEST_LABEL_FLAG_LABEL),
-            .desc = "exists",
+            .c = {.t = DELETE_LABEL, .n = DELETE_LABEL_CATEGORY_NAME},
+            .d = "exists",
+            .f = test_delete_label_flag_exists,
         },
         {
-            .t = FIND_LABEL,
-            .f = test_find_label_flag_empty,
             .a = ARGS("-fl"),
-            .desc = "empty",
+            .c = {.t = FIND_LABEL, .n = FIND_LABEL_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_find_label_flag_empty,
         },
         {
-            .t = DELETE_LABEL,
-            .f = test_delete_label_flag_empty,
             .a = ARGS("-dl"),
-            .desc = "empty",
+            .c = {.t = DELETE_LABEL, .n = DELETE_LABEL_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_delete_label_flag_empty,
         },
         {
-            .t = GENERATE_PASSWORD,
-            .f = test_generate_password_flag_empty,
             .a = ARGS("-gp"),
-            .desc = "empty",
+            .c = {.t = GENERATE_PASSWORD, .n = GENERATE_PASSWORD_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_generate_password_flag_empty,
         },
         {
-            .t = GENERATE_PASSWORD,
-            .f = test_generate_password_flag_128_chars,
             .a = ARGS("-gp", "128"),
-            .desc = "128 chars",
+            .c = {.t = GENERATE_PASSWORD, .n = GENERATE_PASSWORD_CATEGORY_NAME},
+            .d = "128 chars",
+            .f = test_generate_password_flag_128_chars,
         },
         {
-            .t = KEY,
-            .f = test_key_flag_empty,
             .a = ARGS("-k"),
-            .desc = "empty",
+            .c = {.t = KEY, .n = KEY_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_key_flag_empty,
         },
         {
-            .t = KEY,
-            .f = test_key_flag_valid,
             .a = ARGS("-k", AES_KEY, "-d", TEST_KEY_FLAG_DATA),
-            .desc = "valid",
+            .c = {.t = KEY, .n = KEY_CATEGORY_NAME},
+            .d = "valid",
+            .f = test_key_flag_valid,
         },
         {
-            .t = KEY,
-            .f = test_key_flag_invalid,
             .a = ARGS("-k", "invalid_key", "-d", TEST_KEY_FLAG_DATA),
-            .desc = "invalid",
+            .c = {.t = KEY, .n = KEY_CATEGORY_NAME},
+            .d = "invalid",
+            .f = test_key_flag_invalid,
         },
         {
-            .t = KEY_FILE,
-            .f = test_key_file_flag_empty,
             .a = ARGS("-kf"),
-            .desc = "empty",
+            .c = {.t = KEY_FILE, .n = KEY_FILE_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_key_file_flag_empty,
         },
         {
-            .t = KEY_FILE,
-            .f = test_key_file_flag_non_existent_file,
             .a = ARGS("-kf", "keyfile_that_doesnt_exist.txt"),
-            .desc = "non-existent",
+            .c = {.t = KEY_FILE, .n = KEY_FILE_CATEGORY_NAME},
+            .d = "non-existent",
+            .f = test_key_file_flag_non_existent_file,
         },
         {
-            .t = KEY_FILE,
+            .a = ARGS("-kf", TEST_KEY_FILE, "-d", TEST_KEY_FILE_FLAG_DATA),
+            .c = {.t = KEY_FILE, .n = KEY_FILE_CATEGORY_NAME},
+            .d = "valid",
             .f = test_key_file_flag_valid,
-            .a = ARGS("-kf", TEST_KEY_FILE, "-d", TEST_KEY_FILE_FLAG_DATA),
-            .desc = "valid",
         },
         {
-            .t = KEY_FILE,
+            .a = ARGS("-kf", TEST_KEY_FILE, "-d", TEST_KEY_FILE_FLAG_DATA),
+            .c = {.t = KEY_FILE, .n = KEY_FILE_CATEGORY_NAME},
+            .d = "invalid",
             .f = test_key_file_flag_invalid,
-            .a = ARGS("-kf", TEST_KEY_FILE, "-d", TEST_KEY_FILE_FLAG_DATA),
-            .desc = "invalid",
         },
         {
-            .t = INPUT_,
-            .f = test_input_flag_empty,
             .a = ARGS("-i"),
-            .desc = "empty",
+            .c = {.t = INPUT_, .n = INPUT_CATEGORY_NAME},
+            .d = "empty",
+            .f = test_input_flag_empty,
         },
         {
-            .t = INPUT_,
-            .f = test_input_flag_non_existent_file,
             .a = ARGS("-i", "input_file_that_doesnt_exist.txt"),
-            .desc = "non-existent",
+            .c = {.t = INPUT_, .n = INPUT_CATEGORY_NAME},
+            .d = "non-existent",
+            .f = test_input_flag_non_existent_file,
         },
         {
-            .t = INPUT_,
-            .f = test_input_flag_write_data,
             .a = ARGS("-i", TEST_DATA_FILE, "-d", TEST_INPUT_FLAG_DATA),
-            .desc = "write data",
+            .c = {.t = INPUT_, .n = INPUT_CATEGORY_NAME},
+            .d = "write data",
+            .f = test_input_flag_write_data,
         },
     };
 
