@@ -91,40 +91,6 @@ int upload_changes(const char *remote)
     return 0;
 }
 
-#ifdef _WIN32
-LPSTR GetLastErrorAsString(void)
-{
-    // https://stackoverflow.com/questions/1387064/how-to-get-the-error-message-from-the-error-code-returned-by-getlasterror
-
-    DWORD errorMessageId = GetLastError();
-    assert(errorMessageId != 0);
-
-    LPSTR messageBuffer = NULL;
-
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM
-            | FORMAT_MESSAGE_IGNORE_INSERTS,       // DWORD   dwFlags,
-        NULL,                                      // LPCVOID lpSource,
-        errorMessageId,                            // DWORD   dwMessageId,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // DWORD   dwLanguageId,
-        (LPSTR)&messageBuffer,                     // LPTSTR  lpBuffer,
-        0,                                         // DWORD   nSize,
-        NULL                                       // va_list *Arguments
-    );
-
-    return messageBuffer;
-}
-#endif // _WIN32
-
-Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
-{
-    Cstr_Array result = {.count = cstrs.count + 1};
-    result.elems = malloc(sizeof(result.elems[0]) * result.count);
-    memcpy(result.elems, cstrs.elems, cstrs.count * sizeof(result.elems[0]));
-    result.elems[cstrs.count] = cstr;
-    return result;
-}
-
 Cstr_Array cstr_array_make(Cstr first, ...)
 {
     Cstr_Array result = {0};
@@ -215,7 +181,7 @@ int pid_wait(Pid pid)
 
     if (result == WAIT_FAILED)
     {
-        PANIC("could not wait on child process: %s", GetLastErrorAsString());
+        PANIC("could not wait on child process: %lu", GetLastError());
     }
 
     DWORD exit_status;
@@ -272,8 +238,8 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
 
     if (!bSuccess)
     {
-        PANIC("Could not create child process %s: %s\n", cmd_show(cmd),
-              GetLastErrorAsString());
+        PANIC("Could not create child process %s: %lu\n", cmd_show(cmd),
+              GetLastError());
     }
 
     CloseHandle(piProcInfo.hThread);
