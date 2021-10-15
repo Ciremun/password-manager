@@ -113,12 +113,12 @@ int main(int argc, char **argv)
         if (msvc)
         {
             CMD("cl.exe", "/DTEST", "/DEBUG", "/ZI", "/Fetest.exe", "/Od",
-                "tests/test.c", SOURCES, MSVC_FLAGS);
+                "test.c", SOURCES, MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, "-DTEST", "tests/test.c", SOURCES, FLAGS, "-lUser32",
-                "-otest", "-O0", "-ggdb");
+            CMD(cc, "-DTEST", "test.c", SOURCES, FLAGS, "-lUser32", "-otest",
+                "-O0", "-ggdb");
         }
         CMD(".\\test.exe");
     }
@@ -142,8 +142,7 @@ int main(int argc, char **argv)
     }
     if (test)
     {
-        CMD(cc, "-DTEST", "tests/test.c", SOURCES, FLAGS, "-otest", "-O0",
-            "-ggdb");
+        CMD(cc, "-DTEST", "test.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
         CMD("./test");
     }
     else
