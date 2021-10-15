@@ -83,13 +83,11 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
         size_t aes_key_length = strlen(f.key.value) + 1;
         if (aes_key_length > 128)
-        {
             aes_key = malloc(aes_key_length);
-        }
         else
-        {
             aes_key = calloc(1, 128);
-        }
+        if (aes_key == NULL)
+            PANIC_MALLOC();
         memcpy(aes_key, f.key.value, aes_key_length);
     }
 
@@ -104,13 +102,11 @@ int run(uint8_t *aes_key, int argc, char **argv)
         size_t aes_key_length = 0;
         char  *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
         if (aes_key_length > 128)
-        {
             aes_key = malloc(aes_key_length);
-        }
         else
-        {
             aes_key = calloc(1, 128);
-        }
+        if (aes_key == NULL)
+            PANIC_MALLOC();
         memcpy(aes_key, key_file, aes_key_length);
         free(key_file);
     }

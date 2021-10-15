@@ -170,7 +170,9 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
         if (f->find_label.value != NULL)
         {
-            char  *label = malloc(decsize);
+            char *label = malloc(decsize);
+            if (label == NULL)
+                PANIC_MALLOC();
             size_t label_length = 0;
             int    found_label = 0;
             for (size_t j = 0; j < decsize; j++)
@@ -485,6 +487,8 @@ char *read_file_as_str(const char *fp, size_t *nch)
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
     char  *str = (char *)malloc(size + 1);
+    if (str == NULL)
+        PANIC_MALLOC();
     fseek(f, 0, SEEK_SET);
     fread(str, 1, size, f);
     str[size] = '\0';
