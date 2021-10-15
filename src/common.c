@@ -93,7 +93,10 @@ int getpasswd(char **pw)
             if (idx >= buf)
             {
                 buf *= 2;
-                *pw = realloc(*pw, buf);
+                void *tmp = realloc(*pw, buf);
+                if (tmp == NULL)
+                    PANIC_MALLOC();
+                *pw = tmp;
             }
             (*pw)[idx++] = c;
         }
@@ -105,7 +108,10 @@ int getpasswd(char **pw)
 
     if (buf != 128)
     {
-        *pw = realloc(*pw, idx);
+        void *tmp = realloc(*pw, idx);
+        if (tmp == NULL)
+            PANIC_MALLOC();
+        *pw = tmp;
     }
 
 #ifndef _WIN32
@@ -145,7 +151,8 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     input_key(&aes_key, f);
     int    did_print = 0;
     size_t i = 0;
-    size_t query_len = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
+    size_t query_len
+        = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
     while (str[i] != '\0')
     {
         size_t start = i;
@@ -276,7 +283,12 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         {
             memset(decoded_data, 0, decsize);
 
-            decoded_data = realloc(decoded_data, label_and_data_size);
+            {
+                void *tmp = realloc(decoded_data, label_and_data_size);
+                if (tmp == NULL)
+                    PANIC_MALLOC();
+                decoded_data = tmp;
+            }
             snprintf((char *)decoded_data, sizeof(char) * label_and_data_size,
                      "%s %s", label, data);
 
@@ -294,7 +306,12 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             }
 
             memset(lines[i], 0, line_length);
-            lines[i] = realloc(lines[i], strlen(encoded_data) + 1);
+            {
+                void *tmp = realloc(lines[i], strlen(encoded_data) + 1);
+                if (tmp == NULL)
+                    PANIC_MALLOC();
+                lines[i] = tmp;
+            }
             strcpy(lines[i], encoded_data);
 
             for (size_t k = 0; k < idx; k++)
@@ -395,9 +412,7 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream)
             }
             char *new_ptr = realloc(*lineptr, new_size);
             if (new_ptr == NULL)
-            {
                 return -1;
-            }
             *n = new_size;
             *lineptr = new_ptr;
         }
@@ -445,11 +460,8 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
         if (idx == lmax)
         {
             char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
-            if (!tmp)
-            {
-                error(stderr, "%s\n", "error: memory allocation failed");
-                exit(1);
-            }
+            if (tmp == NULL)
+                PANIC_MALLOC();
             *lines = tmp;
             lmax *= 2;
         }
