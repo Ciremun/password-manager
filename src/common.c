@@ -210,11 +210,9 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
                     = (const char *)decoded_data + label_length + 1;
 #ifdef _WIN32
                 if (copy_to_clipboard(password, strlen(password) + 1))
-                {
-#else
+#endif // _WIN32
                 {
                     fprintf(stdout, "%s", password);
-#endif
                     did_print = 1;
                     free(decoded_data);
                     break;
