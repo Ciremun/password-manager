@@ -145,6 +145,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     input_key(&aes_key, f);
     int    did_print = 0;
     size_t i = 0;
+    size_t query_len = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
     while (str[i] != '\0')
     {
         size_t start = i;
@@ -182,7 +183,6 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
                 free(decoded_data);
                 continue;
             }
-            size_t query_len = strlen(f->find_label.value);
             if (query_len > label_length)
             {
                 free(label);
