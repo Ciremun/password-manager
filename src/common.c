@@ -57,7 +57,10 @@ int getpasswd(char **pw)
 
     if (*pw == NULL)
     {
-        *pw = calloc(1, buf);
+        void *tmp = calloc(1, buf);
+        if (tmp == NULL)
+            PANIC_MALLOC();
+        *pw = tmp;
     }
 
 #ifndef _WIN32
