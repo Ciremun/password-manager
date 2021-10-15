@@ -1,5 +1,7 @@
 # password-manager
 
+<a href="https://scan.coverity.com/projects/ciremun-password-manager"><img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/23849/badge.svg"/></a>
+
 ## Usage
 
     ./pm [flags]                  read or write data
