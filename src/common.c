@@ -69,7 +69,7 @@ int getpasswd(char **pw)
 
     if (tcgetattr(0, &old_kbd_mode))
     {
-        error(stderr, "%s() error: tcgetattr failed\n", __func__);
+        error("%s tcgetattr failed\n", __func__);
         return 0;
     }
     memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
@@ -79,7 +79,7 @@ int getpasswd(char **pw)
     new_kbd_mode.c_cc[VMIN] = 1;
     if (tcsetattr(0, TCSANOW, &new_kbd_mode))
     {
-        error(stderr, "%s() error: tcsetattr failed\n", __func__);
+        error("%s tcsetattr failed\n", __func__);
         return 0;
     }
 #endif // _WIN32
@@ -120,7 +120,7 @@ int getpasswd(char **pw)
 #ifndef _WIN32
     if (tcsetattr(0, TCSANOW, &old_kbd_mode))
     {
-        error(stderr, "%s() error: tcsetattr failed\n", __func__);
+        error("%s tcsetattr failed\n", __func__);
         return 0;
     }
 #endif // _WIN32
@@ -237,7 +237,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     }
     if (!did_print)
     {
-        error(stdout, "%s\n", "info: no results");
+        info("%s\n", "no results");
     }
     free(str);
     free(aes_key);
@@ -306,7 +306,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             FILE *f = fopen(data_store, "wb");
             if (f == NULL)
             {
-                error(stderr, "error opening file %s\n", data_store);
+                error("opening file %s\n", data_store);
                 exit(1);
             }
 
@@ -445,13 +445,13 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
 
     if (!(f = fopen(fp, "rb")))
     {
-        error(stderr, "error opening file %s\n", fp);
+        error("opening file %s\n", fp);
         exit(1);
     }
 
     if (!(*lines = calloc(LMAX, sizeof(**lines))))
     {
-        error(stderr, "%s\n", "error: memory allocation failed");
+        error("%s\n", "memory allocation failed");
         exit(1);
     }
 
@@ -484,7 +484,7 @@ char *read_file_as_str(const char *fp, size_t *nch)
     FILE *f = fopen(fp, "rb");
     if (f == NULL)
     {
-        error(stderr, "error opening file %s\n", fp);
+        error("opening file %s\n", fp);
         exit(1);
     }
     fseek(f, 0, SEEK_END);
@@ -506,7 +506,7 @@ void write_file(const char *fp, const char *mode, void *data)
     FILE *f = fopen(fp, mode);
     if (f == NULL)
     {
-        error(stderr, "error opening file %s\n", fp);
+        error("opening file %s\n", fp);
         exit(1);
     }
     fprintf(f, "%s\n", (char *)data);
@@ -571,7 +571,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
     }
     else
     {
-        error(stdout, "%s\n", "info: no results");
+        info("%s\n", "no results");
     }
     for (size_t i = 0; i < total_lines; i++)
     {

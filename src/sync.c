@@ -40,7 +40,7 @@ int verify_remote(const char *remote)
     FILE       *f = fopen(git_config, "rb");
     if (f == NULL)
     {
-        error(stderr, "error opening file %s\n", git_config);
+        error("error opening file %s\n", git_config);
         return 0;
     }
     fseek(f, 0, SEEK_END);
@@ -48,7 +48,7 @@ int verify_remote(const char *remote)
     char  *str = (char *)malloc(size + 1);
     if (str == NULL)
     {
-        error(stderr, "%s:%d memory allocation failed\n", __FILE__, __LINE__);
+        error("%s:%d memory allocation failed\n", __FILE__, __LINE__);
         fclose(f);
         return 0;
     }
@@ -77,9 +77,7 @@ int verify_remote(const char *remote)
             break;
         }
     }
-    error(stderr,
-          "error: provided remote (%s) doesn't match origin in .git/config\n",
-          remote);
+    error("provided remote (%s) doesn't match origin in .git/config\n", remote);
     free(str);
     return 0;
 }

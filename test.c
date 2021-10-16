@@ -480,7 +480,7 @@ void test_key_file_flag_valid(Test *t)
     FILE *f = fopen(TEST_KEY_FILE, "wb");
     if (f == NULL)
     {
-        error(stderr, "error opening file %s\n", TEST_KEY_FILE);
+        error("opening file %s\n", TEST_KEY_FILE);
         exit(1);
     }
     fprintf(f, "%s", AES_KEY);
@@ -511,7 +511,7 @@ void test_key_file_flag_invalid(Test *t)
     FILE *f = fopen(TEST_KEY_FILE, "wb");
     if (f == NULL)
     {
-        error(stderr, "error opening file %s\n", TEST_KEY_FILE);
+        error("opening file %s\n", TEST_KEY_FILE);
         exit(1);
     }
     fprintf(f, "%s", "invalid_key");

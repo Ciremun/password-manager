@@ -77,7 +77,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.key.value)
         {
-            error(stderr, "%s\n", "error: key flag called without key value");
+            error("%s\n", "key flag called without key value");
             return 1;
         }
 
@@ -95,8 +95,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.key_file.value)
         {
-            error(stderr, "%s\n",
-                  "error: key-file flag called without filename");
+            error("%s\n", "key-file flag called without filename");
             return 1;
         }
         size_t aes_key_length = 0;
@@ -119,7 +118,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         else
         {
-            error(stderr, "%s\n", "error: input flag called without file path");
+            error("%s\n", "input flag called without file path");
             return 1;
         }
     }
@@ -137,8 +136,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         else
         {
-            error(stderr, "%s\n",
-                  "error: delete-label flag called without label");
+            error("%s\n", "delete-label flag called without label");
             return 1;
         }
     }
@@ -150,16 +148,14 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
             if (f.generate_password.exists)
             {
-                error(stderr, "%s\n",
-                      "error: can't combine data-file and "
-                      "generate-password flags");
+                error("%s\n", "can't combine data-file and "
+                              "generate-password flags");
                 return 1;
             }
 
             if (!f.data_file.value)
             {
-                error(stderr, "%s\n",
-                      "error: data-file flag called without filename");
+                error("%s\n", "data-file flag called without filename");
                 return 1;
             }
 
@@ -190,7 +186,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 }
                 else if (!(password_length <= INT_MAX))
                 {
-                    error(stderr, "error: length %s is out of range 1-%d\n",
+                    error("length %s is out of range 1-%d\n",
                           f.generate_password.value, INT_MAX);
                     return 1;
                 }
@@ -223,17 +219,15 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         if (f.label.exists)
         {
-            error(stderr, "%s\n",
-                  "error: label flag called without --data or --data-file or "
-                  "--generate-password");
+            error("%s\n", "label flag called without --data or --data-file or "
+                          "--generate-password");
             return 1;
         }
         if (f.find_label.exists)
         {
             if (!f.find_label.value)
             {
-                error(stderr, "%s\n",
-                      "error: find label flag called without name");
+                error("%s\n", "find label flag called without name");
                 return 1;
             }
             decrypt_and_print(aes_key, &f);
@@ -252,20 +246,19 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
     if (!f.data.value)
     {
-        error(stderr, "%s\n", "error: data flag called without data");
+        error("%s\n", "data flag called without data");
         return 1;
     }
 
     if (f.data_file.exists)
     {
-        error(stderr, "%s\n", "error: can't combine data and data-file flags");
+        error("%s\n", "can't combine data and data-file flags");
         return 1;
     }
 
     if (f.generate_password.exists)
     {
-        error(stderr, "%s\n",
-              "error: can't combine data and generate-password flags");
+        error("%s\n", "can't combine data and generate-password flags");
         return 1;
     }
 
@@ -273,7 +266,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.label.value)
         {
-            error(stderr, "%s\n", "error: label flag called without name");
+            error("%s\n", "label flag called without name");
             return 1;
         }
         encrypt_and_replace(&f, f.label.value, f.data.value, aes_key);
