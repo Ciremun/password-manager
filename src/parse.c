@@ -67,7 +67,7 @@ void parse_flags(Flags *f, int argc, char **argv)
 int run(uint8_t *aes_key, int argc, char **argv)
 {
     if (!mem_init(&g_mem))
-        PANIC("mem_init failed!\n");
+        PANIC("%s\n", "mem_init failed!");
 
     sync_remote_url = getenv("PM_SYNC_REMOTE_URL");
 
@@ -285,7 +285,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     }
 
     if (!mem_free(&g_mem))
-        PANIC("mem_free failed!\n");
+        PANIC("%s\n", "mem_free failed!");
 
     return 0;
 }
