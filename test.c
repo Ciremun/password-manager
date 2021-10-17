@@ -21,6 +21,7 @@
 #define TEST_INPUT_FLAG_DATA            "test_input_flag_data"
 #define TEST_LABEL_FLAG_LABEL           "test_label_flag_label"
 #define TEST_LABEL_FLAG_DATA            "test_label_flag_data"
+#define TEST_LABEL_FLAG_REPLACE_DATA    "test_label_flag_replace_data"
 #define NO_FLAG_CATEGORY_NAME           "No Flag"
 #define DATA_CATEGORY_NAME              "Data"
 #define DATA_FILE_CATEGORY_NAME         "Data File"
@@ -318,6 +319,30 @@ void test_label_flag_valid(Test *t)
     free(data);
 }
 
+void test_label_flag_replace(Test *t)
+{
+    assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
+
+    size_t nch = 0;
+    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+
+    size_t         decsize = 0;
+    unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
+
+    reset_key(&t->a);
+    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+
+    test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_REPLACE_DATA,
+                (char *)decoded_data)
+             == 0,
+         t);
+
+    free(t->a.key);
+    free(decoded_data);
+    free(data);
+}
+
 void test_delete_label_flag_doesnt_exist(Test *t)
 {
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
@@ -332,7 +357,7 @@ void test_delete_label_flag_doesnt_exist(Test *t)
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_DATA,
+    test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_REPLACE_DATA,
                 (char *)decoded_data)
              == 0,
          t);
@@ -657,6 +682,13 @@ int main(void)
             .c = {.t = LABEL, .n = LABEL_CATEGORY_NAME},
             .d = "valid",
             .f = test_label_flag_valid,
+        },
+        {
+            .a = ARGS("-l", TEST_LABEL_FLAG_LABEL, "-d",
+                      TEST_LABEL_FLAG_REPLACE_DATA),
+            .c = {.t = LABEL, .n = LABEL_CATEGORY_NAME},
+            .d = "replace",
+            .f = test_label_flag_replace,
         },
         {
             .a = ARGS("-dl", "label_that_doesnt_exist"),
