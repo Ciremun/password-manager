@@ -4,6 +4,10 @@
 #include "rand.h"
 #include "version.h"
 
+#define MEM_IMPLEMENTATION
+#include "mem.h"
+
+Memory g_mem;
 extern struct AES_ctx ctx;
 extern const char    *help_s;
 extern char          *data_store;
@@ -62,6 +66,9 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
+    if (!mem_init(&g_mem))
+        PANIC("mem_init failed!\n");
+
     sync_remote_url = getenv("PM_SYNC_REMOTE_URL");
 
     Flags f = {0};
@@ -83,9 +90,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
         size_t aes_key_length = strlen(f.key.value) + 1;
         if (aes_key_length > 128)
-            aes_key = malloc(aes_key_length);
+            aes_key = mem_alloc(&g_mem, aes_key_length);
         else
-            aes_key = calloc(1, 128);
+            aes_key = mem_alloc(&g_mem, 128);
         if (aes_key == NULL)
             PANIC_MALLOC();
         memcpy(aes_key, f.key.value, aes_key_length);
@@ -276,6 +283,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
         encrypt_and_write(&f, (uint8_t *)f.data.value, aes_key,
                           strlen(f.data.value) + 1);
     }
+
+    if (!mem_free(&g_mem))
+        PANIC("mem_free failed!\n");
 
     return 0;
 }
