@@ -69,7 +69,6 @@ LPSTR GetLastErrorAsString(void);
     {                                                                          \
         Cmd cmd = {.line = cstr_array_make(__VA_ARGS__, NULL)};                \
         return_code_if_error(cmd_run_sync(cmd));                               \
-        free(cmd.line.elems);                                                  \
     } while (0)
 
 int        verify_remote(const char *remote);

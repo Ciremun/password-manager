@@ -40,12 +40,12 @@ int verify_remote(const char *remote)
     FILE       *f = fopen(git_config, "rb");
     if (f == NULL)
     {
-        error("error opening file %s\n", git_config);
+        error("opening file %s\n", git_config);
         return 0;
     }
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
-    char  *str = (char *)malloc(size + 1);
+    char  *str = (char *)alloc(size + 1);
     if (str == NULL)
     {
         error("%s:%d memory allocation failed\n", __FILE__, __LINE__);
@@ -69,7 +69,6 @@ int verify_remote(const char *remote)
                 {
                     if (memcmp(str + start, remote, i - start) == 0)
                     {
-                        free(str);
                         return 1;
                     }
                 }
@@ -78,7 +77,6 @@ int verify_remote(const char *remote)
         }
     }
     error("provided remote (%s) doesn't match origin in .git/config\n", remote);
-    free(str);
     return 0;
 }
 
@@ -121,7 +119,7 @@ Cstr_Array cstr_array_make(Cstr first, ...)
     }
     va_end(args);
 
-    result.elems = malloc(sizeof(result.elems[0]) * result.count);
+    result.elems = alloc(sizeof(result.elems[0]) * result.count);
     if (result.elems == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -156,7 +154,7 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char        *result = malloc(sizeof(char) * result_len);
+    char        *result = alloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -253,7 +251,6 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
     }
 
     CloseHandle(piProcInfo.hThread);
-    free(lpCommandLine);
 
     return piProcInfo.hProcess;
 #else

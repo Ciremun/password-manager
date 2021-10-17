@@ -1,10 +1,12 @@
 #include "common.h"
+#include "mem.h"
 #include "sync.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t        aes_iv[];
 extern char          *data_store;
 extern char          *sync_remote_url;
+extern Memory         g_mem;
 
 const char *help_s
     = "\n"
@@ -56,12 +58,7 @@ int getpasswd(char **pw)
     size_t buf = 128;
 
     if (*pw == NULL)
-    {
-        void *tmp = calloc(1, buf);
-        if (tmp == NULL)
-            PANIC_MALLOC();
-        *pw = tmp;
-    }
+        *pw = alloc(buf);
 
 #ifndef _WIN32
     struct termios old_kbd_mode;
@@ -98,7 +95,7 @@ int getpasswd(char **pw)
                 buf *= 2;
                 void *tmp = realloc(*pw, buf);
                 if (tmp == NULL)
-                    PANIC_MALLOC();
+                    PANIC("%s\n", "memory allocation failed!");
                 *pw = tmp;
             }
             (*pw)[idx++] = c;
@@ -113,7 +110,7 @@ int getpasswd(char **pw)
     {
         void *tmp = realloc(*pw, idx);
         if (tmp == NULL)
-            PANIC_MALLOC();
+            PANIC("%s\n", "memory allocation failed!");
         *pw = tmp;
     }
 
@@ -173,9 +170,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
         if (f->find_label.value != NULL)
         {
-            char *label = malloc(decsize);
-            if (label == NULL)
-                PANIC_MALLOC();
+            char  *label = (char *)alloc(decsize);
             size_t label_length = 0;
             int    found_label = 0;
             for (size_t j = 0; j < decsize; j++)
@@ -191,13 +186,11 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
             }
             if (!found_label)
             {
-                free(label);
                 free(decoded_data);
                 continue;
             }
             if (query_len > label_length)
             {
-                free(label);
                 free(decoded_data);
                 continue;
             }
@@ -210,7 +203,6 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
                     break;
                 }
             }
-            free(label);
             if (do_continue)
             {
                 free(decoded_data);
@@ -239,8 +231,6 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
     {
         info("%s\n", "no results");
     }
-    free(str);
-    exit(0);
 }
 
 void encrypt_and_replace(Flags *f, char *find_label, char *data,
@@ -269,9 +259,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         AES_init_ctx_iv(&ctx, aes_key, aes_iv);
         AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-        char *label = calloc(1, decsize);
-        if (label == NULL)
-            PANIC_MALLOC();
+        char *label = (char *)alloc(decsize);
 
         for (size_t j = 0; j < decsize; j++)
         {
@@ -290,7 +278,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             {
                 void *tmp = realloc(decoded_data, label_and_data_size);
                 if (tmp == NULL)
-                    PANIC_MALLOC();
+                    PANIC("%s\n", "memory allocation failed!");
                 decoded_data = tmp;
             }
             snprintf((char *)decoded_data, sizeof(char) * label_and_data_size,
@@ -304,16 +292,13 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
 
             FILE *f = fopen(data_store, "wb");
             if (f == NULL)
-            {
-                error("opening file %s\n", data_store);
-                exit(1);
-            }
+                PANIC_OPEN_FILE(data_store);
 
             memset(lines[i], 0, line_length);
             {
                 void *tmp = realloc(lines[i], strlen(encoded_data) + 1);
                 if (tmp == NULL)
-                    PANIC_MALLOC();
+                    PANIC("%s\n", "memory allocation failed!");
                 lines[i] = tmp;
             }
             strcpy(lines[i], encoded_data);
@@ -325,7 +310,6 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             }
 
             fclose(f);
-            free(label);
             free(lines);
             free(encoded_data);
             free(decoded_data);
@@ -334,11 +318,10 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             return;
         }
 
-        free(label);
         free(decoded_data);
     }
 
-    uint8_t *label_and_data = malloc(label_and_data_size);
+    uint8_t *label_and_data = alloc(label_and_data_size);
     snprintf((char *)label_and_data, sizeof(uint8_t) * label_and_data_size,
              "%s %s", find_label, data);
 
@@ -349,12 +332,9 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
     write_file(data_store, "a", encoded_data);
 
     for (size_t i = 0; i < idx; i++)
-    {
         free(lines[i]);
-    }
 
     free(lines);
-    free(label_and_data);
     free(encoded_data);
 
     upload_changes(sync_remote_url);
@@ -440,10 +420,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
     FILE   *f = NULL;
 
     if (!(f = fopen(fp, "rb")))
-    {
-        error("opening file %s\n", fp);
-        exit(1);
-    }
+        PANIC_OPEN_FILE(fp);
 
     if (!(*lines = calloc(LMAX, sizeof(**lines))))
     {
@@ -462,15 +439,14 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
         {
             char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
             if (tmp == NULL)
-                PANIC_MALLOC();
+                PANIC("%s\n", "memory allocation failed!");
             *lines = tmp;
             lmax *= 2;
         }
     }
 
     fclose(f);
-    if (ln)
-        free(ln);
+    free(ln);
 
     *lsize = idx;
 }
@@ -479,15 +455,10 @@ char *read_file_as_str(const char *fp, size_t *nch)
 {
     FILE *f = fopen(fp, "rb");
     if (f == NULL)
-    {
-        error("opening file %s\n", fp);
-        exit(1);
-    }
+        PANIC_OPEN_FILE(fp);
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
-    char  *str = (char *)malloc(size + 1);
-    if (str == NULL)
-        PANIC_MALLOC();
+    char  *str = (char *)alloc(size + 1);
     fseek(f, 0, SEEK_SET);
     fread(str, 1, size, f);
     str[size] = '\0';
@@ -501,10 +472,7 @@ void write_file(const char *fp, const char *mode, void *data)
 {
     FILE *f = fopen(fp, mode);
     if (f == NULL)
-    {
-        error("opening file %s\n", fp);
-        exit(1);
-    }
+        PANIC_OPEN_FILE(fp);
     fprintf(f, "%s\n", (char *)data);
     fclose(f);
 }
@@ -522,9 +490,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
         size_t         decoded_line_length = 0;
         unsigned char *decoded_line
             = decode_line(lines[line_idx], aes_key, &decoded_line_length);
-        char *label = calloc(1, decoded_line_length * sizeof(decoded_line) + 1);
-        if (label == NULL)
-            PANIC_MALLOC();
+        char *label = alloc(decoded_line_length * sizeof(decoded_line) + 1);
         for (size_t j = 0; j < decoded_line_length; j++)
         {
             if (decoded_line[j] == ' ')
@@ -538,29 +504,21 @@ void delete_label(char *find_label, uint8_t *aes_key)
         if (strcmp(label, find_label) == 0)
         {
             found_label = 1;
-            free(label);
             break;
         }
-        free(label);
     }
     if (found_label)
     {
         FILE *f = 0;
         if (!(f = fopen(data_store, "wb")))
-        {
             PANIC_OPEN_FILE(data_store);
-        }
         for (size_t i = 0; i < total_lines; ++i)
         {
             if (i == line_idx)
-            {
                 continue;
-            }
             size_t line_length = strlen(lines[i]);
             for (size_t j = 0; j < line_length; ++j)
-            {
                 putc(lines[i][j], f);
-            }
             putc('\n', f);
         }
         fclose(f);
@@ -570,9 +528,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
         info("%s\n", "no results");
     }
     for (size_t i = 0; i < total_lines; i++)
-    {
         free(lines[i]);
-    }
     free(lines);
 
     upload_changes(sync_remote_url);
@@ -586,4 +542,12 @@ unsigned char *decode_line(const char *line, uint8_t *aes_key,
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_line, *decoded_line_length);
     return decoded_line;
+}
+
+void *alloc(u64 size)
+{
+    void *tmp = mem_alloc(&g_mem, size);
+    if (tmp == NULL)
+        PANIC("%s\n", "mem_alloc failed!");
+    return tmp;
 }

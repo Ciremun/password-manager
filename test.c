@@ -72,16 +72,28 @@ struct Test
     void (*f)(Test *t);
 };
 
+extern Memory  g_mem;
 struct AES_ctx ctx;
 uint8_t        aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
                     0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 char          *data_store = 0;
 size_t         failed_tests_count = 0;
 
-void reset_key(Args *a)
+char *read_file_as_str_test(const char *fp, size_t *nch)
 {
-    a->key = calloc(1, 128);
-    memcpy(a->key, AES_KEY, sizeof(AES_KEY));
+    FILE *f = fopen(fp, "rb");
+    if (f == NULL)
+        PANIC_OPEN_FILE(fp);
+    fseek(f, 0, SEEK_END);
+    size_t size = ftell(f);
+    char  *str = (char *)malloc(size + 1);
+    fseek(f, 0, SEEK_SET);
+    fread(str, 1, size, f);
+    str[size] = '\0';
+    fclose(f);
+    if (nch != NULL)
+        *nch = size;
+    return str;
 }
 
 #ifdef _WIN32
@@ -108,6 +120,11 @@ int run_test_in_fork(Args *a)
     {
         run(a->key, a->argc, a->argv);
         exit(0);
+    }
+    else if (pid == -1)
+    {
+        fprintf(stderr, "fork failed: %s\n", strerror(errno));
+        return -1;
     }
     else
     {
@@ -143,6 +160,7 @@ void free_argv(Args *a)
 
 void exit_test_case(int exit_code)
 {
+    mem_free(&g_mem);
 #ifdef _WIN32
     ExitThread(exit_code);
 #else
@@ -166,21 +184,16 @@ void test_no_flag_pm_data_exists(Test *t)
     write_file(DEFAULT_DATA_STORE, "wb", "");
     test(run_test_in_fork(&t->a) == 0, t);
     remove(DEFAULT_DATA_STORE);
-#ifndef _WIN32
-    free(t->a.key);
-#endif // _WIN32
 }
 
 void test_no_flag_pm_data_doesnt_exist(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
-    free(t->a.key);
 }
 
 void test_data_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) != 0, t);
-    free(t->a.key);
     remove(DEFAULT_DATA_STORE);
 }
 
@@ -196,7 +209,6 @@ void test_data_flag_valid(Test *t)
     unsigned char *decoded_data
         = b64_decode_ex(lines[0], strlen(lines[0]), &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
@@ -206,26 +218,24 @@ void test_data_flag_valid(Test *t)
         free(lines[i]);
     free(lines);
     free(decoded_data);
-    free(t->a.key);
+
     remove(DEFAULT_DATA_STORE);
 }
 
 void test_data_flag_with_generate_password(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_data_flag_with_data_file(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_data_file_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
+
     remove(DEFAULT_DATA_STORE);
 }
 
@@ -235,20 +245,17 @@ void test_data_file_flag_empty_file(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp("\n", (char *)decoded_data) == 0, t);
 
-    free(t->a.key);
     free(decoded_data);
-    free(data);
     remove(DEFAULT_DATA_STORE);
     remove(TEST_DATA_FILE);
 }
@@ -256,7 +263,6 @@ void test_data_file_flag_empty_file(Test *t)
 void test_data_file_flag_non_existent_file(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
-    free(t->a.key);
 }
 
 void test_data_file_flag_valid(Test *t)
@@ -265,20 +271,17 @@ void test_data_file_flag_valid(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp("test data file\n", (char *)decoded_data) == 0, t);
 
-    free(t->a.key);
     free(decoded_data);
-    free(data);
     remove(DEFAULT_DATA_STORE);
     remove(TEST_DATA_FILE);
 }
@@ -286,13 +289,11 @@ void test_data_file_flag_valid(Test *t)
 void test_data_file_flag_with_generate_password(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_label_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_label_flag_valid(Test *t)
@@ -300,12 +301,11 @@ void test_label_flag_valid(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
@@ -314,9 +314,7 @@ void test_label_flag_valid(Test *t)
              == 0,
          t);
 
-    free(t->a.key);
     free(decoded_data);
-    free(data);
 }
 
 void test_label_flag_replace(Test *t)
@@ -324,12 +322,11 @@ void test_label_flag_replace(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
@@ -338,9 +335,7 @@ void test_label_flag_replace(Test *t)
              == 0,
          t);
 
-    free(t->a.key);
     free(decoded_data);
-    free(data);
 }
 
 void test_delete_label_flag_doesnt_exist(Test *t)
@@ -348,12 +343,11 @@ void test_delete_label_flag_doesnt_exist(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
@@ -362,9 +356,7 @@ void test_delete_label_flag_doesnt_exist(Test *t)
              == 0,
          t);
 
-    free(t->a.key);
     free(decoded_data);
-    free(data);
 }
 
 void test_delete_label_flag_exists(Test *t)
@@ -372,33 +364,28 @@ void test_delete_label_flag_exists(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp("", (char *)decoded_data) == 0, t);
 
-    free(t->a.key);
     free(decoded_data);
-    free(data);
     remove(DEFAULT_DATA_STORE);
 }
 
 void test_find_label_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_delete_label_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_generate_password_flag_empty(Test *t)
@@ -406,14 +393,13 @@ void test_generate_password_flag_empty(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
     test(decsize >= 15, t);
 
-    free(data);
     free(decoded_data);
     remove(DEFAULT_DATA_STORE);
 }
@@ -423,27 +409,24 @@ void test_generate_password_flag_128_chars(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strlen((char *)decoded_data) == 128, t);
 
     free(decoded_data);
-    free(data);
-    free(t->a.key);
+
     remove(DEFAULT_DATA_STORE);
 }
 
 void test_key_flag_empty(Test *t)
 {
     test(run(NULL, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_key_flag_valid(Test *t)
@@ -451,7 +434,7 @@ void test_key_flag_valid(Test *t)
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -461,9 +444,8 @@ void test_key_flag_valid(Test *t)
 
     test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) == 0, t);
 
-    free(data);
     free(decoded_data);
-    free(t->a.key);
+
     remove(DEFAULT_DATA_STORE);
 }
 
@@ -472,7 +454,7 @@ void test_key_flag_invalid(Test *t)
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -482,39 +464,33 @@ void test_key_flag_invalid(Test *t)
 
     test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) != 0, t);
 
-    free(data);
     free(decoded_data);
-    free(t->a.key);
+
     remove(DEFAULT_DATA_STORE);
 }
 
 void test_key_file_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_key_file_flag_non_existent_file(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
-    free(t->a.key);
 }
 
 void test_key_file_flag_valid(Test *t)
 {
     FILE *f = fopen(TEST_KEY_FILE, "wb");
     if (f == NULL)
-    {
-        error("opening file %s\n", TEST_KEY_FILE);
-        exit(1);
-    }
+        PANIC_OPEN_FILE(TEST_KEY_FILE);
     fprintf(f, "%s", AES_KEY);
     fclose(f);
 
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -525,8 +501,7 @@ void test_key_file_flag_valid(Test *t)
     test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) == 0, t);
 
     free(decoded_data);
-    free(data);
-    free(t->a.key);
+
     remove(TEST_KEY_FILE);
     remove(DEFAULT_DATA_STORE);
 }
@@ -535,17 +510,14 @@ void test_key_file_flag_invalid(Test *t)
 {
     FILE *f = fopen(TEST_KEY_FILE, "wb");
     if (f == NULL)
-    {
-        error("opening file %s\n", TEST_KEY_FILE);
-        exit(1);
-    }
+        PANIC_OPEN_FILE(TEST_KEY_FILE);
     fprintf(f, "%s", "invalid_key");
     fclose(f);
 
     assert(run(NULL, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(DEFAULT_DATA_STORE, &nch);
+    char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
@@ -556,8 +528,7 @@ void test_key_file_flag_invalid(Test *t)
     test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) != 0, t);
 
     free(decoded_data);
-    free(data);
-    free(t->a.key);
+
     remove(TEST_KEY_FILE);
     remove(DEFAULT_DATA_STORE);
 }
@@ -565,13 +536,11 @@ void test_key_file_flag_invalid(Test *t)
 void test_input_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-    free(t->a.key);
 }
 
 void test_input_flag_non_existent_file(Test *t)
 {
     test(run_test_in_fork(&t->a) == 1, t);
-    free(t->a.key);
 }
 
 void test_input_flag_write_data(Test *t)
@@ -579,28 +548,22 @@ void test_input_flag_write_data(Test *t)
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
-    char  *data = read_file_as_str(TEST_DATA_FILE, &nch);
+    char  *data = read_file_as_str_test(TEST_DATA_FILE, &nch);
 
     size_t         decsize = 0;
     unsigned char *decoded_data = b64_decode_ex(data, nch, &decsize);
 
-    reset_key(&t->a);
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp((char *)decoded_data, TEST_INPUT_FLAG_DATA) == 0, t);
 
-    free(data);
     free(decoded_data);
-    free(t->a.key);
+
     remove(TEST_DATA_FILE);
 }
 
-void run_test(Test *t)
-{
-    reset_key(&t->a);
-    t->f(t);
-}
+void run_test(Test *t) { t->f(t); }
 
 int main(void)
 {
@@ -790,13 +753,19 @@ int main(void)
 
     size_t tests_count = sizeof(tests) / sizeof(tests[0]);
 
+    uint8_t *key = calloc(1, 128);
+    memcpy(key, AES_KEY, sizeof(AES_KEY));
+
     for (size_t i = 0; i < tests_count; i++)
     {
+        tests[i].a.key = key;
         run_test(&tests[i]);
         free_argv(&tests[i].a);
     }
 
     printf("\n(%zu / %zu) tests passed\n", tests_count - failed_tests_count,
            tests_count);
+
+    free(key);
     return failed_tests_count >= 1;
 }

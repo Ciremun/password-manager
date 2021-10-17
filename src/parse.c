@@ -7,7 +7,7 @@
 #define MEM_IMPLEMENTATION
 #include "mem.h"
 
-Memory g_mem;
+Memory                g_mem;
 extern struct AES_ctx ctx;
 extern const char    *help_s;
 extern char          *data_store;
@@ -90,11 +90,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
         size_t aes_key_length = strlen(f.key.value) + 1;
         if (aes_key_length > 128)
-            aes_key = mem_alloc(&g_mem, aes_key_length);
+            aes_key = alloc(aes_key_length);
         else
-            aes_key = mem_alloc(&g_mem, 128);
-        if (aes_key == NULL)
-            PANIC_MALLOC();
+            aes_key = alloc(128);
         memcpy(aes_key, f.key.value, aes_key_length);
     }
 
@@ -108,13 +106,10 @@ int run(uint8_t *aes_key, int argc, char **argv)
         size_t aes_key_length = 0;
         char  *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
         if (aes_key_length > 128)
-            aes_key = malloc(aes_key_length);
+            aes_key = alloc(aes_key_length);
         else
-            aes_key = calloc(1, 128);
-        if (aes_key == NULL)
-            PANIC_MALLOC();
+            aes_key = alloc(128);
         memcpy(aes_key, key_file, aes_key_length);
-        free(key_file);
     }
 
     if (f.input.exists)
@@ -170,15 +165,10 @@ int run(uint8_t *aes_key, int argc, char **argv)
             char  *data = read_file_as_str(f.data_file.value, &nch);
 
             if (f.label.exists)
-            {
                 encrypt_and_replace(&f, f.label.value, data, aes_key);
-            }
             else
-            {
                 encrypt_and_write(&f, (uint8_t *)data, aes_key, nch);
-            }
 
-            free(data);
             return 0;
         }
         if (f.generate_password.exists)
@@ -202,7 +192,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             {
                 password_length = (unsigned long)random_int();
             }
-            char *password = malloc(password_length + 1);
+            char *password = alloc(password_length + 1);
             random_string((int)password_length, password);
             if (f.label.exists)
             {
@@ -221,7 +211,6 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 fprintf(stdout, "%s", password);
 #endif
             }
-            free(password);
             return 0;
         }
         if (f.label.exists)
@@ -238,6 +227,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 return 1;
             }
             decrypt_and_print(aes_key, &f);
+            goto done;
         }
         else
         {
@@ -248,6 +238,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
 
             decrypt_and_print(aes_key, &f);
+            goto done;
         }
     }
 
@@ -284,8 +275,12 @@ int run(uint8_t *aes_key, int argc, char **argv)
                           strlen(f.data.value) + 1);
     }
 
+done:
+
     if (!mem_free(&g_mem))
-        PANIC("%s\n", "mem_free failed!");
+    {
+        error("%s\n", "mem_free failed!");
+    }
 
     return 0;
 }

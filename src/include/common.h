@@ -21,6 +21,7 @@ typedef SSIZE_T ssize_t;
 
 #include "aes.h"
 #include "b64.h"
+#include "mem.h"
 #include "parse.h"
 
 #define LMAX               255
@@ -53,16 +54,15 @@ void           encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
 void           encrypt_and_replace(Flags *f, char *find_label, char *data,
                                    uint8_t *aes_key);
 void           delete_label(char *label, uint8_t *aes_key);
+void          *alloc(u64 size);
 
 #define PANIC(FMT, ...)                                                        \
     do                                                                         \
     {                                                                          \
-        fprintf(stderr, FMT, __VA_ARGS__);                                     \
+        error(FMT, __VA_ARGS__);                                               \
         exit(1);                                                               \
     } while (0)
 
-#define PANIC_OPEN_FILE(PATH) PANIC("error opening file %s\n", PATH)
-#define PANIC_MALLOC()                                                         \
-    PANIC("%s:%d memory allocation failed\n", __FILE__, __LINE__)
+#define PANIC_OPEN_FILE(PATH) PANIC("opening file %s\n", PATH)
 
 #endif // IO_COMMON_H
