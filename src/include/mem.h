@@ -18,10 +18,6 @@
 
 typedef unsigned long long int u64;
 
-#ifndef _WIN32
-int GetPhysicallyInstalledSystemMemory(u64 *output);
-#endif // _WIN32
-
 typedef struct
 {
     char *start;
