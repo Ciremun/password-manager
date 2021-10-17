@@ -240,7 +240,6 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
         info("%s\n", "no results");
     }
     free(str);
-    free(aes_key);
     exit(0);
 }
 
@@ -330,7 +329,6 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             free(lines);
             free(encoded_data);
             free(decoded_data);
-            free(aes_key);
 
             upload_changes(sync_remote_url);
             return;
@@ -358,7 +356,6 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
     free(lines);
     free(label_and_data);
     free(encoded_data);
-    free(aes_key);
 
     upload_changes(sync_remote_url);
 }
@@ -373,7 +370,6 @@ void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
     char *encoded_data = b64_encode(data, data_length);
     write_file(data_store, "a", encoded_data);
     free(encoded_data);
-    free(aes_key);
 
     upload_changes(sync_remote_url);
 }
@@ -578,7 +574,6 @@ void delete_label(char *find_label, uint8_t *aes_key)
         free(lines[i]);
     }
     free(lines);
-    free(aes_key);
 
     upload_changes(sync_remote_url);
 }
