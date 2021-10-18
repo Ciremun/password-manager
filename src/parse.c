@@ -90,9 +90,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
         size_t aes_key_length = strlen(f.key.value) + 1;
         if (aes_key_length > 128)
-            aes_key = alloc(aes_key_length);
+            aes_key = (uint8_t *)alloc(aes_key_length);
         else
-            aes_key = alloc(128);
+            aes_key = (uint8_t *)alloc(128);
         memcpy(aes_key, f.key.value, aes_key_length);
     }
 
@@ -106,9 +106,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
         size_t aes_key_length = 0;
         char  *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
         if (aes_key_length > 128)
-            aes_key = alloc(aes_key_length);
+            aes_key = (uint8_t *)alloc(aes_key_length);
         else
-            aes_key = alloc(128);
+            aes_key = (uint8_t *)alloc(128);
         memcpy(aes_key, key_file, aes_key_length);
     }
 
@@ -192,7 +192,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             {
                 password_length = (unsigned long)random_int();
             }
-            char *password = alloc(password_length + 1);
+            char *password = (char *)alloc(password_length + 1);
             random_string((int)password_length, password);
             if (f.label.exists)
             {

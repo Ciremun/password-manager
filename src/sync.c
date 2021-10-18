@@ -25,7 +25,7 @@
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 {
     Cstr_Array result = {.count = cstrs.count + 1};
-    result.elems = alloc(sizeof(result.elems[0]) * result.count);
+    result.elems = (Cstr *)alloc(sizeof(result.elems[0]) * result.count);
     memcpy(result.elems, cstrs.elems, cstrs.count * sizeof(result.elems[0]));
     result.elems[cstrs.count] = cstr;
     return result;
@@ -119,7 +119,7 @@ Cstr_Array cstr_array_make(Cstr first, ...)
     }
     va_end(args);
 
-    result.elems = alloc(sizeof(result.elems[0]) * result.count);
+    result.elems = (Cstr *)alloc(sizeof(result.elems[0]) * result.count);
     if (result.elems == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -154,7 +154,7 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char        *result = alloc(sizeof(char) * result_len);
+    char        *result = (char *)alloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));

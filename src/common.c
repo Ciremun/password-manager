@@ -58,7 +58,7 @@ int getpasswd(char **pw)
     size_t buf = 128;
 
     if (*pw == NULL)
-        *pw = alloc(buf);
+        *pw = (char *)alloc(buf);
 
 #ifndef _WIN32
     struct termios old_kbd_mode;
@@ -257,7 +257,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
                 void *tmp = realloc(decoded_data, label_and_data_size);
                 if (tmp == NULL)
                     PANIC("%s\n", "memory allocation failed!");
-                decoded_data = tmp;
+                decoded_data = (unsigned char *)tmp;
             }
             snprintf((char *)decoded_data, sizeof(char) * label_and_data_size,
                      "%s %s", label, data);
@@ -277,7 +277,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
                 void *tmp = realloc(lines[i], strlen(encoded_data) + 1);
                 if (tmp == NULL)
                     PANIC("%s\n", "memory allocation failed!");
-                lines[i] = tmp;
+                lines[i] = (char *)tmp;
             }
             strcpy(lines[i], encoded_data);
 
@@ -299,7 +299,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         free(decoded_data);
     }
 
-    uint8_t *label_and_data = alloc(label_and_data_size);
+    uint8_t *label_and_data = (uint8_t *)alloc(label_and_data_size);
     snprintf((char *)label_and_data, sizeof(uint8_t) * label_and_data_size,
              "%s %s", find_label, data);
 
@@ -351,7 +351,7 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream)
 
     if (*lineptr == NULL)
     {
-        *lineptr = malloc(128);
+        *lineptr = (char *)malloc(128);
         if (*lineptr == NULL)
         {
             return -1;
@@ -369,7 +369,7 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream)
             {
                 new_size = 128;
             }
-            char *new_ptr = realloc(*lineptr, new_size);
+            char *new_ptr = (char *)realloc(*lineptr, new_size);
             if (new_ptr == NULL)
                 return -1;
             *n = new_size;
@@ -400,7 +400,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
     if (!(f = fopen(fp, "rb")))
         PANIC_OPEN_FILE(fp);
 
-    if (!(*lines = calloc(LMAX, sizeof(**lines))))
+    if (!(*lines = (char **)calloc(LMAX, sizeof(**lines))))
     {
         error("%s\n", "memory allocation failed");
         exit(1);
@@ -415,7 +415,7 @@ void read_file(const char *fp, char ***lines, size_t *lsize)
 
         if (idx == lmax)
         {
-            char **tmp = realloc(lines, lmax * 2 * sizeof *lines);
+            char **tmp = (char **)realloc(lines, lmax * 2 * sizeof *lines);
             if (tmp == NULL)
                 PANIC("%s\n", "memory allocation failed!");
             *lines = tmp;
@@ -469,7 +469,8 @@ void delete_label(char *find_label, uint8_t *aes_key)
         size_t         line_length = strlen(lines[line_idx]);
         unsigned char *decoded_line = decode_line(
             lines[line_idx], aes_key, line_length, &decoded_line_length);
-        char *label = alloc(decoded_line_length * sizeof(decoded_line) + 1);
+        char *label
+            = (char *)alloc(decoded_line_length * sizeof(decoded_line) + 1);
         for (size_t j = 0; j < decoded_line_length; j++)
         {
             if (decoded_line[j] == ' ')
