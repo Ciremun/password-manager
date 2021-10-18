@@ -118,17 +118,8 @@ void input_key(uint8_t **aes_key, Flags *f)
 {
     if (!*aes_key)
     {
-        if (f != NULL)
-        {
-            if (!f->copy.exists)
-            {
-                fprintf(stdout, "%s\n", "key?");
-            }
-        }
-        else
-        {
+        if (f == NULL || !f->copy.exists)
             fprintf(stdout, "%s\n", "key?");
-        }
         getpasswd((char **)aes_key);
     }
 }
