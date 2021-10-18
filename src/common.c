@@ -154,9 +154,7 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
             i++;
         size_t         decsize = 0;
         unsigned char *decoded_data
-            = b64_decode_ex(str + start, line_length, &decsize);
-        AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-        AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+            = decode_line(str + start, aes_key, line_length, &decsize);
         if (f->find_label.value != NULL)
         {
             char  *label = (char *)alloc(decsize);
@@ -246,9 +244,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         size_t         decsize = 0;
         size_t         line_length = strlen(lines[i]);
         unsigned char *decoded_data
-            = b64_decode_ex(lines[i], line_length, &decsize);
-        AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-        AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+            = decode_line(lines[i], aes_key, line_length, &decsize);
 
         char *label = (char *)alloc(decsize);
 
@@ -479,8 +475,9 @@ void delete_label(char *find_label, uint8_t *aes_key)
     for (; line_idx < total_lines; ++line_idx)
     {
         size_t         decoded_line_length = 0;
-        unsigned char *decoded_line
-            = decode_line(lines[line_idx], aes_key, &decoded_line_length);
+        size_t         line_length = strlen(lines[line_idx]);
+        unsigned char *decoded_line = decode_line(
+            lines[line_idx], aes_key, line_length, &decoded_line_length);
         char *label = alloc(decoded_line_length * sizeof(decoded_line) + 1);
         for (size_t j = 0; j < decoded_line_length; j++)
         {
@@ -526,10 +523,10 @@ void delete_label(char *find_label, uint8_t *aes_key)
 }
 
 unsigned char *decode_line(const char *line, uint8_t *aes_key,
-                           size_t *decoded_line_length)
+                           size_t line_length, size_t *decoded_line_length)
 {
     unsigned char *decoded_line
-        = b64_decode_ex(line, strlen(line), decoded_line_length);
+        = b64_decode_ex(line, line_length, decoded_line_length);
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_line, *decoded_line_length);
     return decoded_line;
