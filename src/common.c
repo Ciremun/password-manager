@@ -93,10 +93,7 @@ int getpasswd(char **pw)
             if (idx >= buf)
             {
                 buf *= 2;
-                void *tmp = realloc(*pw, buf);
-                if (tmp == NULL)
-                    PANIC("%s\n", "memory allocation failed!");
-                *pw = tmp;
+                alloc(buf);
             }
             (*pw)[idx++] = c;
         }
@@ -104,14 +101,6 @@ int getpasswd(char **pw)
         {
             (*pw)[--idx] = 0;
         }
-    }
-
-    if (buf != 128)
-    {
-        void *tmp = realloc(*pw, idx);
-        if (tmp == NULL)
-            PANIC("%s\n", "memory allocation failed!");
-        *pw = tmp;
     }
 
 #ifndef _WIN32
