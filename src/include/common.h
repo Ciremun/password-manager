@@ -48,13 +48,13 @@ void exit_test_case(int exit_code);
 
 typedef struct
 {
-    char *data;
+    char  *data;
     size_t length;
 } Line;
 
 typedef struct
 {
-    Line *array;
+    Line  *array;
     size_t count;
 } Lines;
 
@@ -70,6 +70,7 @@ unsigned char *decode_line(const char *line, uint8_t *aes_key,
                            size_t line_length, size_t *decoded_line_length);
 void           write_file(const char *fp, const char *mode, void *data);
 Lines          decrypt_and_find(uint8_t *aes_key, Flags *f);
+void           decrypt_and_print(uint8_t *aes_key, Flags *f);
 void           encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
                                  size_t data_length);
 void           encrypt_and_replace(Flags *f, char *find_label, char *data,

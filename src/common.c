@@ -531,6 +531,34 @@ unsigned char *decode_line(const char *line, uint8_t *aes_key,
     return decoded_line;
 }
 
+void decrypt_and_print(uint8_t *aes_key, Flags *f)
+{
+    Lines lines = decrypt_and_find(aes_key, f);
+    if (f->output.value)
+    {
+        FILE *o = fopen(f->output.value, "wb");
+        if (o == NULL)
+            PANIC_OPEN_FILE(f->output.value);
+        for (size_t i = 0; i < lines.count; ++i)
+        {
+            fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
+            fputc('\n', o);
+        }
+        fputc(0, o);
+        fclose(o);
+    }
+    else
+    {
+        if (!lines.count)
+        {
+            info("%s\n", "no results");
+        }
+        else
+            for (size_t i = 0; i < lines.count; ++i)
+                fprintf(stdout, "%s\n", lines.array[i].data);
+    }
+}
+
 void *alloc(u64 size)
 {
     void *tmp = mem_alloc(&g_mem, size);
