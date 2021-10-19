@@ -51,6 +51,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->key_file;
         else if (!f->version.exists && is_flag(argv[i], "-v", "--version"))
             flag = &f->version;
+        else if (!f->output.exists && is_flag(argv[i], "-o", "--output"))
+            flag = &f->output;
 
         if (flag != NULL)
         {
@@ -226,7 +228,26 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 error("%s\n", "find label flag called without name");
                 return 1;
             }
-            decrypt_and_print(aes_key, &f);
+            Lines lines = decrypt_and_find(aes_key, &f);
+            if (f.output.value)
+            {
+                FILE *o = fopen(f.output.value, "wb");
+                for (size_t i = 0; i < lines.count; ++i)
+                {
+                    fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
+                    fputc('\n', o);
+                }
+            }
+            else
+            {
+                if (!lines.count)
+                {
+                    info("%s\n", "no results");
+                }
+                else
+                    for (size_t i = 0; i < lines.count; ++i)
+                        fprintf(stdout, "%s\n", lines.array[i].data);
+            }
             goto done;
         }
         else
@@ -237,7 +258,26 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 return 0;
             }
 
-            decrypt_and_print(aes_key, &f);
+            Lines lines = decrypt_and_find(aes_key, &f);
+            if (f.output.value)
+            {
+                FILE *o = fopen(f.output.value, "wb");
+                for (size_t i = 0; i < lines.count; ++i)
+                {
+                    fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
+                    fputc('\n', o);
+                }
+            }
+            else
+            {
+                if (!lines.count)
+                {
+                    info("%s\n", "no results");
+                }
+                else
+                    for (size_t i = 0; i < lines.count; ++i)
+                        fprintf(stdout, "%s\n", lines.array[i].data);
+            }
             goto done;
         }
     }

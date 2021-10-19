@@ -29,7 +29,8 @@ const char *help_s
       "-gp --generate-password [N]   put random data\n"
       "-k  --key                     key\n"
       "-kf --key-file                key file path\n"
-      "-i  --input                   stored data path\n"
+      "-i  --input                   encrypted file path\n"
+      "-o  --output                  decrypted file path\n"
       "-v  --version                 display version\n"
       "-h  --help                    display help\n\n";
 
@@ -124,22 +125,30 @@ void input_key(uint8_t **aes_key, Flags *f)
     }
 }
 
-void decrypt_and_print(uint8_t *aes_key, Flags *f)
+Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
 {
     pull_changes(sync_remote_url);
-    char *str = read_file_as_str(data_store, NULL);
+    size_t nch = 0;
+    char  *str = read_file_as_str(data_store, &nch);
     input_key(&aes_key, f);
-    int    did_print = 0;
     size_t i = 0;
     size_t query_len
         = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
-    while (str[i] != '\0')
+    size_t total_lines = 0;
+    for (size_t j = 0; j < nch; ++j)
+        if (str[j] == '\n')
+            total_lines++;
+    Lines lines = {
+        .array = (Line *)alloc(sizeof(Line) * total_lines),
+        .count = 0,
+    };
+    while (i < nch)
     {
         size_t start = i;
         do
         {
             i++;
-        } while (str[i] != '\n' && str[i] != '\0');
+        } while (i < nch && str[i] != '\n');
         size_t line_length = i - start - 1;
         if (str[i] == '\n')
             i++;
@@ -191,26 +200,24 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
                 const char *password
                     = (const char *)decoded_data + label_length + 1;
 #ifdef _WIN32
-                if (copy_to_clipboard(password, strlen(password) + 1))
-                {
+                if (!copy_to_clipboard(password, strlen(password) + 1))
+                    error("%s\n", "couldn't copy to clipboard");
 #else
-                {
-                    fprintf(stdout, "%s", password);
+                fprintf(stdout, "%s", password);
 #endif // _WIN32
-                    did_print = 1;
-                    free(decoded_data);
-                    break;
-                }
+                free(decoded_data);
+                exit(0);
             }
         }
-        fprintf(stdout, "%s\n", decoded_data);
-        did_print = 1;
-        free(decoded_data);
+        if (!f->copy.exists)
+        {
+            lines.array[lines.count].length = decsize - 1;
+            lines.array[lines.count++].data = (char *)decoded_data;
+        }
     }
-    if (!did_print)
-    {
-        info("%s\n", "no results");
-    }
+    if (f->copy.exists)
+        lines.count = 0;
+    return lines;
 }
 
 void encrypt_and_replace(Flags *f, char *find_label, char *data,

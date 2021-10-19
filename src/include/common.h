@@ -37,6 +37,27 @@ void exit_test_case(int exit_code);
 #define info(fmt, ...)  fprintf(stdout, "info: " fmt, __VA_ARGS__)
 #endif // TEST
 
+#define PANIC(FMT, ...)                                                        \
+    do                                                                         \
+    {                                                                          \
+        error(FMT, __VA_ARGS__);                                               \
+        exit(1);                                                               \
+    } while (0)
+
+#define PANIC_OPEN_FILE(PATH) PANIC("opening file %s\n", PATH)
+
+typedef struct
+{
+    char *data;
+    size_t length;
+} Line;
+
+typedef struct
+{
+    Line *array;
+    size_t count;
+} Lines;
+
 #ifdef _WIN32
 int copy_to_clipboard(const char *password, size_t size);
 #endif
@@ -48,21 +69,12 @@ char          *read_file_as_str(const char *fp, size_t *nch);
 unsigned char *decode_line(const char *line, uint8_t *aes_key,
                            size_t line_length, size_t *decoded_line_length);
 void           write_file(const char *fp, const char *mode, void *data);
-void           decrypt_and_print(uint8_t *aes_key, Flags *f);
+Lines          decrypt_and_find(uint8_t *aes_key, Flags *f);
 void           encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
                                  size_t data_length);
 void           encrypt_and_replace(Flags *f, char *find_label, char *data,
                                    uint8_t *aes_key);
 void           delete_label(char *label, uint8_t *aes_key);
 void          *alloc(u64 size);
-
-#define PANIC(FMT, ...)                                                        \
-    do                                                                         \
-    {                                                                          \
-        error(FMT, __VA_ARGS__);                                               \
-        exit(1);                                                               \
-    } while (0)
-
-#define PANIC_OPEN_FILE(PATH) PANIC("opening file %s\n", PATH)
 
 #endif // IO_COMMON_H

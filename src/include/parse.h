@@ -13,14 +13,15 @@ typedef struct
     Flag data_file;
     Flag label;
     Flag find_label;
+    Flag delete_label;
+    Flag copy;
     Flag generate_password;
     Flag key;
-    Flag copy;
-    Flag delete_label;
-    Flag input;
-    Flag help;
     Flag key_file;
+    Flag input;
+    Flag output;
     Flag version;
+    Flag help;
 } Flags;
 
 int  is_flag(char *arg, char *s, char *l);

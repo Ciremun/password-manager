@@ -19,6 +19,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include "common.h"
 #include "sync.h"
 
 #ifndef _WIN32
@@ -37,25 +38,8 @@ int verify_remote(const char *remote)
     if (remote == NULL)
         return 0;
     const char *git_config = ".git/config";
-    FILE       *f = fopen(git_config, "rb");
-    if (f == NULL)
-    {
-        error("opening file %s\n", git_config);
-        return 0;
-    }
-    fseek(f, 0, SEEK_END);
-    size_t size = ftell(f);
-    char  *str = (char *)alloc(size + 1);
-    if (str == NULL)
-    {
-        error("%s:%d memory allocation failed\n", __FILE__, __LINE__);
-        fclose(f);
-        return 0;
-    }
-    fseek(f, 0, SEEK_SET);
-    fread(str, 1, size, f);
-    str[size] = '\0';
-    fclose(f);
+    size_t size = 0;
+    char *str = read_file_as_str(git_config, &size);
     for (size_t i = 0; i + 5 < size; ++i)
     {
         if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l'
@@ -64,15 +48,8 @@ int verify_remote(const char *remote)
             i += 6;
             size_t start = i;
             for (; i < size; ++i)
-            {
-                if (str[i] == '\n' || str[i] == '\r')
-                {
-                    if (memcmp(str + start, remote, i - start) == 0)
-                    {
-                        return 1;
-                    }
-                }
-            }
+                if ((str[i] == '\n' || str[i] == '\r') && (memcmp(str + start, remote, i - start) == 0))
+                    return 1;
             break;
         }
     }
