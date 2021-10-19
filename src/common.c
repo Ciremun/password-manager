@@ -209,11 +209,8 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
                 exit(0);
             }
         }
-        if (!f->copy.exists)
-        {
-            lines.array[lines.count].length = decsize - 1;
-            lines.array[lines.count++].data = (char *)decoded_data;
-        }
+        lines.array[lines.count].length = decsize - 1;
+        lines.array[lines.count++].data = (char *)decoded_data;
     }
     if (f->copy.exists)
         lines.count = 0;

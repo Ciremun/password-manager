@@ -238,6 +238,11 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 fprintf(stdout, "%s\n", help_s);
                 return 0;
             }
+            if (f.copy.exists)
+            {
+                error("%s\n", "copy is only supported along with -fl, -gp flags");
+                return 1;
+            }
             decrypt_and_print(aes_key, &f);
             goto done;
         }
