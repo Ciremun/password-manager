@@ -237,6 +237,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                     fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
                     fputc('\n', o);
                 }
+                fputc(0, o);
             }
             else
             {
@@ -267,6 +268,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                     fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
                     fputc('\n', o);
                 }
+                fputc(0, o);
             }
             else
             {
