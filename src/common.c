@@ -173,12 +173,10 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
             }
             if (!found_label)
             {
-                free(decoded_data);
                 continue;
             }
             if (query_len > label_length)
             {
-                free(decoded_data);
                 continue;
             }
             int do_continue = 0;
@@ -192,7 +190,6 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
             }
             if (do_continue)
             {
-                free(decoded_data);
                 continue;
             }
             if (f->copy.exists)
@@ -205,7 +202,6 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
 #else
                 fprintf(stdout, "%s", password);
 #endif // _WIN32
-                free(decoded_data);
                 exit(0);
             }
         }
@@ -240,6 +236,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         size_t         line_length = strlen(lines[i]);
         unsigned char *decoded_data
             = decode_line(lines[i], aes_key, line_length, &decsize);
+        alloc(label_and_data_size - decsize);
 
         char *label = (char *)alloc(decsize);
 
@@ -257,12 +254,6 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         {
             memset(decoded_data, 0, decsize);
 
-            {
-                void *tmp = realloc(decoded_data, label_and_data_size);
-                if (tmp == NULL)
-                    PANIC("%s\n", "memory allocation failed!");
-                decoded_data = (unsigned char *)tmp;
-            }
             snprintf((char *)decoded_data, sizeof(char) * label_and_data_size,
                      "%s %s", label, data);
 
@@ -293,14 +284,11 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
 
             fclose(f);
             free(lines);
-            free(encoded_data);
-            free(decoded_data);
 
             upload_changes(sync_remote_url);
             return;
         }
 
-        free(decoded_data);
     }
 
     uint8_t *label_and_data = (uint8_t *)alloc(label_and_data_size);
@@ -317,7 +305,6 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         free(lines[i]);
 
     free(lines);
-    free(encoded_data);
 
     upload_changes(sync_remote_url);
 }
@@ -331,7 +318,6 @@ void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
 
     char *encoded_data = b64_encode(data, data_length);
     write_file(data_store, "a", encoded_data);
-    free(encoded_data);
 
     upload_changes(sync_remote_url);
 }
@@ -484,7 +470,6 @@ void delete_label(char *find_label, uint8_t *aes_key)
             }
             label[j] = decoded_line[j];
         }
-        free(decoded_line);
         if (strcmp(label, find_label) == 0)
         {
             found_label = 1;

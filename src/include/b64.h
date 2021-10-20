@@ -9,29 +9,6 @@
 #define B64_H 1
 
 /**
- *  Memory allocation functions to use. You can define b64_malloc and
- * b64_realloc to custom functions if you want.
- */
-
-#ifndef b64_malloc
-#define b64_malloc(ptr) malloc(ptr)
-#endif
-#ifndef b64_realloc
-#define b64_realloc(ptr, size) realloc(ptr, size)
-#endif
-
-// How much memory to allocate per buffer
-#define B64_BUFFER_SIZE (1024 * 64) // 64K
-
-// Start buffered memory
-char *b64_buf_malloc();
-
-// Update memory size. Returns the same pointer if we
-// have enough space in the buffer. Otherwise, we add
-// additional buffers.
-void *b64_buf_realloc(unsigned char *ptr, size_t size);
-
-/**
  * Base64 index table.
  */
 
@@ -53,12 +30,6 @@ extern "C"
      */
 
     char *b64_encode(const unsigned char *, size_t);
-
-    /**
-     * Decode `char *' source with `size_t' size.
-     * Returns a `unsigned char *' base64 decoded string.
-     */
-    unsigned char *b64_decode(const char *, size_t);
 
     /**
      * Decode `char *' source with `size_t' size.

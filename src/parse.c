@@ -283,10 +283,12 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
 done:
 
+#ifndef TEST
     if (!mem_free(&g_mem))
     {
         error("%s\n", "mem_free failed!");
     }
+#endif // TEST
 
     return 0;
 }
