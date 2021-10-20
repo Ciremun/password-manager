@@ -559,7 +559,10 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
             fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
             fputc('\n', o);
         }
-        fclose(o);
+        if (f->output.exists)
+        {
+            fclose(o);
+        }
     }
     else
     {
