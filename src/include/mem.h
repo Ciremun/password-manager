@@ -101,7 +101,7 @@ int mem_init(Memory *memory)
         return 0;
 #else
 #ifdef TEST
-    memory->capacity = (u64)536870912;
+    memory->capacity = (u64)16777216;
 #endif // TEST
     memory->base = (char *)(mmap(0, memory->capacity, PROT_READ | PROT_WRITE,
                                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
