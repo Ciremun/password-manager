@@ -209,7 +209,7 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
                 exit(0);
             }
         }
-        lines.array[lines.count].length = decsize - 1;
+        lines.array[lines.count].length = decsize;
         lines.array[lines.count++].data = (char *)decoded_data;
     }
     if (f->copy.exists)
@@ -531,28 +531,39 @@ unsigned char *decode_line(const char *line, uint8_t *aes_key,
 void decrypt_and_print(uint8_t *aes_key, Flags *f)
 {
     Lines lines = decrypt_and_find(aes_key, f);
-    if (f->output.value)
+    if (lines.count)
     {
-        FILE *o = fopen(f->output.value, "wb");
-        if (o == NULL)
-            PANIC_OPEN_FILE(f->output.value);
+        FILE *o;
+        if (f->output.exists)
+        {
+            if (f->output.value)
+            {
+                o = fopen(f->output.value, "wb");
+                if (o == NULL)
+                {
+                    PANIC_OPEN_FILE(f->output.value);
+                }
+            }
+            else
+            {
+                error("%s\n", "output flag called without filename");
+                return;
+            }
+        }
+        else
+        {
+            o = stdout;
+        }
         for (size_t i = 0; i < lines.count; ++i)
         {
             fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
             fputc('\n', o);
         }
-        fputc(0, o);
         fclose(o);
     }
     else
     {
-        if (!lines.count)
-        {
-            info("%s\n", "no results");
-        }
-        else
-            for (size_t i = 0; i < lines.count; ++i)
-                fprintf(stdout, "%s\n", lines.array[i].data);
+        info("%s\n", "no results");
     }
 }
 
