@@ -19,7 +19,8 @@
     -c  --copy                    -fl, -gp helper, win32: copy to clipboard, posix: pipe with clip tools
     -k  --key                     key
     -kf --key-file                key file path
-    -i  --input                   stored data path
+    -i  --input                   encrypted file path
+    -o  --output                  decrypted file path
     -v  --version                 display version
     -h  --help                    display help
 

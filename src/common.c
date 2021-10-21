@@ -17,7 +17,7 @@ const char *help_s
       "flags:\n"
       "\n"
       "-d  --data                    data to encrypt\n"
-      "-df --data-file               read data from file\n"
+      "-df --data-file               data to encrypt from file\n"
       "-l  --label                   add label for data\n"
       "-fl --find-label              find data by label\n"
       "-dl --delete-label            delete label and its data\n"
