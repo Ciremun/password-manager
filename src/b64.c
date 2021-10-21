@@ -64,16 +64,9 @@ unsigned char *b64_decode_ex(const char *src, size_t len, size_t *decsize)
             buf[2] = ((tmp[2] & 0x3) << 6) + tmp[3];
 
             // write decoded buffer to `dec'
-            if (dec != NULL)
+            for (i = 0; i < 3; ++i)
             {
-                for (i = 0; i < 3; ++i)
-                {
-                    dec[size++] = buf[i];
-                }
-            }
-            else
-            {
-                return NULL;
+                dec[size++] = buf[i];
             }
 
             // reset
@@ -110,28 +103,14 @@ unsigned char *b64_decode_ex(const char *src, size_t len, size_t *decsize)
         buf[2] = ((tmp[2] & 0x3) << 6) + tmp[3];
 
         // write remainer decoded buffer to `dec'
-        if (dec != NULL)
+        for (j = 0; (j < i - 1); ++j)
         {
-            for (j = 0; (j < i - 1); ++j)
-            {
-                dec[size++] = buf[j];
-            }
-        }
-        else
-        {
-            return NULL;
+            dec[size++] = buf[j];
         }
     }
 
     // Make sure we have enough space to add '\0' character at end.
-    if (dec != NULL)
-    {
-        dec[size] = '\0';
-    }
-    else
-    {
-        return NULL;
-    }
+    dec[size] = '\0';
 
     // Return back the size of decoded string if demanded.
     if (decsize != NULL)
