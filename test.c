@@ -217,7 +217,7 @@ void test_data_flag_valid(Test *t)
     for (size_t i = 0; i < nch; ++i)
         free(lines[i]);
     free(lines);
-    
+
     remove(DEFAULT_DATA_STORE);
 }
 
@@ -254,7 +254,6 @@ void test_data_file_flag_empty_file(Test *t)
 
     test(strcmp("\n", (char *)decoded_data) == 0, t);
 
-    
     remove(DEFAULT_DATA_STORE);
     remove(TEST_DATA_FILE);
 }
@@ -280,7 +279,6 @@ void test_data_file_flag_valid(Test *t)
 
     test(strcmp("test data file\n", (char *)decoded_data) == 0, t);
 
-    
     remove(DEFAULT_DATA_STORE);
     remove(TEST_DATA_FILE);
 }
@@ -312,8 +310,6 @@ void test_label_flag_valid(Test *t)
                 (char *)decoded_data)
              == 0,
          t);
-
-    
 }
 
 void test_label_flag_replace(Test *t)
@@ -333,8 +329,6 @@ void test_label_flag_replace(Test *t)
                 (char *)decoded_data)
              == 0,
          t);
-
-    
 }
 
 void test_delete_label_flag_doesnt_exist(Test *t)
@@ -354,8 +348,6 @@ void test_delete_label_flag_doesnt_exist(Test *t)
                 (char *)decoded_data)
              == 0,
          t);
-
-    
 }
 
 void test_delete_label_flag_exists(Test *t)
@@ -373,7 +365,6 @@ void test_delete_label_flag_exists(Test *t)
 
     test(strcmp("", (char *)decoded_data) == 0, t);
 
-    
     remove(DEFAULT_DATA_STORE);
 }
 
@@ -394,11 +385,11 @@ void test_generate_password_flag_empty(Test *t)
     size_t nch = 0;
     char  *data = read_file_as_str_test(DEFAULT_DATA_STORE, &nch);
 
-    size_t         decsize = 0;
+    size_t decsize = 0;
     b64_decode_ex(data, nch, &decsize);
 
     test(decsize >= 15, t);
-    
+
     remove(DEFAULT_DATA_STORE);
 }
 
@@ -416,8 +407,6 @@ void test_generate_password_flag_128_chars(Test *t)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strlen((char *)decoded_data) == 128, t);
-
-    
 
     remove(DEFAULT_DATA_STORE);
 }
@@ -442,8 +431,6 @@ void test_key_flag_valid(Test *t)
 
     test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) == 0, t);
 
-    
-
     remove(DEFAULT_DATA_STORE);
 }
 
@@ -461,8 +448,6 @@ void test_key_flag_invalid(Test *t)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) != 0, t);
-
-    
 
     remove(DEFAULT_DATA_STORE);
 }
@@ -498,8 +483,6 @@ void test_key_file_flag_valid(Test *t)
 
     test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) == 0, t);
 
-    
-
     remove(TEST_KEY_FILE);
     remove(DEFAULT_DATA_STORE);
 }
@@ -524,8 +507,6 @@ void test_key_file_flag_invalid(Test *t)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) != 0, t);
-
-    
 
     remove(TEST_KEY_FILE);
     remove(DEFAULT_DATA_STORE);
@@ -555,8 +536,6 @@ void test_input_flag_write_data(Test *t)
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
     test(strcmp((char *)decoded_data, TEST_INPUT_FLAG_DATA) == 0, t);
-
-    
 
     remove(TEST_DATA_FILE);
 }

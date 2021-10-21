@@ -288,7 +288,6 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             upload_changes(sync_remote_url);
             return;
         }
-
     }
 
     uint8_t *label_and_data = (uint8_t *)alloc(label_and_data_size);
