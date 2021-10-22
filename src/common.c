@@ -203,7 +203,7 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
                     error("%s\n", "couldn't copy to clipboard");
                 }
 #else
-                fprintf(stdout, "%s", password);
+                fwrite(password, sizeof(char), decsize, stdout);
 #endif // _WIN32
                 exit(0);
             }
