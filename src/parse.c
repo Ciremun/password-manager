@@ -167,7 +167,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             char  *data = read_file_as_str(f.data_file.value, &nch);
 
             if (f.label.exists)
-                encrypt_and_replace(&f, f.label.value, data, aes_key);
+                encrypt_and_replace(&f, f.label.value, data, aes_key, nch);
             else
                 encrypt_and_write(&f, (uint8_t *)data, aes_key, nch);
 
@@ -198,7 +198,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             random_string((int)password_length, password);
             if (f.label.exists)
             {
-                encrypt_and_replace(&f, f.label.value, password, aes_key);
+                encrypt_and_replace(&f, f.label.value, password, aes_key, password_length);
             }
             else
             {
@@ -274,7 +274,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             error("%s\n", "label flag called without name");
             return 1;
         }
-        encrypt_and_replace(&f, f.label.value, f.data.value, aes_key);
+        encrypt_and_replace(&f, f.label.value, f.data.value, aes_key, 0);
     }
     else
     {

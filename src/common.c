@@ -217,7 +217,7 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
 }
 
 void encrypt_and_replace(Flags *f, char *find_label, char *data,
-                         uint8_t *aes_key)
+                         uint8_t *aes_key, size_t data_length)
 {
     char **lines = NULL;
     size_t idx = 0;
@@ -231,7 +231,11 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
     read_file(data_store, &lines, &idx);
     input_key(&aes_key, f);
 
-    size_t label_and_data_size = strlen(find_label) + strlen(data) + 2;
+    if (!data_length)
+        data_length = strlen(data);
+
+    size_t find_label_length = strlen(find_label);
+    size_t label_and_data_size = find_label_length + data_length + 2;
 
     for (size_t i = 0; i < idx; i++)
     {
@@ -243,22 +247,21 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
 
         char *label = (char *)alloc(decsize);
 
-        for (size_t j = 0; j < decsize; j++)
+        size_t label_length;
+        for (label_length = 0; label_length < decsize; label_length++)
         {
-            if (decoded_data[j] == ' ')
+            if (decoded_data[label_length] == ' ')
             {
-                label[j] = '\0';
                 break;
             }
-            label[j] = decoded_data[j];
+            label[label_length] = decoded_data[label_length];
         }
 
-        if (strcmp(label, find_label) == 0)
+        if (memcmp(label, find_label, label_length) == 0)
         {
-            memset(decoded_data, 0, decsize);
-
-            snprintf((char *)decoded_data, sizeof(char) * label_and_data_size,
-                     "%s %s", label, data);
+            memcpy(decoded_data, label, label_length);
+            decoded_data[label_length] = ' ';
+            memcpy(decoded_data + label_length + 1, data, data_length);
 
             AES_init_ctx_iv(&ctx, aes_key, aes_iv);
             AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_data,
@@ -295,8 +298,9 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
     }
 
     uint8_t *label_and_data = (uint8_t *)alloc(label_and_data_size);
-    snprintf((char *)label_and_data, sizeof(uint8_t) * label_and_data_size,
-             "%s %s", find_label, data);
+    memcpy(label_and_data, find_label, find_label_length);
+    label_and_data[find_label_length] = ' ';
+    memcpy(label_and_data + find_label_length + 1, data, data_length);
 
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, label_and_data, label_and_data_size);
