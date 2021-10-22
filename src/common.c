@@ -447,6 +447,7 @@ void write_file(const char *fp, const char *mode, void *data, size_t size)
     if (f == NULL)
         PANIC_OPEN_FILE(fp);
     fwrite(data, sizeof(char), size, f);
+    fputc('\n', f);
     fclose(f);
 }
 

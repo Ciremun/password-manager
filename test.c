@@ -181,7 +181,7 @@ void test(int check, Test *t)
 
 void test_no_flag_pm_data_exists(Test *t)
 {
-    write_file(DEFAULT_DATA_STORE, "wb", "");
+    write_file(DEFAULT_DATA_STORE, "wb", "", 0);
     test(run_test_in_fork(&t->a) == 0, t);
     remove(DEFAULT_DATA_STORE);
 }
@@ -240,7 +240,7 @@ void test_data_file_flag_empty(Test *t)
 
 void test_data_file_flag_empty_file(Test *t)
 {
-    write_file(TEST_DATA_FILE, "wb", "");
+    write_file(TEST_DATA_FILE, "wb", "", 0);
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
@@ -265,7 +265,7 @@ void test_data_file_flag_non_existent_file(Test *t)
 
 void test_data_file_flag_valid(Test *t)
 {
-    write_file(TEST_DATA_FILE, "wb", "test data file");
+    write_file(TEST_DATA_FILE, "wb", "test data file", 15);
     assert(run(t->a.key, t->a.argc, t->a.argv) == 0);
 
     size_t nch = 0;
@@ -277,7 +277,7 @@ void test_data_file_flag_valid(Test *t)
     AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
 
-    test(strcmp("test data file\n", (char *)decoded_data) == 0, t);
+    test(strcmp("test data file", (char *)decoded_data) == 0, t);
 
     remove(DEFAULT_DATA_STORE);
     remove(TEST_DATA_FILE);

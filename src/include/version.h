@@ -1,6 +1,6 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define PM_VERSION "8304e83"
+#define PM_VERSION "367ba94"
 
 #endif // VERSION_H
