@@ -2,10 +2,9 @@
 
 name: coverity-scan
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 18 * * *' # Daily at 18:00 UTC
-
-on: workflow_dispatch
 
 jobs:
   latest:
