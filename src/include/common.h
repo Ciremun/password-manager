@@ -68,7 +68,7 @@ void           read_file(const char *fp, char ***lines, size_t *lsize);
 char          *read_file_as_str(const char *fp, size_t *nch);
 unsigned char *decode_line(const char *line, uint8_t *aes_key,
                            size_t line_length, size_t *decoded_line_length);
-void           write_file(const char *fp, const char *mode, void *data);
+void           write_file(const char *fp, const char *mode, void *data, size_t size);
 Lines          decrypt_and_find(uint8_t *aes_key, Flags *f);
 void           decrypt_and_print(uint8_t *aes_key, Flags *f);
 void           encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,

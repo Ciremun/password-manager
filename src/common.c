@@ -157,6 +157,7 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
             = decode_line(str + start, aes_key, line_length, &decsize);
         if (f->find_label.value != NULL)
         {
+            alloc(decsize);
             char  *label = (char *)alloc(decsize);
             size_t label_length = 0;
             int    found_label = 0;
@@ -197,8 +198,10 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
                 const char *password
                     = (const char *)decoded_data + label_length + 1;
 #ifdef _WIN32
-                if (!copy_to_clipboard(password, strlen(password) + 1))
+                if (!copy_to_clipboard(password, decsize))
+                {
                     error("%s\n", "couldn't copy to clipboard");
+                }
 #else
                 fprintf(stdout, "%s", password);
 #endif // _WIN32
@@ -261,7 +264,8 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
             AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_data,
                                   label_and_data_size);
 
-            char *encoded_data = b64_encode(decoded_data, label_and_data_size);
+            size_t encsize;
+            char *encoded_data = b64_encode(decoded_data, label_and_data_size, &encsize);
 
             FILE *f = fopen(data_store, "wb");
             if (f == NULL)
@@ -269,7 +273,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
 
             memset(lines[i], 0, line_length);
             {
-                void *tmp = realloc(lines[i], strlen(encoded_data) + 1);
+                void *tmp = realloc(lines[i], encsize + 1);
                 if (tmp == NULL)
                     PANIC("%s\n", "memory allocation failed!");
                 lines[i] = (char *)tmp;
@@ -297,8 +301,9 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, label_and_data, label_and_data_size);
 
-    char *encoded_data = b64_encode(label_and_data, label_and_data_size);
-    write_file(data_store, "a", encoded_data);
+    size_t encsize;
+    char *encoded_data = b64_encode(label_and_data, label_and_data_size, &encsize);
+    write_file(data_store, "a", encoded_data, encsize);
 
     for (size_t i = 0; i < idx; i++)
         free(lines[i]);
@@ -315,8 +320,9 @@ void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, data, data_length);
 
-    char *encoded_data = b64_encode(data, data_length);
-    write_file(data_store, "a", encoded_data);
+    size_t encsize;
+    char *encoded_data = b64_encode(data, data_length, &encsize);
+    write_file(data_store, "a", encoded_data, encsize);
 
     upload_changes(sync_remote_url);
 }
@@ -435,12 +441,12 @@ char *read_file_as_str(const char *fp, size_t *nch)
     return str;
 }
 
-void write_file(const char *fp, const char *mode, void *data)
+void write_file(const char *fp, const char *mode, void *data, size_t size)
 {
     FILE *f = fopen(fp, mode);
     if (f == NULL)
         PANIC_OPEN_FILE(fp);
-    fprintf(f, "%s\n", (char *)data);
+    fwrite(data, sizeof(char), size, f);
     fclose(f);
 }
 

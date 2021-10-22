@@ -121,7 +121,7 @@ unsigned char *b64_decode_ex(const char *src, size_t len, size_t *decsize)
     return dec;
 }
 
-char *b64_encode(const unsigned char *src, size_t len)
+char *b64_encode(const unsigned char *src, size_t len, size_t *encsize)
 {
     int           i = 0;
     int           j = 0;
@@ -196,6 +196,11 @@ char *b64_encode(const unsigned char *src, size_t len)
 
     // Make sure we have enough space to add '\0' character at end.
     enc[size] = '\0';
+
+    if (encsize != NULL)
+    {
+        *encsize = size;
+    }
 
     return enc;
 }
