@@ -263,12 +263,13 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         {
             if (decoded_data[label_length] == ' ')
             {
+                label[label_length] = '\0';
                 break;
             }
             label[label_length] = decoded_data[label_length];
         }
 
-        if (memcmp(label, find_label, label_length) == 0)
+        if (strcmp(label, find_label) == 0)
         {
             memcpy(decoded_data, label, label_length);
             decoded_data[label_length] = ' ';
