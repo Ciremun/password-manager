@@ -31,7 +31,7 @@ const char *help_s
       "-kf --key-file                key file path\n"
       "-i  --input                   encrypted file path\n"
       "-o  --output                  decrypted file path\n"
-      "-b  --binary                  data-file binary mode\n"
+      "-b  --binary                  binary mode\n"
       "-v  --version                 display version\n"
       "-h  --help                    display help\n\n";
 

@@ -21,7 +21,7 @@
     -kf --key-file                key file path
     -i  --input                   encrypted file path
     -o  --output                  decrypted file path
-    -b  --binary                  data-file binary mode
+    -b  --binary                  binary mode
     -v  --version                 display version
     -h  --help                    display help
 
