@@ -10,6 +10,7 @@ jobs:
   latest:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
 
       - name: Download Coverity Build Tool
         run: |
