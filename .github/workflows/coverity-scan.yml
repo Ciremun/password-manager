@@ -26,6 +26,7 @@ jobs:
 
       - name: Build with cov-build
         run: |
+          ls -la
           export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
           cc nobuild.c -o nobuild && cov-build --dir cov-int ./nobuild
 
