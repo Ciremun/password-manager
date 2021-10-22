@@ -20,6 +20,7 @@ typedef struct
     Flag key_file;
     Flag input;
     Flag output;
+    Flag binary;
     Flag version;
     Flag help;
 } Flags;

@@ -53,6 +53,8 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->version;
         else if (!f->output.exists && is_flag(argv[i], "-o", "--output"))
             flag = &f->output;
+        else if (!f->binary.exists && is_flag(argv[i], "-b", "--binary"))
+            flag = &f->binary;
 
         if (flag != NULL)
         {
@@ -198,7 +200,8 @@ int run(uint8_t *aes_key, int argc, char **argv)
             random_string((int)password_length, password);
             if (f.label.exists)
             {
-                encrypt_and_replace(&f, f.label.value, password, aes_key, password_length);
+                encrypt_and_replace(&f, f.label.value, password, aes_key,
+                                    password_length);
             }
             else
             {

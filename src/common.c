@@ -31,6 +31,7 @@ const char *help_s
       "-kf --key-file                key file path\n"
       "-i  --input                   encrypted file path\n"
       "-o  --output                  decrypted file path\n"
+      "-b  --binary                  data-file binary mode\n"
       "-v  --version                 display version\n"
       "-h  --help                    display help\n\n";
 
@@ -131,6 +132,16 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
     size_t nch = 0;
     char  *str = read_file_as_str(data_store, &nch);
     input_key(&aes_key, f);
+    if (f->binary.exists)
+    {
+        decrypt_raw((uint8_t *)str, aes_key, nch);
+        Lines lines = {
+            .array = (Line *)alloc(sizeof(Line)),
+            .count = 1,
+        };
+        lines.array[0] = (Line){.data = str, .length = nch};
+        return lines;
+    }
     size_t i = 0;
     size_t query_len
         = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
@@ -154,7 +165,7 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
             i++;
         size_t         decsize = 0;
         unsigned char *decoded_data
-            = decode_line(str + start, aes_key, line_length, &decsize);
+            = decrypt_base64(str + start, aes_key, line_length, &decsize);
         if (f->find_label.value != NULL)
         {
             alloc(decsize);
@@ -208,8 +219,8 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
                 exit(0);
             }
         }
-        lines.array[lines.count].length = decsize;
-        lines.array[lines.count++].data = (char *)decoded_data;
+        lines.array[lines.count++]
+            = (Line){.data = (char *)decoded_data, .length = decsize};
     }
     if (f->copy.exists)
         lines.count = 0;
@@ -242,7 +253,7 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
         size_t         decsize = 0;
         size_t         line_length = strlen(lines[i]);
         unsigned char *decoded_data
-            = decode_line(lines[i], aes_key, line_length, &decsize);
+            = decrypt_base64(lines[i], aes_key, line_length, &decsize);
         alloc(label_and_data_size - decsize);
 
         char *label = (char *)alloc(decsize);
@@ -268,7 +279,8 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
                                   label_and_data_size);
 
             size_t encsize;
-            char *encoded_data = b64_encode(decoded_data, label_and_data_size, &encsize);
+            char  *encoded_data
+                = b64_encode(decoded_data, label_and_data_size, &encsize);
 
             FILE *f = fopen(data_store, "wb");
             if (f == NULL)
@@ -306,7 +318,8 @@ void encrypt_and_replace(Flags *f, char *find_label, char *data,
     AES_CTR_xcrypt_buffer(&ctx, label_and_data, label_and_data_size);
 
     size_t encsize;
-    char *encoded_data = b64_encode(label_and_data, label_and_data_size, &encsize);
+    char  *encoded_data
+        = b64_encode(label_and_data, label_and_data_size, &encsize);
     write_file(data_store, "a", encoded_data, encsize);
 
     for (size_t i = 0; i < idx; i++)
@@ -324,11 +337,15 @@ void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, data, data_length);
 
-    size_t encsize;
-    char *encoded_data = b64_encode(data, data_length, &encsize);
-    write_file(data_store, "a", encoded_data, encsize);
-
-    upload_changes(sync_remote_url);
+    if (!f->binary.exists)
+    {
+        size_t encsize;
+        char  *encoded_data = b64_encode(data, data_length, &encsize);
+        write_file(data_store, "a", encoded_data, encsize);
+        upload_changes(sync_remote_url);
+    }
+    else
+        write_file(data_store, "a", data, data_length);
 }
 
 ssize_t getline(char **lineptr, size_t *n, FILE *stream)
@@ -467,7 +484,7 @@ void delete_label(char *find_label, uint8_t *aes_key)
     {
         size_t         decoded_line_length = 0;
         size_t         line_length = strlen(lines[line_idx]);
-        unsigned char *decoded_line = decode_line(
+        unsigned char *decoded_line = decrypt_base64(
             lines[line_idx], aes_key, line_length, &decoded_line_length);
         char *label
             = (char *)alloc(decoded_line_length * sizeof(decoded_line) + 1);
@@ -513,14 +530,19 @@ void delete_label(char *find_label, uint8_t *aes_key)
     upload_changes(sync_remote_url);
 }
 
-unsigned char *decode_line(const char *line, uint8_t *aes_key,
-                           size_t line_length, size_t *decoded_line_length)
+unsigned char *decrypt_base64(const char *line, uint8_t *aes_key,
+                              size_t line_length, size_t *decoded_line_length)
 {
     unsigned char *decoded_line
         = b64_decode_ex(line, line_length, decoded_line_length);
-    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, (uint8_t *)decoded_line, *decoded_line_length);
+    decrypt_raw((uint8_t *)decoded_line, aes_key, *decoded_line_length);
     return decoded_line;
+}
+
+void decrypt_raw(uint8_t *line, uint8_t *aes_key, size_t length)
+{
+    AES_init_ctx_iv(&ctx, aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, line, length);
 }
 
 void decrypt_and_print(uint8_t *aes_key, Flags *f)

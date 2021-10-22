@@ -66,16 +66,18 @@ int            getpasswd(char **pw);
 ssize_t        getline(char **lineptr, size_t *n, FILE *stream);
 void           read_file(const char *fp, char ***lines, size_t *lsize);
 char          *read_file_as_str(const char *fp, size_t *nch);
-unsigned char *decode_line(const char *line, uint8_t *aes_key,
-                           size_t line_length, size_t *decoded_line_length);
-void           write_file(const char *fp, const char *mode, void *data, size_t size);
-Lines          decrypt_and_find(uint8_t *aes_key, Flags *f);
-void           decrypt_and_print(uint8_t *aes_key, Flags *f);
-void           encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
-                                 size_t data_length);
-void           encrypt_and_replace(Flags *f, char *find_label, char *data,
-                                   uint8_t *aes_key, size_t data_length);
-void           delete_label(char *label, uint8_t *aes_key);
-void          *alloc(u64 size);
+unsigned char *decrypt_base64(const char *line, uint8_t *aes_key,
+                              size_t line_length, size_t *decoded_line_length);
+void           decrypt_raw(uint8_t *line, uint8_t *aes_key, size_t length);
+
+void  write_file(const char *fp, const char *mode, void *data, size_t size);
+Lines decrypt_and_find(uint8_t *aes_key, Flags *f);
+void  decrypt_and_print(uint8_t *aes_key, Flags *f);
+void  encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
+                        size_t data_length);
+void  encrypt_and_replace(Flags *f, char *find_label, char *data,
+                          uint8_t *aes_key, size_t data_length);
+void  delete_label(char *label, uint8_t *aes_key);
+void *alloc(u64 size);
 
 #endif // IO_COMMON_H

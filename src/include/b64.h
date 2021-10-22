@@ -24,7 +24,7 @@ extern "C"
 {
 #endif
 
-    char *b64_encode(const unsigned char *, size_t, size_t *);
+    char          *b64_encode(const unsigned char *, size_t, size_t *);
     unsigned char *b64_decode_ex(const char *, size_t, size_t *);
 
 #ifdef __cplusplus
