@@ -168,7 +168,6 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
             = decrypt_base64(str + start, aes_key, line_length, &decsize);
         if (f->find_label.value != NULL)
         {
-            alloc(decsize);
             char  *label = (char *)alloc(decsize);
             size_t label_length = 0;
             int    found_label = 0;
@@ -208,13 +207,14 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
             {
                 const char *password
                     = (const char *)decoded_data + label_length + 1;
+		size_t password_length = decsize - label_length - 1;
 #ifdef _WIN32
-                if (!copy_to_clipboard(password, decsize))
+                if (!copy_to_clipboard(password, password_length))
                 {
                     error("%s\n", "couldn't copy to clipboard");
                 }
 #else
-                fwrite(password, sizeof(char), decsize, stdout);
+                fwrite(password, sizeof(char), password_length, stdout);
 #endif // _WIN32
                 exit(0);
             }
