@@ -15,3 +15,6 @@
 
 	./pm -kf key.txt -i binary.enc -o binary.dec -b
 
+### print all passwords
+
+    ./pm -kf key.txt
