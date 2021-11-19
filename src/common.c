@@ -207,9 +207,9 @@ Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
             {
                 const char *password
                     = (const char *)decoded_data + label_length + 1;
-		size_t password_length = decsize - label_length - 1;
+		        size_t password_length = decsize - label_length - 1;
 #ifdef _WIN32
-                if (!copy_to_clipboard(password, password_length))
+                if (!copy_to_clipboard(password, password_length + 1))
                 {
                     error("%s\n", "couldn't copy to clipboard");
                 }
