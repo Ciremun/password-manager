@@ -93,6 +93,12 @@ int main(int argc, char **argv)
     FILE *git_heads_master = fopen(".git/refs/heads/master", "rb");
     if (git_heads_master == 0)
         printf("error opening .git/refs/heads/master\n");
+    if (version_header && !git_heads_master)
+    {
+        fprintf(
+            version_header, "%s",
+            "#ifndef VERSION_H\n#define VERSION_H\n\n#define PM_VERSION \"unknown\"\n\n#endif // VERSION_H\n");
+    }
     if (version_header && git_heads_master)
     {
         fprintf(
