@@ -40,14 +40,14 @@ typedef HANDLE Fd;
 #include <sys/wait.h>
 #include <unistd.h>
 typedef pid_t Pid;
-typedef int   Fd;
+typedef int Fd;
 #endif // _WIN32
 
 typedef char *Cstr;
 
 typedef struct
 {
-    Cstr  *elems;
+    Cstr *elems;
     size_t count;
 } Cstr_Array;
 
@@ -60,25 +60,25 @@ typedef struct
 LPSTR GetLastErrorAsString(void);
 #endif // _WIN32
 
-#define return_code_if_error(code)                                             \
-    if (code != 0)                                                             \
+#define return_code_if_error(code) \
+    if (code != 0)                 \
     return code
 
-#define CMD(...)                                                               \
-    do                                                                         \
-    {                                                                          \
-        Cmd cmd = {.line = cstr_array_make(__VA_ARGS__, NULL)};                \
-        return_code_if_error(cmd_run_sync(cmd));                               \
+#define CMD(...)                                                \
+    do                                                          \
+    {                                                           \
+        Cmd cmd = {.line = cstr_array_make(__VA_ARGS__, NULL)}; \
+        return_code_if_error(cmd_run_sync(cmd));                \
     } while (0)
 
-int        verify_remote(const char *remote);
-int        pull_changes(const char *remote);
-int        upload_changes(const char *remote);
-int        pid_wait(Pid pid);
-int        cmd_run_sync(Cmd cmd);
-Pid        cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
-Cstr       cmd_show(Cmd cmd);
-Cstr       cstr_array_join(Cstr sep, Cstr_Array cstrs);
+int verify_remote(const char *remote);
+int pull_changes(const char *remote);
+int upload_changes(const char *remote);
+int pid_wait(Pid pid);
+int cmd_run_sync(Cmd cmd);
+Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
+Cstr cmd_show(Cmd cmd);
+Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs);
 Cstr_Array cstr_array_make(Cstr first, ...);
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr);
 

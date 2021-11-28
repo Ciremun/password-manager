@@ -8,14 +8,14 @@
 #include "stdlib.h"
 #include "string.h"
 
-#define SOURCES                                                                \
-    "src/aes.c", "src/b64.c", "src/common.c", "src/parse.c", "src/rand.c",     \
+#define SOURCES                                                            \
+    "src/aes.c", "src/b64.c", "src/common.c", "src/parse.c", "src/rand.c", \
         "src/sync.c"
-#define FLAGS      "-Wall", "-Wextra", "-pedantic", "-Isrc/include/"
+#define FLAGS "-Wall", "-Wextra", "-pedantic", "-Isrc/include/"
 #define MSVC_FLAGS "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
 
 #define STR_HELPER(x) #x
-#define STR(x)        STR_HELPER(x)
+#define STR(x) STR_HELPER(x)
 
 #if defined(_WIN32)
 #define OS "win"
@@ -32,28 +32,25 @@
 #endif // OS
 
 #if defined(__GNUC__) && defined(__llvm__) && defined(__clang__)
-#define CC                                                                     \
-    "clang-" STR(__clang_major__) "." STR(__clang_minor__) "." STR(            \
+#define CC                                                          \
+    "clang-" STR(__clang_major__) "." STR(__clang_minor__) "." STR( \
         __clang_patchlevel__)
 #elif defined(_MSC_VER) && !defined(__clang__)
 #define CC "msvc-" STR(_MSC_VER)
 #elif defined(__GNUC__) && !defined(__llvm__) && !defined(__INTEL_COMPILER)
-#define CC                                                                     \
+#define CC \
     "gcc-" STR(__GNUC__) "." STR(__GNUC_MINOR__) "." STR(__GNUC_PATCHLEVEL__)
 #else
 #define CC "unknown"
 #endif // CC
 
-#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__)              \
-    || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
 #define ARCH "x86_64"
 #elif defined(__aarch64__)
 #define ARCH "aarch64"
 #elif defined(__arm__) || defined(_M_ARM)
 #define ARCH "arm"
-#elif defined(i386) || defined(__i386) || defined(__i386__)                    \
-    || defined(__i386__) || defined(__i486__) || defined(__i586__)             \
-    || defined(__i686__) || defined(_M_IX86) || defined(_X86_)
+#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) || defined(_M_IX86) || defined(_X86_)
 #define ARCH "intel_x86"
 #else
 #define ARCH "unknown"
@@ -80,7 +77,7 @@ int main(int argc, char **argv)
     GO_REBUILD_URSELF(argc, argv);
 
     char *cc = getenv("cc");
-    int   test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
+    int test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
     if (test)
     {
         PANIC_OVERWRITE_IF_FILE_EXISTS(DEFAULT_DATA_STORE);
@@ -113,7 +110,7 @@ int main(int argc, char **argv)
     if (git_heads_master)
         fclose(git_heads_master);
 #if defined(PM_CROSSCOMPILING)
-    // nothing
+        // nothing
 #elif defined(_WIN32)
     int msvc = cc == NULL || strcmp(cc, "cl") == 0 || strcmp(cc, "cl.exe") == 0;
     if (test)

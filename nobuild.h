@@ -11,7 +11,7 @@
 #include <unistd.h>
 #define PATH_SEP "/"
 typedef pid_t Pid;
-typedef int   Fd;
+typedef int Fd;
 #else
 #define WIN32_MEAN_AND_LEAN
 #include "windows.h"
@@ -66,9 +66,9 @@ struct dirent
 
 typedef struct DIR DIR;
 
-DIR           *opendir(const char *dirpath);
+DIR *opendir(const char *dirpath);
 struct dirent *readdir(DIR *dirp);
-int            closedir(DIR *dirp);
+int closedir(DIR *dirp);
 
 #endif // MINIRENT_H_
 // minirent.h HEADER END ////////////////////////////////////////
@@ -85,11 +85,11 @@ LPSTR GetLastErrorAsString(void);
 #include <stdlib.h>
 #include <string.h>
 
-#define FOREACH_ARRAY(type, elem, array, body)                                 \
-    for (size_t elem_##index = 0; elem_##index < array.count; ++elem_##index)  \
-    {                                                                          \
-        type *elem = &array.elems[elem_##index];                               \
-        body;                                                                  \
+#define FOREACH_ARRAY(type, elem, array, body)                                \
+    for (size_t elem_##index = 0; elem_##index < array.count; ++elem_##index) \
+    {                                                                         \
+        type *elem = &array.elems[elem_##index];                              \
+        body;                                                                 \
     }
 
 typedef const char *Cstr;
@@ -102,17 +102,17 @@ Cstr cstr_no_ext(Cstr path);
 
 typedef struct
 {
-    Cstr  *elems;
+    Cstr *elems;
     size_t count;
 } Cstr_Array;
 
 Cstr_Array cstr_array_make(Cstr first, ...);
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr);
-Cstr       cstr_array_join(Cstr sep, Cstr_Array cstrs);
+Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs);
 
 #define JOIN(sep, ...) cstr_array_join(sep, cstr_array_make(__VA_ARGS__, NULL))
-#define CONCAT(...)    JOIN("", __VA_ARGS__)
-#define PATH(...)      JOIN(PATH_SEP, __VA_ARGS__)
+#define CONCAT(...) JOIN("", __VA_ARGS__)
+#define PATH(...) JOIN(PATH_SEP, __VA_ARGS__)
 
 typedef struct
 {
@@ -127,28 +127,28 @@ typedef struct
     Cstr_Array line;
 } Cmd;
 
-Fd   fd_open_for_read(Cstr path);
-Fd   fd_open_for_write(Cstr path);
+Fd fd_open_for_read(Cstr path);
+Fd fd_open_for_write(Cstr path);
 void fd_close(Fd fd);
 void pid_wait(Pid pid);
 Cstr cmd_show(Cmd cmd);
-Pid  cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
+Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
 void cmd_run_sync(Cmd cmd);
 
 typedef struct
 {
-    Cmd   *elems;
+    Cmd *elems;
     size_t count;
 } Cmd_Array;
 
 // TODO(#1): no way to disable echo in nobuild scripts
 // TODO(#2): no way to ignore fails
-#define CMD(...)                                                               \
-    do                                                                         \
-    {                                                                          \
-        Cmd cmd = {.line = cstr_array_make(__VA_ARGS__, NULL)};                \
-        INFO("CMD: %s", cmd_show(cmd));                                        \
-        cmd_run_sync(cmd);                                                     \
+#define CMD(...)                                                \
+    do                                                          \
+    {                                                           \
+        Cmd cmd = {.line = cstr_array_make(__VA_ARGS__, NULL)}; \
+        INFO("CMD: %s", cmd_show(cmd));                         \
+        cmd_run_sync(cmd);                                      \
     } while (0)
 
 typedef enum
@@ -163,62 +163,62 @@ typedef enum
 typedef struct
 {
     Chain_Token_Type type;
-    Cstr_Array       args;
+    Cstr_Array args;
 } Chain_Token;
 
 // TODO(#17): IN and OUT are already taken by WinAPI
-#define IN(path)                                                               \
-    (Chain_Token)                                                              \
-    {                                                                          \
-        .type = CHAIN_TOKEN_IN, .args = cstr_array_make(path, NULL)            \
+#define IN(path)                                                    \
+    (Chain_Token)                                                   \
+    {                                                               \
+        .type = CHAIN_TOKEN_IN, .args = cstr_array_make(path, NULL) \
     }
 
-#define OUT(path)                                                              \
-    (Chain_Token)                                                              \
-    {                                                                          \
-        .type = CHAIN_TOKEN_OUT, .args = cstr_array_make(path, NULL)           \
+#define OUT(path)                                                    \
+    (Chain_Token)                                                    \
+    {                                                                \
+        .type = CHAIN_TOKEN_OUT, .args = cstr_array_make(path, NULL) \
     }
 
-#define CHAIN_CMD(...)                                                         \
-    (Chain_Token)                                                              \
-    {                                                                          \
-        .type = CHAIN_TOKEN_CMD, .args = cstr_array_make(__VA_ARGS__, NULL)    \
+#define CHAIN_CMD(...)                                                      \
+    (Chain_Token)                                                           \
+    {                                                                       \
+        .type = CHAIN_TOKEN_CMD, .args = cstr_array_make(__VA_ARGS__, NULL) \
     }
 
 // TODO(#20): pipes do not allow redirecting stderr
 typedef struct
 {
-    Cstr      input_filepath;
+    Cstr input_filepath;
     Cmd_Array cmds;
-    Cstr      output_filepath;
+    Cstr output_filepath;
 } Chain;
 
 Chain chain_build_from_tokens(Chain_Token first, ...);
-void  chain_run_sync(Chain chain);
-void  chain_echo(Chain chain);
+void chain_run_sync(Chain chain);
+void chain_echo(Chain chain);
 
 // TODO(#15): PIPE does not report where exactly a syntactic error has happened
-#define CHAIN(...)                                                             \
-    do                                                                         \
-    {                                                                          \
-        Chain chain = chain_build_from_tokens(__VA_ARGS__, (Chain_Token){0});  \
-        chain_echo(chain);                                                     \
-        chain_run_sync(chain);                                                 \
+#define CHAIN(...)                                                            \
+    do                                                                        \
+    {                                                                         \
+        Chain chain = chain_build_from_tokens(__VA_ARGS__, (Chain_Token){0}); \
+        chain_echo(chain);                                                    \
+        chain_run_sync(chain);                                                \
     } while (0)
 
 #ifndef REBUILD_URSELF
 #if _WIN32
 #if defined(__GNUC__)
-#define REBUILD_URSELF(binary_path, source_path)                               \
+#define REBUILD_URSELF(binary_path, source_path) \
     CMD("gcc", "-o", binary_path, source_path)
 #elif defined(__clang__)
-#define REBUILD_URSELF(binary_path, source_path)                               \
+#define REBUILD_URSELF(binary_path, source_path) \
     CMD("clang", "-o", binary_path, source_path)
 #elif defined(_MSC_VER)
 #define REBUILD_URSELF(binary_path, source_path) CMD("cl.exe", source_path)
 #endif
 #else
-#define REBUILD_URSELF(binary_path, source_path)                               \
+#define REBUILD_URSELF(binary_path, source_path) \
     CMD("cc", "-o", binary_path, source_path)
 #endif
 #endif
@@ -247,27 +247,27 @@ void  chain_echo(Chain chain);
 //   keep the process of bootstrapping as simple as possible and doing all of
 //   the actual work inside of the nobuild)
 //
-#define GO_REBUILD_URSELF(argc, argv)                                          \
-    do                                                                         \
-    {                                                                          \
-        const char *source_path = __FILE__;                                    \
-        assert(argc >= 1);                                                     \
-        const char *binary_path = argv[0];                                     \
-                                                                               \
-        if (is_path1_modified_after_path2(source_path, binary_path))           \
-        {                                                                      \
-            RENAME(binary_path, CONCAT(binary_path, ".old"));                  \
-            REBUILD_URSELF(binary_path, source_path);                          \
-            Cmd cmd = {                                                \
-                .line = {                                              \
-                    .elems = (Cstr*) argv,                             \
-                    .count = argc,                                     \
-                },                                                     \
-            };       \
-            INFO("CMD: %s", cmd_show(cmd));                                    \
-            cmd_run_sync(cmd);                                                 \
-            exit(0);                                                           \
-        }                                                                      \
+#define GO_REBUILD_URSELF(argc, argv)                                \
+    do                                                               \
+    {                                                                \
+        const char *source_path = __FILE__;                          \
+        assert(argc >= 1);                                           \
+        const char *binary_path = argv[0];                           \
+                                                                     \
+        if (is_path1_modified_after_path2(source_path, binary_path)) \
+        {                                                            \
+            RENAME(binary_path, CONCAT(binary_path, ".old"));        \
+            REBUILD_URSELF(binary_path, source_path);                \
+            Cmd cmd = {                                              \
+                .line = {                                            \
+                    .elems = (Cstr *)argv,                           \
+                    .count = argc,                                   \
+                },                                                   \
+            };                                                       \
+            INFO("CMD: %s", cmd_show(cmd));                          \
+            cmd_run_sync(cmd);                                       \
+            exit(0);                                                 \
+        }                                                            \
     } while (0)
 // The implementation idea is stolen from https://github.com/zhiayang/nabs
 
@@ -280,59 +280,59 @@ int path_exists(Cstr path);
 #define PATH_EXISTS(path) path_exists(path)
 
 void path_mkdirs(Cstr_Array path);
-#define MKDIRS(...)                                                            \
-    do                                                                         \
-    {                                                                          \
-        Cstr_Array path = cstr_array_make(__VA_ARGS__, NULL);                  \
-        INFO("MKDIRS: %s", cstr_array_join(PATH_SEP, path));                   \
-        path_mkdirs(path);                                                     \
+#define MKDIRS(...)                                           \
+    do                                                        \
+    {                                                         \
+        Cstr_Array path = cstr_array_make(__VA_ARGS__, NULL); \
+        INFO("MKDIRS: %s", cstr_array_join(PATH_SEP, path));  \
+        path_mkdirs(path);                                    \
     } while (0)
 
 void path_rename(Cstr old_path, Cstr new_path);
-#define RENAME(old_path, new_path)                                             \
-    do                                                                         \
-    {                                                                          \
-        INFO("RENAME: %s -> %s", old_path, new_path);                          \
-        path_rename(old_path, new_path);                                       \
+#define RENAME(old_path, new_path)                    \
+    do                                                \
+    {                                                 \
+        INFO("RENAME: %s -> %s", old_path, new_path); \
+        path_rename(old_path, new_path);              \
     } while (0)
 
 void path_rm(Cstr path);
-#define RM(path)                                                               \
-    do                                                                         \
-    {                                                                          \
-        INFO("RM: %s", path);                                                  \
-        path_rm(path);                                                         \
+#define RM(path)              \
+    do                        \
+    {                         \
+        INFO("RM: %s", path); \
+        path_rm(path);        \
     } while (0)
 
-#define FOREACH_FILE_IN_DIR(file, dirpath, body)                               \
-    do                                                                         \
-    {                                                                          \
-        struct dirent *dp = NULL;                                              \
-        DIR           *dir = opendir(dirpath);                                 \
-        if (dir == NULL)                                                       \
-        {                                                                      \
-            PANIC("could not open directory %s: %s", dirpath,                  \
-                  strerror(errno));                                            \
-        }                                                                      \
-        errno = 0;                                                             \
-        while ((dp = readdir(dir)))                                            \
-        {                                                                      \
-            const char *file = dp->d_name;                                     \
-            body;                                                              \
-        }                                                                      \
-                                                                               \
-        if (errno > 0)                                                         \
-        {                                                                      \
-            PANIC("could not read directory %s: %s", dirpath,                  \
-                  strerror(errno));                                            \
-        }                                                                      \
-                                                                               \
-        closedir(dir);                                                         \
+#define FOREACH_FILE_IN_DIR(file, dirpath, body)              \
+    do                                                        \
+    {                                                         \
+        struct dirent *dp = NULL;                             \
+        DIR *dir = opendir(dirpath);                          \
+        if (dir == NULL)                                      \
+        {                                                     \
+            PANIC("could not open directory %s: %s", dirpath, \
+                  strerror(errno));                           \
+        }                                                     \
+        errno = 0;                                            \
+        while ((dp = readdir(dir)))                           \
+        {                                                     \
+            const char *file = dp->d_name;                    \
+            body;                                             \
+        }                                                     \
+                                                              \
+        if (errno > 0)                                        \
+        {                                                     \
+            PANIC("could not read directory %s: %s", dirpath, \
+                  strerror(errno));                           \
+        }                                                     \
+                                                              \
+        closedir(dir);                                        \
     } while (0)
 
 #if defined(__GNUC__) || defined(__clang__)
 // https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Function-Attributes.html
-#define NOBUILD_PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK)                    \
+#define NOBUILD_PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK) \
     __attribute__((format(printf, STRING_INDEX, FIRST_TO_CHECK)))
 #else
 #define NOBUILD_PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK)
@@ -363,14 +363,13 @@ LPSTR GetLastErrorAsString(void)
     LPSTR messageBuffer = NULL;
 
     DWORD size = FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM
-            | FORMAT_MESSAGE_IGNORE_INSERTS,       // DWORD   dwFlags,
-        NULL,                                      // LPCVOID lpSource,
-        errorMessageId,                            // DWORD   dwMessageId,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // DWORD   dwLanguageId,
-        (LPSTR)&messageBuffer,                     // LPTSTR  lpBuffer,
-        0,                                         // DWORD   nSize,
-        NULL                                       // va_list *Arguments
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // DWORD   dwFlags,
+        NULL,                                                                                        // LPCVOID lpSource,
+        errorMessageId,                                                                              // DWORD   dwMessageId,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),                                                   // DWORD   dwLanguageId,
+        (LPSTR)&messageBuffer,                                                                       // LPTSTR  lpBuffer,
+        0,                                                                                           // DWORD   nSize,
+        NULL                                                                                         // va_list *Arguments
     );
 
     return messageBuffer;
@@ -379,9 +378,9 @@ LPSTR GetLastErrorAsString(void)
 // minirent.h IMPLEMENTATION BEGIN ////////////////////////////////////////
 struct DIR
 {
-    HANDLE          hFind;
+    HANDLE hFind;
     WIN32_FIND_DATA data;
-    struct dirent  *dirent;
+    struct dirent *dirent;
 };
 
 DIR *opendir(const char *dirpath)
@@ -474,8 +473,7 @@ int cstr_ends_with(Cstr cstr, Cstr postfix)
 {
     const size_t cstr_len = strlen(cstr);
     const size_t postfix_len = strlen(postfix);
-    return postfix_len <= cstr_len
-           && strcmp(cstr + cstr_len - postfix_len, postfix) == 0;
+    return postfix_len <= cstr_len && strcmp(cstr + cstr_len - postfix_len, postfix) == 0;
 }
 
 Cstr cstr_no_ext(Cstr path)
@@ -548,14 +546,14 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t sep_len = strlen(sep);
-    size_t       len = 0;
+    size_t len = 0;
     for (size_t i = 0; i < cstrs.count; ++i)
     {
         len += strlen(cstrs.elems[i]);
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char        *result = malloc(sizeof(char) * result_len);
+    char *result = malloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -820,7 +818,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
 
 void cmd_run_sync(Cmd cmd) { pid_wait(cmd_run_async(cmd, NULL, NULL)); }
 
-static void chain_set_input_output_files_or_count_cmds(Chain      *chain,
+static void chain_set_input_output_files_or_count_cmds(Chain *chain,
                                                        Chain_Token token)
 {
     switch (token.type)
@@ -885,8 +883,7 @@ Chain chain_build_from_tokens(Chain_Token first, ...)
     }
     va_end(args);
 
-    result.cmds.elems
-        = malloc(sizeof(result.cmds.elems[0]) * result.cmds.count);
+    result.cmds.elems = malloc(sizeof(result.cmds.elems[0]) * result.cmds.count);
     if (result.cmds.elems == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -917,8 +914,8 @@ void chain_run_sync(Chain chain)
     Pid *cpids = malloc(sizeof(Pid) * chain.cmds.count);
 
     Pipe pip = {0};
-    Fd   fdin = 0;
-    Fd  *fdprev = NULL;
+    Fd fdin = 0;
+    Fd *fdprev = NULL;
 
     if (chain.input_filepath)
     {
@@ -945,7 +942,7 @@ void chain_run_sync(Chain chain)
     }
 
     {
-        Fd  fdout = 0;
+        Fd fdout = 0;
         Fd *fdnext = NULL;
 
         if (chain.output_filepath)
@@ -1020,8 +1017,7 @@ int path_is_dir(Cstr path)
 #ifdef _WIN32
     DWORD dwAttrib = GetFileAttributes(path);
 
-    return (dwAttrib != INVALID_FILE_ATTRIBUTES
-            && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+    return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 #else
     struct stat statbuf = {0};
     if (stat(path, &statbuf) < 0)
@@ -1070,7 +1066,7 @@ void path_mkdirs(Cstr_Array path)
         len += strlen(path.elems[i]);
     }
 
-    size_t       seps_count = path.count - 1;
+    size_t seps_count = path.count - 1;
     const size_t sep_len = strlen(PATH_SEP);
 
     char *result = malloc(len + seps_count * sep_len + 1);

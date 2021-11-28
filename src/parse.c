@@ -7,10 +7,10 @@
 #define MEM_IMPLEMENTATION
 #include "mem.h"
 
-Memory                g_mem;
+Memory g_mem;
 extern struct AES_ctx ctx;
-extern const char    *help_s;
-extern char          *data_store;
+extern const char *help_s;
+extern char *data_store;
 
 char *sync_remote_url = 0;
 
@@ -28,22 +28,19 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->data;
         else if (!f->label.exists && is_flag(argv[i], "-l", "--label"))
             flag = &f->label;
-        else if (!f->find_label.exists
-                 && is_flag(argv[i], "-fl", "--find-label"))
+        else if (!f->find_label.exists && is_flag(argv[i], "-fl", "--find-label"))
             flag = &f->find_label;
         else if (!f->help.exists && is_flag(argv[i], "-h", "--help"))
             flag = &f->help;
         else if (!f->data_file.exists && is_flag(argv[i], "-df", "--data-file"))
             flag = &f->data_file;
-        else if (!f->generate_password.exists
-                 && is_flag(argv[i], "-gp", "--generate-password"))
+        else if (!f->generate_password.exists && is_flag(argv[i], "-gp", "--generate-password"))
             flag = &f->generate_password;
         else if (!f->key.exists && is_flag(argv[i], "-k", "--key"))
             flag = &f->key;
         else if (!f->copy.exists && is_flag(argv[i], "-c", "--copy"))
             flag = &f->copy;
-        else if (!f->delete_label.exists
-                 && is_flag(argv[i], "-dl", "--delete-label"))
+        else if (!f->delete_label.exists && is_flag(argv[i], "-dl", "--delete-label"))
             flag = &f->delete_label;
         else if (!f->input.exists && is_flag(argv[i], "-i", "--input"))
             flag = &f->input;
@@ -108,7 +105,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             return 1;
         }
         size_t aes_key_length = 0;
-        char  *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
+        char *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
         if (aes_key_length > 128)
             aes_key = (uint8_t *)alloc(aes_key_length);
         else
@@ -166,7 +163,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
 
             size_t nch = 0;
-            char  *data = read_file_as_str(f.data_file.value, &nch);
+            char *data = read_file_as_str(f.data_file.value, &nch);
 
             if (f.label.exists)
                 encrypt_and_replace(&f, f.label.value, data, aes_key, nch);

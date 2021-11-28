@@ -26,7 +26,7 @@ typedef struct
 {
     char *start;
     char *base;
-    u64   capacity;
+    u64 capacity;
 #ifdef _WIN32
     u64 commited;
     u64 allocated;
@@ -34,8 +34,8 @@ typedef struct
 #endif // _WIN32
 } Memory;
 
-int   mem_init(Memory *memory);
-int   mem_free(Memory *memory);
+int mem_init(Memory *memory);
+int mem_free(Memory *memory);
 void *mem_alloc(Memory *memory, u64 size);
 
 #endif // MEM_H_
@@ -50,7 +50,7 @@ int GetPhysicallyInstalledSystemMemory(u64 *output)
         return 0;
 
     char buff[64];
-    int  count = 0;
+    int count = 0;
     if ((count = read(fd, buff, 64)) <= 0)
         goto error;
 
@@ -133,8 +133,7 @@ void *mem_alloc(Memory *memory, u64 size)
     {
         memory->commit_size += size * 2;
         if (VirtualAlloc(memory->start, memory->commit_size, MEM_COMMIT,
-                         PAGE_READWRITE)
-            == 0)
+                         PAGE_READWRITE) == 0)
             return 0;
         memory->commited += memory->commit_size;
     }

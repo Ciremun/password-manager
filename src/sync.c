@@ -38,18 +38,16 @@ int verify_remote(const char *remote)
     if (remote == NULL)
         return 0;
     const char *git_config = ".git/config";
-    size_t      size = 0;
-    char       *str = read_file_as_str(git_config, &size);
+    size_t size = 0;
+    char *str = read_file_as_str(git_config, &size);
     for (size_t i = 0; i + 5 < size; ++i)
     {
-        if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l'
-            && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
+        if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l' && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
         {
             i += 6;
             size_t start = i;
             for (; i < size; ++i)
-                if ((str[i] == '\n' || str[i] == '\r')
-                    && (memcmp(str + start, remote, i - start) == 0))
+                if ((str[i] == '\n' || str[i] == '\r') && (memcmp(str + start, remote, i - start) == 0))
                     return 1;
             break;
         }
@@ -125,14 +123,14 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t sep_len = strlen(sep);
-    size_t       len = 0;
+    size_t len = 0;
     for (size_t i = 0; i < cstrs.count; ++i)
     {
         len += strlen(cstrs.elems[i]);
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char        *result = (char *)alloc(sizeof(char) * result_len);
+    char *result = (char *)alloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -219,8 +217,8 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
     ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
 
     char *lpCommandLine = (char *)cstr_array_join(" ", cmd.line);
-    BOOL  bSuccess = CreateProcess(NULL, lpCommandLine, NULL, NULL, TRUE, 0,
-                                   NULL, NULL, &siStartInfo, &piProcInfo);
+    BOOL bSuccess = CreateProcess(NULL, lpCommandLine, NULL, NULL, TRUE, 0,
+                                  NULL, NULL, &siStartInfo, &piProcInfo);
 
     if (!bSuccess)
     {

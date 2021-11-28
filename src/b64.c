@@ -10,13 +10,13 @@ int bufc = 0;
 
 unsigned char *b64_decode_ex(const char *src, size_t len, size_t *decsize)
 {
-    int            i = 0;
-    int            j = 0;
-    int            l = 0;
-    size_t         size = 0;
+    int i = 0;
+    int j = 0;
+    int l = 0;
+    size_t size = 0;
     unsigned char *dec = NULL;
-    unsigned char  buf[3];
-    unsigned char  tmp[4];
+    unsigned char buf[3];
+    unsigned char tmp[4];
 
     // alloc
     dec = (unsigned char *)alloc(len * 3 / 4);
@@ -123,10 +123,10 @@ unsigned char *b64_decode_ex(const char *src, size_t len, size_t *decsize)
 
 char *b64_encode(const unsigned char *src, size_t len, size_t *encsize)
 {
-    int           i = 0;
-    int           j = 0;
-    char         *enc = NULL;
-    size_t        size = 0;
+    int i = 0;
+    int j = 0;
+    char *enc = NULL;
+    size_t size = 0;
     unsigned char buf[4];
     unsigned char tmp[3];
 
