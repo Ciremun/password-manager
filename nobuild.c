@@ -112,7 +112,9 @@ int main(int argc, char **argv)
         fclose(version_header);
     if (git_heads_master)
         fclose(git_heads_master);
-#ifdef _WIN32
+#if defined(PM_CROSSCOMPILING)
+    // nothing
+#elif defined(_WIN32)
     int msvc = cc == NULL || strcmp(cc, "cl") == 0 || strcmp(cc, "cl.exe") == 0;
     if (test)
     {
