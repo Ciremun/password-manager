@@ -1,12 +1,12 @@
 #include "common.h"
-#include "mem.h"
+#include "pm_io.h"
 #include "sync.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 extern char *data_store;
 extern char *sync_remote_url;
-extern Memory g_mem;
+// extern Memory g_mem;
 
 const char *help_s = "\n"
                      "./pm [flags]                  read or write data\n"

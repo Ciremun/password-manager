@@ -4,10 +4,10 @@
 #include "rand.h"
 #include "version.h"
 
-#define MEM_IMPLEMENTATION
-#include "mem.h"
+#define PM_IO_IMPLEMENTATION
+#include "pm_io.h"
 
-Memory g_mem;
+// Memory g_mem;
 extern struct AES_ctx ctx;
 extern const char *help_s;
 extern char *data_store;
@@ -67,8 +67,8 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
-    if (!mem_init(&g_mem))
-        PANIC("%s\n", "mem_init failed!");
+    // if (!mem_init(&g_mem))
+    //     PANIC("%s\n", "mem_init failed!");
 
     sync_remote_url = getenv("PM_SYNC_REMOTE_URL");
 
@@ -284,12 +284,12 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
 done:
 
-#ifndef TEST
-    if (!mem_free(&g_mem))
-    {
-        error("%s\n", "mem_free failed!");
-    }
-#endif // TEST
+// #ifndef TEST
+//     if (!mem_free(&g_mem))
+//     {
+//         error("%s\n", "mem_free failed!");
+//     }
+// #endif // TEST
 
     return 0;
 }

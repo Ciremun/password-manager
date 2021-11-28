@@ -21,7 +21,7 @@ typedef SSIZE_T ssize_t;
 
 #include "aes.h"
 #include "b64.h"
-#include "mem.h"
+#include "pm_io.h"
 #include "parse.h"
 
 #define LMAX 255
