@@ -34,36 +34,34 @@ Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 }
 #endif // _WIN32
 
-int verify_remote(const char *remote)
+int verify_remote(String remote)
 {
-    if (remote == NULL)
-        return 0;
     const char *git_config_path = ".git/config";
     File f = open_or_create_file(git_config_path, PM_READ_ONLY, 0);
-    char* s = map_file(f);
+    map_file(&f);
     for (size_t i = 0; i + 5 < f.size; ++i)
     {
-        if (s[i + 0] == 'u' && s[i + 1] == 'r' && s[i + 2] == 'l' && s[i + 3] == ' ' && s[i + 4] == '=' && s[i + 5] == ' ')
+        if (memcmp(f.start + i, "url = ", 6) == 0)
         {
             i += 6;
             size_t start = i;
             for (; i < f.size; ++i)
-                if ((s[i] == '\n' || s[i] == '\r') && (memcmp(s + start, remote, i - start) == 0))
+                if ((f.start[i] == '\n' || f.start[i] == '\r') && (memcmp(f.start + start, remote.data, remote.length) == 0))
                     goto return_true;
             goto return_false;
         }
     }
 
 return_false:
-    error("provided remote (%s) doesn't match origin in .git/config\n", remote);
+    error("provided remote (%s) doesn't match origin in .git/config\n", (char *)remote.data);
     return 0;
 
 return_true:
-    unmap_file(s, f.size);
+    unmap_file(f);
     return 1;
 }
 
-int pull_changes(const char *remote)
+int pull_changes(String remote)
 {
     if (!verify_remote(remote))
         return -1;
@@ -72,7 +70,7 @@ int pull_changes(const char *remote)
     return 0;
 }
 
-int upload_changes(const char *remote)
+int upload_changes(String remote)
 {
     if (!verify_remote(remote))
         return -1;

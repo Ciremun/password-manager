@@ -66,11 +66,6 @@ File open_or_create_file(const char *path, flag_t access, int create)
 int close_file(File f)
 {
 #ifdef _WIN32
-    if (CloseHandle(f.hMap) == 0)
-    {
-        error("CloseHandle failed: %ld\n", GetLastError());
-        return 0;
-    }
     if (CloseHandle(f.handle) == 0)
     {
         error("CloseHandle failed: %ld\n", GetLastError());
@@ -145,11 +140,11 @@ int get_file_size(File *f)
     return 1;
 }
 
-char *map_file(File f)
+void map_file(File *f)
 {
 #ifdef _WIN32
     DWORD flProtect;
-    switch (f.access)
+    switch (f->access)
     {
     case PM_READ_WRITE:
         flProtect = PAGE_READWRITE;
@@ -161,16 +156,16 @@ char *map_file(File f)
         exit(1);
     }
 
-    HANDLE hMap = CreateFileMappingA(f.handle, 0, flProtect, 0, 0, 0);
-    if (!hMap)
+    f->hMap = CreateFileMappingA(f->handle, 0, flProtect, 0, 0, 0);
+    if (f->hMap == 0)
     {
         error("CreateFileMappingA failed: %ld\n", GetLastError());
-        CloseHandle(f.handle);
-        return 0;
+        CloseHandle(f->handle);
+        exit(1);
     }
 
     DWORD dwDesiredAccess;
-    switch (f.access)
+    switch (f->access)
     {
     case PM_READ_WRITE:
         dwDesiredAccess = FILE_MAP_ALL_ACCESS;
@@ -182,19 +177,18 @@ char *map_file(File f)
         exit(1);
     }
 
-    char *map_start = (char *)MapViewOfFile(hMap, dwDesiredAccess, 0, 0, 0);
-    if (map_start == 0)
+    f->start = (char *)MapViewOfFile(f->hMap, dwDesiredAccess, 0, 0, 0);
+    if (f->start == 0)
     {
         error("MapViewOfFile failed: %ld\n", GetLastError());
-        CloseHandle(hMap);
-        CloseHandle(f.handle);
-        return 0;
+        CloseHandle(f->hMap);
+        CloseHandle(f->handle);
+        exit(1);
     }
-    f.hMap = hMap;
 #else
 
     int prot;
-    switch (f.access)
+    switch (f->access)
     {
     case PM_READ_WRITE:
         prot = PROT_READ | PROT_WRITE;
@@ -206,28 +200,30 @@ char *map_file(File f)
         exit(1);
     }
 
-    char *map_start;
-    if ((map_start = mmap(0, f.size, prot, MAP_SHARED,
-                          f.handle, 0)) == (void *)-1)
+    if ((f->start = mmap(0, f->size, prot, MAP_SHARED,
+                          f->handle, 0)) == (void *)-1)
     {
         error("mmap failed: %s\n", strerror(errno));
-        return 0;
+        exit(1);
     }
 #endif // _WIN32
-    return map_start;
 }
 
-int unmap_file(char *map_start, size_t size)
+int unmap_file(File f)
 {
 #ifdef _WIN32
-    (void)size;
-    if (UnmapViewOfFile(map_start) == 0)
+    if (UnmapViewOfFile(f.start) == 0)
     {
         error("UnmapViewOfFile failed: %ld\n", GetLastError());
         return 0;
     }
+    if (CloseHandle(f.hMap) == 0)
+    {
+        error("CloseHandle failed: %ld\n", GetLastError());
+        return 0;
+    }
 #else
-    if (munmap(map_start, size) < 0)
+    if (munmap(f.start, f.size) < 0)
     {
         error("munmap failed: %s\n", strerror(errno));
         return 0;

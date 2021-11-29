@@ -48,9 +48,9 @@ LPSTR GetLastErrorAsString(void);
         return_code_if_error(cmd_run_sync(cmd));                \
     } while (0)
 
-int verify_remote(const char *remote);
-int pull_changes(const char *remote);
-int upload_changes(const char *remote);
+int verify_remote(String remote);
+int pull_changes(String remote);
+int upload_changes(String remote);
 int pid_wait(Pid pid);
 int cmd_run_sync(Cmd cmd);
 Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);

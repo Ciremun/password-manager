@@ -61,6 +61,7 @@ typedef struct
     handle_t handle;
     flag_t access;
     size_t size;
+    uint8_t *start;
 } File;
 
 File open_or_create_file(const char *path, flag_t access, int create);
@@ -68,8 +69,8 @@ int close_file(File f);
 int file_exists(const char *path);
 int truncate_file(handle_t h, size_t new_size);
 int get_file_size(File *f);
-char *map_file(File f);
-int unmap_file(char *map_start, size_t size);
+void map_file(File *f);
+int unmap_file(File f);
 int getpasswd(uint8_t *pw);
 void input_key(uint8_t *aes_key, Flags *f);
 
