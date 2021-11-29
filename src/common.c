@@ -125,103 +125,6 @@ void input_key(uint8_t **aes_key, Flags *f)
     }
 }
 
-Lines decrypt_and_find(uint8_t *aes_key, Flags *f)
-{
-    pull_changes(sync_remote_url);
-    size_t nch = 0;
-    char *str = read_file_as_str(data_store, &nch);
-    input_key(&aes_key, f);
-    if (f->binary.exists)
-    {
-        decrypt_raw((uint8_t *)str, aes_key, nch);
-        Lines lines = {
-            .array = (Line *)alloc(sizeof(Line)),
-            .count = 1,
-        };
-        lines.array[0] = (Line){.data = str, .length = nch};
-        return lines;
-    }
-    size_t i = 0;
-    size_t query_len = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
-    size_t total_lines = 0;
-    for (size_t j = 0; j < nch; ++j)
-        if (str[j] == '\n')
-            total_lines++;
-    Lines lines = {
-        .array = (Line *)alloc(sizeof(Line) * total_lines),
-        .count = 0,
-    };
-    while (i < nch)
-    {
-        size_t start = i;
-        do
-        {
-            i++;
-        } while (i < nch && str[i] != '\n');
-        size_t line_length = i - start - 1;
-        if (str[i] == '\n')
-            i++;
-        size_t decsize = 0;
-        unsigned char *decoded_data = decrypt_base64(str + start, aes_key, line_length, &decsize);
-        if (f->find_label.value != NULL)
-        {
-            char *label = (char *)alloc(decsize);
-            size_t label_length = 0;
-            int found_label = 0;
-            for (size_t j = 0; j < decsize; j++)
-            {
-                if (decoded_data[j] == ' ')
-                {
-                    found_label = 1;
-                    label[j] = '\0';
-                    break;
-                }
-                label[j] = decoded_data[j];
-                label_length++;
-            }
-            if (!found_label)
-            {
-                continue;
-            }
-            if (query_len > label_length)
-            {
-                continue;
-            }
-            int do_continue = 0;
-            for (size_t j = 0; j < query_len; j++)
-            {
-                if (f->find_label.value[j] != label[j])
-                {
-                    do_continue++;
-                    break;
-                }
-            }
-            if (do_continue)
-            {
-                continue;
-            }
-            if (f->copy.exists)
-            {
-                const char *password = (const char *)decoded_data + label_length + 1;
-                size_t password_length = decsize - label_length - 1;
-#ifdef _WIN32
-                if (!copy_to_clipboard(password, password_length + 1))
-                {
-                    error("%s\n", "couldn't copy to clipboard");
-                }
-#else
-                fwrite(password, sizeof(char), password_length, stdout);
-#endif // _WIN32
-                exit(0);
-            }
-        }
-        lines.array[lines.count++] = (Line){.data = (char *)decoded_data, .length = decsize};
-    }
-    if (f->copy.exists)
-        lines.count = 0;
-    return lines;
-}
-
 void encrypt_and_replace(Flags *f, char *find_label, char *data,
                          uint8_t *aes_key, size_t data_length)
 {
@@ -341,130 +244,6 @@ void encrypt_and_write(Flags *f, uint8_t *data, uint8_t *aes_key,
         write_file(data_store, "a", data, data_length);
 }
 
-ssize_t getline(char **lineptr, size_t *n, FILE *stream)
-{
-    size_t pos;
-    int c;
-
-    if (lineptr == NULL || stream == NULL || n == NULL)
-    {
-        errno = EINVAL;
-        return -1;
-    }
-
-    c = getc(stream);
-    if (c == EOF)
-    {
-        return -1;
-    }
-
-    if (*lineptr == NULL)
-    {
-        *lineptr = (char *)malloc(128);
-        if (*lineptr == NULL)
-        {
-            return -1;
-        }
-        *n = 128;
-    }
-
-    pos = 0;
-    while (c != EOF)
-    {
-        if (pos + 1 >= *n)
-        {
-            size_t new_size = *n + (*n >> 2);
-            if (new_size < 128)
-            {
-                new_size = 128;
-            }
-            char *new_ptr = (char *)realloc(*lineptr, new_size);
-            if (new_ptr == NULL)
-                return -1;
-            *n = new_size;
-            *lineptr = new_ptr;
-        }
-
-        ((unsigned char *)(*lineptr))[pos++] = c;
-        if (c == '\n')
-        {
-            break;
-        }
-        c = getc(stream);
-    }
-
-    (*lineptr)[pos] = '\0';
-    return pos;
-}
-
-void read_file(const char *fp, char ***lines, size_t *lsize)
-{
-    char *ln = NULL;
-    size_t n = 0;
-    ssize_t nchr = 0;
-    size_t idx = 0;
-    size_t lmax = LMAX;
-    FILE *f = NULL;
-
-    if (!(f = fopen(fp, "rb")))
-        PANIC_OPEN_FILE(fp);
-
-    if (!(*lines = (char **)calloc(LMAX, sizeof(**lines))))
-    {
-        error("%s\n", "memory allocation failed");
-        exit(1);
-    }
-
-    while ((nchr = getline(&ln, &n, f)) != -1)
-    {
-        while (nchr > 0 && (ln[nchr - 1] == '\n' || ln[nchr - 1] == '\r'))
-            ln[--nchr] = 0;
-
-        (*lines)[idx++] = strdup(ln);
-
-        if (idx == lmax)
-        {
-            char **tmp = (char **)realloc(lines, lmax * 2 * sizeof *lines);
-            if (tmp == NULL)
-                PANIC("%s\n", "memory allocation failed!");
-            *lines = tmp;
-            lmax *= 2;
-        }
-    }
-
-    fclose(f);
-    free(ln);
-
-    *lsize = idx;
-}
-
-char *read_file_as_str(const char *fp, size_t *nch)
-{
-    FILE *f = fopen(fp, "rb");
-    if (f == NULL)
-        PANIC_OPEN_FILE(fp);
-    fseek(f, 0, SEEK_END);
-    size_t size = ftell(f);
-    char *str = (char *)alloc(size + 1);
-    fseek(f, 0, SEEK_SET);
-    fread(str, 1, size, f);
-    str[size] = '\0';
-    fclose(f);
-    if (nch != NULL)
-        *nch = size;
-    return str;
-}
-
-void write_file(const char *fp, const char *mode, void *data, size_t size)
-{
-    FILE *f = fopen(fp, mode);
-    if (f == NULL)
-        PANIC_OPEN_FILE(fp);
-    fwrite(data, sizeof(char), size, f);
-    fputc('\n', f);
-    fclose(f);
-}
-
 void delete_label(char *find_label, uint8_t *aes_key)
 {
     int found_label = 0;
@@ -538,7 +317,98 @@ void decrypt_raw(uint8_t *line, uint8_t *aes_key, size_t length)
 
 void decrypt_and_print(uint8_t *aes_key, Flags *f)
 {
-    Lines lines = decrypt_and_find(aes_key, f);
+    pull_changes(sync_remote_url);
+    size_t nch = 0;
+    char *str = read_file_as_str(data_store, &nch);
+    input_key(&aes_key, f);
+    if (f->binary.exists)
+    {
+        decrypt_raw((uint8_t *)str, aes_key, nch);
+        Lines lines = {
+            .array = (Line *)alloc(sizeof(Line)),
+            .count = 1,
+        };
+        lines.array[0] = (Line){.data = str, .length = nch};
+        return lines;
+    }
+    size_t i = 0;
+    size_t query_len = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
+    size_t total_lines = 0;
+    for (size_t j = 0; j < nch; ++j)
+        if (str[j] == '\n')
+            total_lines++;
+    Lines lines = {
+        .array = (Line *)alloc(sizeof(Line) * total_lines),
+        .count = 0,
+    };
+    while (i < nch)
+    {
+        size_t start = i;
+        do
+        {
+            i++;
+        } while (i < nch && str[i] != '\n');
+        size_t line_length = i - start - 1;
+        if (str[i] == '\n')
+            i++;
+        size_t decsize = 0;
+        unsigned char *decoded_data = decrypt_base64(str + start, aes_key, line_length, &decsize);
+        if (f->find_label.value != NULL)
+        {
+            char *label = (char *)alloc(decsize);
+            size_t label_length = 0;
+            int found_label = 0;
+            for (size_t j = 0; j < decsize; j++)
+            {
+                if (decoded_data[j] == ' ')
+                {
+                    found_label = 1;
+                    label[j] = '\0';
+                    break;
+                }
+                label[j] = decoded_data[j];
+                label_length++;
+            }
+            if (!found_label)
+            {
+                continue;
+            }
+            if (query_len > label_length)
+            {
+                continue;
+            }
+            int do_continue = 0;
+            for (size_t j = 0; j < query_len; j++)
+            {
+                if (f->find_label.value[j] != label[j])
+                {
+                    do_continue++;
+                    break;
+                }
+            }
+            if (do_continue)
+            {
+                continue;
+            }
+            if (f->copy.exists)
+            {
+                const char *password = (const char *)decoded_data + label_length + 1;
+                size_t password_length = decsize - label_length - 1;
+#ifdef _WIN32
+                if (!copy_to_clipboard(password, password_length + 1))
+                {
+                    error("%s\n", "couldn't copy to clipboard");
+                }
+#else
+                fwrite(password, sizeof(char), password_length, stdout);
+#endif // _WIN32
+                exit(0);
+            }
+        }
+        lines.array[lines.count++] = (Line){.data = (char *)decoded_data, .length = decsize};
+    }
+    if (f->copy.exists)
+        lines.count = 0;
     if (lines.count)
     {
         FILE *o;
