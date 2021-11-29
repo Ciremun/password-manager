@@ -60,9 +60,6 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
-    // if (!mem_init(&g_mem))
-    //     PANIC("%s\n", "mem_init failed!");
-
     sync_remote_url = getenv("PM_SYNC_REMOTE_URL");
 
     Flags f = {0};
@@ -226,7 +223,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 return 1;
             }
             decrypt_and_print(&f, aes_key);
-            goto done;
+            return 0;
         }
         else
         {
@@ -266,7 +263,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 return 1;
             }
             decrypt_and_print(&f, aes_key);
-            goto done;
+            return 0;
         }
     }
 
@@ -301,8 +298,6 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         encrypt_and_write(&f, (String){.data = (uint8_t *)f.data.value, .length = strlen(f.data.value)}, aes_key);
     }
-
-done:
 
     return 0;
 }
