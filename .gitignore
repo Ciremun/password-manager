@@ -3,7 +3,6 @@
 build/
 password-manager/
 cov-int/
-src/include/version.h
 
 *.obj
 *.exe
