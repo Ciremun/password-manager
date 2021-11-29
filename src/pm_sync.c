@@ -40,7 +40,7 @@ int verify_remote(const char *remote)
         return 0;
     const char *git_config_path = ".git/config";
     size_t size = 0;
-    File git_config_file = open_file(git_config, READ_ONLY);
+    File git_config_file = open_or_create_file(git_config, READ_ONLY, 0);
     char* git_config_data = map_file(git_config_file);
 
     char *str = read_file_as_str(git_config, &size);

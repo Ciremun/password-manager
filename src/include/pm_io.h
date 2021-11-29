@@ -41,9 +41,9 @@ typedef int handle_t;
 #include <stdint.h>
 
 #ifdef _WIN32
-#define BAD_FILE_HANDLE INVALID_HANDLE_VALUE
+#define PM_BAD_FILE_HANDLE INVALID_HANDLE_VALUE
 #else
-#define BAD_FILE_HANDLE -1
+#define PM_BAD_FILE_HANDLE -1
 #endif // _WIN32
 
 #define DEFAULT_DATA_STORE ".pm_data"
@@ -61,7 +61,7 @@ typedef enum
     READ_WRITE
 } flag_t;
 
-File open_or_create_file(const char *path, flag_t access_flag);
+File open_or_create_file(const char *path, flag_t access_flag, int create);
 int close_file(handle_t h);
 int file_exists(const char *path);
 int truncate_file(handle_t h, size_t new_size);
