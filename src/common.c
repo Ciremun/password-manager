@@ -577,11 +577,3 @@ void decrypt_and_print(uint8_t *aes_key, Flags *f)
         info("%s\n", "no results");
     }
 }
-
-void *alloc(u64 size)
-{
-    void *tmp = mem_alloc(&g_mem, size);
-    if (tmp == NULL)
-        PANIC("%s\n", "mem_alloc failed!");
-    return tmp;
-}
