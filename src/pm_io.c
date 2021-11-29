@@ -2,13 +2,21 @@
 
 char *data_store = 0;
 
-File open_file(const char *path)
+File open_file(const char *path, flag_t flag)
 {
     File f;
 #ifdef _WIN32
     DWORD dwCreationDisposition = file_exists(path) ? OPEN_EXISTING : CREATE_NEW;
+    DWORD dwDesiredAccess;
 
-    f.handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, 0, 0, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, 0);
+    if (flag == READ_ONLY)
+        dwDesiredAccess = GENERIC_READ;
+    if (flag == WRITE_ONLY)
+        dwDesiredAccess = GENERIC_WRITE;
+    if (flag == READ_WRITE)
+        dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
+
+    f.handle = CreateFileA(path, dwDesiredAccess, 0, 0, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, 0);
     if (f.handle == INVALID_HANDLE_VALUE)
     {
         error("CreateFileA failed: %ld\n", GetLastError());
@@ -23,9 +31,16 @@ File open_file(const char *path)
         exit(1);
     }
 #else
-    int flags = O_RDWR;
-    int exists = file_exists(path);
+    int flags;
 
+    if (flag == READ_ONLY)
+        flags = O_RDONLY;
+    if (flag == WRITE_ONLY)
+        flags = O_WRONLY;
+    if (flag == READ_WRITE)
+        flags = O_RDWR;
+
+    int exists = file_exists(path);
     if (!exists)
     {
         flags |= O_CREAT;
