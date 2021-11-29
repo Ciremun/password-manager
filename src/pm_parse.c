@@ -5,6 +5,7 @@
 #include <string.h>
 
 extern char *sync_remote_url;
+extern char *data_store;
 
 int is_flag(char *arg, char *s, char *l)
 {
