@@ -1,18 +1,14 @@
-#include "src/include/common.h"
-#undef PANIC
-
 #define NOBUILD_IMPLEMENTATION
 #include "nobuild.h"
 
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define SOURCES                                                            \
-    "src/aes.c", "src/b64.c", "src/common.c", "src/parse.c", "src/rand.c", \
-        "src/sync.c"
+#define SOURCES "src/pm.c"
 #define FLAGS "-Wall", "-Wextra", "-pedantic", "-Isrc/include/"
 #define MSVC_FLAGS "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
+#define DEFAULT_DATA_STORE ".pm_data"
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
@@ -72,6 +68,14 @@
         }                                                                      \
     } while (0)
 
+char pm_version[32] =
+#ifdef _WIN32
+    "/"
+#else
+    "-"
+#endif // _WIN32
+    "DPM_VERSION=";
+
 int main(int argc, char **argv)
 {
     GO_REBUILD_URSELF(argc, argv);
@@ -84,29 +88,16 @@ int main(int argc, char **argv)
         PANIC_OVERWRITE_IF_FILE_EXISTS("test.txt");
         PANIC_OVERWRITE_IF_FILE_EXISTS("key_file.txt");
     }
-    FILE *version_header = fopen("src/include/version.h", "wb");
-    if (version_header == 0)
-        printf("error opening src/include/version.h\n");
     FILE *git_heads_master = fopen(".git/refs/heads/master", "rb");
     if (git_heads_master == 0)
         printf("error opening .git/refs/heads/master\n");
-    if (version_header && !git_heads_master)
+    if (git_heads_master)
     {
-        fprintf(
-            version_header, "%s",
-            "#ifndef VERSION_H\n#define VERSION_H\n\n#define PM_VERSION \"unknown\"\n\n#endif // VERSION_H\n");
+        int i = 13;
+        while (i < 20)
+            pm_version[i++] = fgetc(git_heads_master);
+        pm_version[i] = '\0';
     }
-    if (version_header && git_heads_master)
-    {
-        fprintf(
-            version_header, "%s",
-            "#ifndef VERSION_H\n#define VERSION_H\n\n#define PM_VERSION \"");
-        for (int i = 0; i < 7; ++i)
-            fputc(fgetc(git_heads_master), version_header);
-        fprintf(version_header, "%s", "\"\n\n#endif // VERSION_H\n");
-    }
-    if (version_header)
-        fclose(version_header);
     if (git_heads_master)
         fclose(git_heads_master);
 #if defined(PM_CROSSCOMPILING)
@@ -131,12 +122,12 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
-            CMD("cl.exe", "/Fe" OUTPUT, "/O2", "src/main.c", SOURCES,
+            CMD("cl.exe", pm_version, "/Fe" OUTPUT, "/O2", "src/pm_main.c", SOURCES,
                 MSVC_FLAGS);
         }
         else
         {
-            CMD(cc, "src/main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
+            CMD(cc, pm_version, "src/pm_main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
                 "-O3");
         }
     }
@@ -152,7 +143,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        CMD(cc, "src/main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
+        CMD(cc, pm_version, "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
     }
 #endif
     return 0;

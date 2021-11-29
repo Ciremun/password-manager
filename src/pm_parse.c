@@ -1,18 +1,7 @@
-#include <limits.h>
+#include "pm_parse.h"
+#include "pm_xcrypt.h"
 
-#include "common.h"
-#include "rand.h"
-#include "version.h"
-
-#define PM_IO_IMPLEMENTATION
-#include "pm_io.h"
-
-// Memory g_mem;
-extern struct AES_ctx ctx;
-extern const char *help_s;
-extern char *data_store;
-
-char *sync_remote_url = 0;
+extern char *sync_remote_url;
 
 int is_flag(char *arg, char *s, char *l)
 {
@@ -77,7 +66,13 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
     if (f.version.exists)
     {
-        fprintf(stdout, "%s %s\n", "password-manager", PM_VERSION);
+        fprintf(stdout, "%s %s\n", "password-manager",
+#ifdef PM_VERSION
+                STR(PM_VERSION)
+#else
+                "unknown"
+#endif // PM_VERSION
+        );
         return 0;
     }
 
@@ -91,9 +86,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
         size_t aes_key_length = strlen(f.key.value) + 1;
         if (aes_key_length > 128)
-            aes_key = (uint8_t *)alloc(aes_key_length);
+            aes_key = (uint8_t *)malloc(aes_key_length);
         else
-            aes_key = (uint8_t *)alloc(128);
+            aes_key = (uint8_t *)malloc(128);
         memcpy(aes_key, f.key.value, aes_key_length);
     }
 
@@ -104,13 +99,13 @@ int run(uint8_t *aes_key, int argc, char **argv)
             error("%s\n", "key-file flag called without filename");
             return 1;
         }
-        size_t aes_key_length = 0;
-        char *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
-        if (aes_key_length > 128)
-            aes_key = (uint8_t *)alloc(aes_key_length);
-        else
-            aes_key = (uint8_t *)alloc(128);
-        memcpy(aes_key, key_file, aes_key_length);
+        // size_t aes_key_length = 0;
+        // char *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
+        // if (aes_key_length > 128)
+        //     aes_key = (uint8_t *)malloc(aes_key_length);
+        // else
+        //     aes_key = (uint8_t *)malloc(128);
+        // memcpy(aes_key, key_file, aes_key_length);
     }
 
     if (f.input.exists)
@@ -162,13 +157,12 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 return 1;
             }
 
-            size_t nch = 0;
-            char *data = read_file_as_str(f.data_file.value, &nch);
+            // char *data = read_file_as_str(f.data_file.value, &nch);
 
-            if (f.label.exists)
-                encrypt_and_replace(&f, f.label.value, data, aes_key, nch);
-            else
-                encrypt_and_write(&f, (uint8_t *)data, aes_key, nch);
+            // if (f.label.exists)
+            //     encrypt_and_replace(&f, f.label.value, data, aes_key, nch);
+            // else
+            //     encrypt_and_write(&f, (uint8_t *)data, aes_key, nch);
 
             return 0;
         }
@@ -193,24 +187,23 @@ int run(uint8_t *aes_key, int argc, char **argv)
             {
                 password_length = (unsigned long)random_int();
             }
-            char *password = (char *)alloc(password_length + 1);
-            random_string((int)password_length, password);
+            char *password_data = (char *)malloc(password_length + 1);
+            random_string((int)password_length, password_data);
+            String password = {.data = (uint8_t *)password_data, .length = password_length};
             if (f.label.exists)
             {
-                encrypt_and_replace(&f, f.label.value, password, aes_key,
-                                    password_length);
+                encrypt_and_replace(&f, password, aes_key, f.label.value);
             }
             else
             {
-                encrypt_and_write(&f, (uint8_t *)password, aes_key,
-                                  (int)password_length + 1);
+                encrypt_and_write(&f, password, aes_key);
             }
             if (f.copy.exists)
             {
 #ifdef _WIN32
-                copy_to_clipboard(password, password_length + 1);
+                copy_to_clipboard(password.data, password_length + 1);
 #else
-                fprintf(stdout, "%s", password);
+                fprintf(stdout, "%s", password.data);
 #endif
             }
             return 0;
@@ -228,14 +221,38 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 error("%s\n", "find label flag called without name");
                 return 1;
             }
-            decrypt_and_print(aes_key, &f);
+            decrypt_and_print(&f, aes_key);
             goto done;
         }
         else
         {
             if (f.help.exists)
             {
-                fprintf(stdout, "%s\n", help_s);
+                fprintf(stdout, "%s\n", "\n"
+                                        "./pm [flags]                  read or write data\n"
+                                        "\n"
+                                        "sync:                         set PM_SYNC_REMOTE_URL env var\n"
+                                        "\n"
+                                        "flags:\n"
+                                        "\n"
+                                        "-d  --data                    data to encrypt\n"
+                                        "-df --data-file               data to encrypt from file\n"
+                                        "-l  --label                   add label for data\n"
+                                        "-fl --find-label              find data by label\n"
+                                        "-dl --delete-label            delete label and its data\n"
+#ifdef _WIN32
+                                        "-c  --copy                    -fl, -gp helper, copy to clipboard\n"
+#else
+                                        "-c  --copy                    -fl, -gp helper, pipe with clip tools\n"
+#endif
+                                        "-gp --generate-password [N]   put random data\n"
+                                        "-k  --key                     key\n"
+                                        "-kf --key-file                key file path\n"
+                                        "-i  --input                   encrypted file path\n"
+                                        "-o  --output                  decrypted file path\n"
+                                        "-b  --binary                  binary mode\n"
+                                        "-v  --version                 display version\n"
+                                        "-h  --help                    display help\n\n");
                 return 0;
             }
             if (f.copy.exists)
@@ -244,7 +261,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                       "copy is only supported along with -fl, -gp flags");
                 return 1;
             }
-            decrypt_and_print(aes_key, &f);
+            decrypt_and_print(&f, aes_key);
             goto done;
         }
     }
@@ -274,22 +291,14 @@ int run(uint8_t *aes_key, int argc, char **argv)
             error("%s\n", "label flag called without name");
             return 1;
         }
-        encrypt_and_replace(&f, f.label.value, f.data.value, aes_key, 0);
+        encrypt_and_replace(&f, (String){.data = (uint8_t *)f.data.value, .length = strlen(f.data.value)}, aes_key, f.label.value);
     }
     else
     {
-        encrypt_and_write(&f, (uint8_t *)f.data.value, aes_key,
-                          strlen(f.data.value) + 1);
+        encrypt_and_write(&f, (String){.data = (uint8_t *)f.data.value, .length = strlen(f.data.value)}, aes_key);
     }
 
 done:
-
-// #ifndef TEST
-//     if (!mem_free(&g_mem))
-//     {
-//         error("%s\n", "mem_free failed!");
-//     }
-// #endif // TEST
 
     return 0;
 }

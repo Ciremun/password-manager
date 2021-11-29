@@ -1,7 +1,4 @@
-#include "stdlib.h"
-#include "time.h"
-
-#include "rand.h"
+#include "pm_rand.h"
 
 int random_int()
 {

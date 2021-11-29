@@ -1,8 +1,8 @@
-#ifndef _AES_H_
-#define _AES_H_
+#ifndef PM_AES_H_
+#define PM_AES_H_
 
-#include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 // #define the macros below to 1/0 to enable/disable the mode of operation.
 //
@@ -89,4 +89,4 @@ void AES_CTR_xcrypt_buffer(struct AES_ctx *ctx, uint8_t *buf, size_t length);
 
 #endif // #if defined(CTR) && (CTR == 1)
 
-#endif // _AES_H_
+#endif // PM_AES_H_

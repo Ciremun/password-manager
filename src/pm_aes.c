@@ -1,3 +1,5 @@
+#include "pm_aes.h"
+
 /*
 
 This is an implementation of the AES algorithm, specifically ECB, CTR and CBC
@@ -32,12 +34,6 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
         For AES192/256 the key size is proportionally larger.
 
 */
-
-/*****************************************************************************/
-/* Includes:                                                                 */
-/*****************************************************************************/
-#include "aes.h"
-#include <string.h> // CBC mode, for memset
 
 /*****************************************************************************/
 /* Defines:                                                                  */
@@ -154,6 +150,10 @@ static uint8_t getSBoxValue(uint8_t num)
 }
 */
 #define getSBoxValue(num) (sbox[(num)])
+
+struct AES_ctx ctx;
+uint8_t aes_iv[] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+                    0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
 // This function produces Nb(Nr+1) round keys. The round keys are used in each
 // round to decrypt the states.

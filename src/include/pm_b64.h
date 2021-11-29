@@ -1,16 +1,15 @@
-
 /**
  * `b64.h' - b64
  *
  * copyright (c) 2014 joseph werle
  */
 
-#ifndef B64_H
-#define B64_H 1
+#ifndef PM_B64_H_
+#define PM_B64_H_
 
-/**
- * Base64 index table.
- */
+#include <ctype.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 static const char b64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                                  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -21,13 +20,13 @@ static const char b64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J
 #ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif // __cplusplus
 
-    char *b64_encode(const unsigned char *, size_t, size_t *);
-    unsigned char *b64_decode_ex(const char *, size_t, size_t *);
+    char *b64_encode(const uint8_t *, size_t, size_t *);
+    uint8_t *b64_decode_ex(const uint8_t *, size_t, size_t *);
 
 #ifdef __cplusplus
 }
-#endif
+#endif // __cplusplus
 
-#endif
+#endif // PM_B64_H_

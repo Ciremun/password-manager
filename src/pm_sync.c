@@ -18,15 +18,15 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#include "pm_sync.h"
 
-#include "sync.h"
-#include "common.h"
+char *sync_remote_url = 0;
 
 #ifndef _WIN32
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 {
     Cstr_Array result = {.count = cstrs.count + 1};
-    result.elems = (Cstr *)alloc(sizeof(result.elems[0]) * result.count);
+    result.elems = (Cstr *)malloc(sizeof(result.elems[0]) * result.count);
     memcpy(result.elems, cstrs.elems, cstrs.count * sizeof(result.elems[0]));
     result.elems[cstrs.count] = cstr;
     return result;
@@ -35,25 +35,25 @@ Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 
 int verify_remote(const char *remote)
 {
-    if (remote == NULL)
-        return 0;
-    const char *git_config = ".git/config";
-    size_t size = 0;
-    char *str = read_file_as_str(git_config, &size);
-    for (size_t i = 0; i + 5 < size; ++i)
-    {
-        if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l' && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
-        {
-            i += 6;
-            size_t start = i;
-            for (; i < size; ++i)
-                if ((str[i] == '\n' || str[i] == '\r') && (memcmp(str + start, remote, i - start) == 0))
-                    return 1;
-            break;
-        }
-    }
-    error("provided remote (%s) doesn't match origin in .git/config\n", remote);
-    return 0;
+    // if (remote == NULL)
+    //     return 0;
+    // const char *git_config = ".git/config";
+    // size_t size = 0;
+    // char *str = read_file_as_str(git_config, &size);
+    // for (size_t i = 0; i + 5 < size; ++i)
+    // {
+    //     if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l' && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
+    //     {
+    //         i += 6;
+    //         size_t start = i;
+    //         for (; i < size; ++i)
+    //             if ((str[i] == '\n' || str[i] == '\r') && (memcmp(str + start, remote, i - start) == 0))
+    //                 return 1;
+    //         break;
+    //     }
+    // }
+    // error("provided remote (%s) doesn't match origin in .git/config\n", remote);
+    // return 0;
 }
 
 int pull_changes(const char *remote)
@@ -95,7 +95,7 @@ Cstr_Array cstr_array_make(Cstr first, ...)
     }
     va_end(args);
 
-    result.elems = (Cstr *)alloc(sizeof(result.elems[0]) * result.count);
+    result.elems = (Cstr *)malloc(sizeof(result.elems[0]) * result.count);
     if (result.elems == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
@@ -130,7 +130,7 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     }
 
     const size_t result_len = (cstrs.count - 1) * sep_len + len + 1;
-    char *result = (char *)alloc(sizeof(char) * result_len);
+    char *result = (char *)malloc(sizeof(char) * result_len);
     if (result == NULL)
     {
         PANIC("could not allocate memory: %s", strerror(errno));
