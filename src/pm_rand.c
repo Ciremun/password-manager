@@ -1,5 +1,7 @@
 #include "pm_rand.h"
 
+#include <stdlib.h>
+
 int random_int()
 {
     srand(time(NULL));

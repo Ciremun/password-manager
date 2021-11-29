@@ -1,5 +1,8 @@
 #include "pm_parse.h"
 #include "pm_xcrypt.h"
+#include "pm_io.h"
+
+#include <string.h>
 
 extern char *sync_remote_url;
 
