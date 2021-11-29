@@ -2,18 +2,18 @@
 
 char *data_store = 0;
 
-File open_file(const char *path, flag_t flag)
+File open_file(const char *path, flag_t access_flag)
 {
     File f;
 #ifdef _WIN32
     DWORD dwCreationDisposition = file_exists(path) ? OPEN_EXISTING : CREATE_NEW;
     DWORD dwDesiredAccess;
 
-    if (flag == READ_ONLY)
+    if (access_flag == READ_ONLY)
         dwDesiredAccess = GENERIC_READ;
-    if (flag == WRITE_ONLY)
+    if (access_flag == WRITE_ONLY)
         dwDesiredAccess = GENERIC_WRITE;
-    if (flag == READ_WRITE)
+    if (access_flag == READ_WRITE)
         dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
 
     f.handle = CreateFileA(path, dwDesiredAccess, 0, 0, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, 0);
@@ -33,11 +33,11 @@ File open_file(const char *path, flag_t flag)
 #else
     int flags;
 
-    if (flag == READ_ONLY)
+    if (access_flag == READ_ONLY)
         flags = O_RDONLY;
-    if (flag == WRITE_ONLY)
+    if (access_flag == WRITE_ONLY)
         flags = O_WRONLY;
-    if (flag == READ_WRITE)
+    if (access_flag == READ_WRITE)
         flags = O_RDWR;
 
     int exists = file_exists(path);

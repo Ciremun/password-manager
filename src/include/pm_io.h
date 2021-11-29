@@ -55,7 +55,7 @@ typedef enum
     READ_WRITE
 } flag_t;
 
-File open_file(const char *path, flag_t flag);
+File open_file(const char *path, flag_t access_flag);
 int close_file(handle_t h);
 int file_exists(const char *path);
 int truncate_file(handle_t h, size_t new_size);
