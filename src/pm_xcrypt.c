@@ -1,5 +1,8 @@
 #include "pm_xcrypt.h"
 
+extern struct AES_ctx ctx;
+extern uint8_t aes_iv[];
+
 #ifdef _WIN32
 int copy_to_clipboard(const char *password, size_t size)
 {
