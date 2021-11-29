@@ -18,6 +18,7 @@ callgrind*
 .pm_data
 pm-*
 pm.*
+!pm.c
 test
 nobuild
 gprof2dot.py
