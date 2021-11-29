@@ -19,8 +19,6 @@ void random_string(int sz, char *out)
                             "YZ0123456789!@#$%^&*()-+";
     int l = (int)(sizeof(charset) - 1);
     for (int n = 0; n < sz; n++)
-    {
         out[n] = charset[rand() % l];
-    }
     out[sz] = '\0';
 }

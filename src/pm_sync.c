@@ -19,6 +19,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "pm_sync.h"
+#include "pm_io.h"
 
 char *sync_remote_url = 0;
 
@@ -35,25 +36,28 @@ Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 
 int verify_remote(const char *remote)
 {
-    // if (remote == NULL)
-    //     return 0;
-    // const char *git_config = ".git/config";
-    // size_t size = 0;
-    // char *str = read_file_as_str(git_config, &size);
-    // for (size_t i = 0; i + 5 < size; ++i)
-    // {
-    //     if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l' && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
-    //     {
-    //         i += 6;
-    //         size_t start = i;
-    //         for (; i < size; ++i)
-    //             if ((str[i] == '\n' || str[i] == '\r') && (memcmp(str + start, remote, i - start) == 0))
-    //                 return 1;
-    //         break;
-    //     }
-    // }
-    // error("provided remote (%s) doesn't match origin in .git/config\n", remote);
-    // return 0;
+    if (remote == NULL)
+        return 0;
+    const char *git_config_path = ".git/config";
+    size_t size = 0;
+    File git_config_file = open_file(git_config, READ_ONLY);
+    char* git_config_data = map_file(git_config_file);
+
+    char *str = read_file_as_str(git_config, &size);
+    for (size_t i = 0; i + 5 < size; ++i)
+    {
+        if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l' && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
+        {
+            i += 6;
+            size_t start = i;
+            for (; i < size; ++i)
+                if ((str[i] == '\n' || str[i] == '\r') && (memcmp(str + start, remote, i - start) == 0))
+                    return 1;
+            break;
+        }
+    }
+    error("provided remote (%s) doesn't match origin in .git/config\n", remote);
+    return 0;
 }
 
 int pull_changes(const char *remote)

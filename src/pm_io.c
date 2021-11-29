@@ -2,61 +2,63 @@
 
 char *data_store = 0;
 
-File open_file(const char *path, flag_t access_flag)
+File open_or_create_file(const char *path, flag_t access_flag, int create)
 {
-    File f;
+    File f = {0};
 #ifdef _WIN32
-    DWORD dwCreationDisposition = file_exists(path) ? OPEN_EXISTING : CREATE_NEW;
-    DWORD dwDesiredAccess;
+    DWORD dwCreationDisposition;
+    if (create && !file_exists(path))
+        dwCreationDisposition =  CREATE_NEW;
+    else
+        dwCreationDisposition = OPEN_EXISTING;
 
-    if (access_flag == READ_ONLY)
+    DWORD dwDesiredAccess;
+    switch (access_flag)
+    {
+    case READ_ONLY:
         dwDesiredAccess = GENERIC_READ;
-    if (access_flag == WRITE_ONLY)
+    case WRITE_ONLY:
         dwDesiredAccess = GENERIC_WRITE;
-    if (access_flag == READ_WRITE)
+    case READ_WRITE:
         dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
+    default:
+        exit(1);
+    }
 
     f.handle = CreateFileA(path, dwDesiredAccess, 0, 0, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, 0);
     if (f.handle == INVALID_HANDLE_VALUE)
     {
         error("CreateFileA failed: %ld\n", GetLastError());
-        exit(1);
-    }
-    if (dwCreationDisposition == CREATE_NEW)
-    {
-        f.size = 0;
+        return f;
     }
     if (dwCreationDisposition == OPEN_EXISTING && !get_file_size(&f))
-    {
         exit(1);
-    }
 #else
     int flags;
 
-    if (access_flag == READ_ONLY)
-        flags = O_RDONLY;
-    if (access_flag == WRITE_ONLY)
-        flags = O_WRONLY;
-    if (access_flag == READ_WRITE)
-        flags = O_RDWR;
-
-    int exists = file_exists(path);
-    if (!exists)
+    switch (access_flag)
     {
-        flags |= O_CREAT;
-        f.size = 0;
+    case READ_ONLY:
+        flags = O_RDONLY;
+    case WRITE_ONLY:
+        flags = O_WRONLY;
+    case READ_WRITE:
+        flags = O_RDWR;
+    default:
+        exit(1);
     }
+
+    if (create && !file_exists(path))
+        flags |= O_CREAT;
 
     f.handle = open(path, flags, 0600);
     if (f.handle < 0)
     {
         error("open failed: %s\n", strerror(errno));
-        exit(1);
+        return f;
     }
-    if (exists && !get_file_size(&f))
-    {
+    if (!(flags & O_CREAT) && !get_file_size(&f))
         exit(1);
-    }
 #endif // _WIN32
     return f;
 }
@@ -70,7 +72,7 @@ int close_file(handle_t h)
         return 0;
     }
 #else
-    if (close(h) == -1)
+    if (close(h) < 0)
     {
         error("close failed: %s\n", strerror(errno));
         return 0;
@@ -107,7 +109,7 @@ int truncate_file(handle_t h, size_t new_size)
         return 0;
     }
 #else
-    if ((ftruncate(h, new_size)) == -1)
+    if ((ftruncate(h, new_size)) < 0)
     {
         error("ftruncate failed: %s\n", strerror(errno));
         return 0;
@@ -179,7 +181,7 @@ int unmap_file(char *map_start, size_t size)
         return 0;
     }
 #else
-    if (munmap(map_start, size) == -1)
+    if (munmap(map_start, size) < 0)
     {
         error("munmap failed: %s\n", strerror(errno));
         return 0;
@@ -223,13 +225,9 @@ int getpasswd(uint8_t **pw)
         && c != EOF)
     {
         if (c != 127)
-        {
             (*pw)[idx++] = c;
-        }
         else if (idx > 0)
-        {
             (*pw)[--idx] = 0;
-        }
     }
 
 #ifndef _WIN32
