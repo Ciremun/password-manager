@@ -63,16 +63,21 @@ File open_or_create_file(const char *path, flag_t access, int create)
     return f;
 }
 
-int close_file(handle_t h)
+int close_file(File f)
 {
 #ifdef _WIN32
-    if (CloseHandle(h) == 0)
+    if (CloseHandle(f.hMap) == 0)
+    {
+        error("CloseHandle failed: %ld\n", GetLastError());
+        return 0;
+    }
+    if (CloseHandle(f.handle) == 0)
     {
         error("CloseHandle failed: %ld\n", GetLastError());
         return 0;
     }
 #else
-    if (close(h) < 0)
+    if (close(f.handle) < 0)
     {
         error("close failed: %s\n", strerror(errno));
         return 0;
@@ -185,6 +190,7 @@ char *map_file(File f)
         CloseHandle(f.handle);
         return 0;
     }
+    f.hMap = hMap;
 #else
 
     int prot;

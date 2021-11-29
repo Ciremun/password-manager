@@ -55,13 +55,16 @@ typedef enum
 
 typedef struct
 {
+#ifdef _WIN32
+    HANDLE hMap;
+#endif // _WIN32
     handle_t handle;
     flag_t access;
     size_t size;
 } File;
 
 File open_or_create_file(const char *path, flag_t access, int create);
-int close_file(handle_t h);
+int close_file(File f);
 int file_exists(const char *path);
 int truncate_file(handle_t h, size_t new_size);
 int get_file_size(File *f);
