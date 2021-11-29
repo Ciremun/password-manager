@@ -39,25 +39,28 @@ int verify_remote(const char *remote)
     if (remote == NULL)
         return 0;
     const char *git_config_path = ".git/config";
-    size_t size = 0;
-    File git_config_file = open_or_create_file(git_config, READ_ONLY, 0);
-    char* git_config_data = map_file(git_config_file);
-
-    char *str = read_file_as_str(git_config, &size);
-    for (size_t i = 0; i + 5 < size; ++i)
+    File f = open_or_create_file(git_config_path, PM_READ_ONLY, 0);
+    char* s = map_file(f);
+    for (size_t i = 0; i + 5 < f.size; ++i)
     {
-        if (str[i + 0] == 'u' && str[i + 1] == 'r' && str[i + 2] == 'l' && str[i + 3] == ' ' && str[i + 4] == '=' && str[i + 5] == ' ')
+        if (s[i + 0] == 'u' && s[i + 1] == 'r' && s[i + 2] == 'l' && s[i + 3] == ' ' && s[i + 4] == '=' && s[i + 5] == ' ')
         {
             i += 6;
             size_t start = i;
-            for (; i < size; ++i)
-                if ((str[i] == '\n' || str[i] == '\r') && (memcmp(str + start, remote, i - start) == 0))
-                    return 1;
-            break;
+            for (; i < f.size; ++i)
+                if ((s[i] == '\n' || s[i] == '\r') && (memcmp(s + start, remote, i - start) == 0))
+                    goto return_true;
+            goto return_false;
         }
     }
+
+return_false:
     error("provided remote (%s) doesn't match origin in .git/config\n", remote);
     return 0;
+
+return_true:
+    unmap_file(s, f.size);
+    return 1;
 }
 
 int pull_changes(const char *remote)

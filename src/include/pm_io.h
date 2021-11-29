@@ -48,20 +48,20 @@ typedef int handle_t;
 
 #define DEFAULT_DATA_STORE ".pm_data"
 
+typedef enum
+{
+    PM_READ_ONLY = 0,
+    PM_READ_WRITE
+} flag_t;
+
 typedef struct
 {
     handle_t handle;
+    flag_t access;
     size_t size;
 } File;
 
-typedef enum
-{
-    READ_ONLY = 0,
-    WRITE_ONLY,
-    READ_WRITE
-} flag_t;
-
-File open_or_create_file(const char *path, flag_t access_flag, int create);
+File open_or_create_file(const char *path, flag_t access, int create);
 int close_file(handle_t h);
 int file_exists(const char *path);
 int truncate_file(handle_t h, size_t new_size);

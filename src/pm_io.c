@@ -2,25 +2,25 @@
 
 char *data_store = 0;
 
-File open_or_create_file(const char *path, flag_t access_flag, int create)
+File open_or_create_file(const char *path, flag_t access, int create)
 {
     File f = {0};
 #ifdef _WIN32
     DWORD dwCreationDisposition;
     if (create && !file_exists(path))
-        dwCreationDisposition =  CREATE_NEW;
+        dwCreationDisposition = CREATE_NEW;
     else
         dwCreationDisposition = OPEN_EXISTING;
 
     DWORD dwDesiredAccess;
-    switch (access_flag)
+    switch (access)
     {
-    case READ_ONLY:
-        dwDesiredAccess = GENERIC_READ;
-    case WRITE_ONLY:
-        dwDesiredAccess = GENERIC_WRITE;
-    case READ_WRITE:
+    case PM_READ_WRITE:
         dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
+        break;
+    case PM_READ_ONLY:
+        dwDesiredAccess = GENERIC_READ;
+        break;
     default:
         exit(1);
     }
@@ -36,14 +36,14 @@ File open_or_create_file(const char *path, flag_t access_flag, int create)
 #else
     int flags;
 
-    switch (access_flag)
+    switch (access)
     {
-    case READ_ONLY:
-        flags = O_RDONLY;
-    case WRITE_ONLY:
-        flags = O_WRONLY;
-    case READ_WRITE:
+    case PM_READ_WRITE:
         flags = O_RDWR;
+        break;
+    case PM_READ_ONLY:
+        flags = O_RDONLY;
+        break;
     default:
         exit(1);
     }
@@ -143,7 +143,20 @@ int get_file_size(File *f)
 char *map_file(File f)
 {
 #ifdef _WIN32
-    HANDLE hMap = CreateFileMappingA(f.handle, 0, PAGE_READWRITE, 0, 0, 0);
+    DWORD flProtect;
+    switch (f.access)
+    {
+    case PM_READ_WRITE:
+        flProtect = PAGE_READWRITE;
+        break;
+    case PM_READ_ONLY:
+        flProtect = PAGE_READONLY;
+        break;
+    default:
+        exit(1);
+    }
+
+    HANDLE hMap = CreateFileMappingA(f.handle, 0, flProtect, 0, 0, 0);
     if (!hMap)
     {
         error("CreateFileMappingA failed: %ld\n", GetLastError());
@@ -151,7 +164,20 @@ char *map_file(File f)
         return 0;
     }
 
-    char *map_start = (char *)MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+    DWORD dwDesiredAccess;
+    switch (f.access)
+    {
+    case PM_READ_WRITE:
+        dwDesiredAccess = FILE_MAP_ALL_ACCESS;
+        break;
+    case PM_READ_ONLY:
+        dwDesiredAccess = FILE_MAP_READ;
+        break;
+    default:
+        exit(1);
+    }
+
+    char *map_start = (char *)MapViewOfFile(hMap, dwDesiredAccess, 0, 0, 0);
     if (map_start == 0)
     {
         error("MapViewOfFile failed: %ld\n", GetLastError());
@@ -160,8 +186,22 @@ char *map_file(File f)
         return 0;
     }
 #else
+
+    int prot;
+    switch (f.access)
+    {
+    case PM_READ_WRITE:
+        prot = PROT_READ | PROT_WRITE;
+        break;
+    case PM_READ_ONLY:
+        prot = PROT_READ;
+        break;
+    default:
+        exit(1);
+    }
+
     char *map_start;
-    if ((map_start = mmap(0, f.size, PROT_READ | PROT_WRITE, MAP_SHARED,
+    if ((map_start = mmap(0, f.size, prot, MAP_SHARED,
                           f.handle, 0)) == (void *)-1)
     {
         error("mmap failed: %s\n", strerror(errno));
