@@ -18,7 +18,9 @@ void exit_test_case(int exit_code);
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <conio.h>
 typedef HANDLE handle_t;
+#define PM_BACKSPACE_KEY 8
 #else
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -28,17 +30,14 @@ typedef HANDLE handle_t;
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-typedef int handle_t;
-#endif // _WIN32
-
-#ifdef _WIN32
-#include <conio.h>
-#include <windows.h>
-#else
 #include <termios.h>
+typedef int handle_t;
+#define PM_BACKSPACE_KEY 127
 #endif // _WIN32
 
 #include <stdint.h>
+
+#include "pm_parse.h"
 
 #ifdef _WIN32
 #define PM_BAD_FILE_HANDLE INVALID_HANDLE_VALUE
@@ -68,6 +67,7 @@ int truncate_file(handle_t h, size_t new_size);
 int get_file_size(File *f);
 char *map_file(File f);
 int unmap_file(char *map_start, size_t size);
-int getpasswd(uint8_t **pw);
+int getpasswd(uint8_t *pw);
+void input_key(uint8_t *aes_key, Flags *f);
 
 #endif // PM_IO_H_

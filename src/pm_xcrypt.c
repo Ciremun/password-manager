@@ -21,16 +21,6 @@ int copy_to_clipboard(const char *password, size_t size)
 }
 #endif // _WIN32
 
-void input_key(uint8_t **aes_key, Flags *f)
-{
-    if (!*aes_key)
-    {
-        if (f == NULL || !f->copy.exists)
-            fprintf(stdout, "%s\n", "key?");
-        getpasswd(aes_key);
-    }
-}
-
 void encrypt_and_replace(Flags *f, String data, uint8_t *aes_key, char *label)
 {
     // char **lines = NULL;

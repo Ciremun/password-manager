@@ -230,9 +230,8 @@ int unmap_file(char *map_start, size_t size)
     return 1;
 }
 
-int getpasswd(uint8_t **pw)
+int getpasswd(uint8_t *pw)
 {
-    // 32 max passwd len
     int c = 0;
     size_t idx = 0;
 
@@ -264,10 +263,12 @@ int getpasswd(uint8_t **pw)
 #endif // _WIN32
         && c != EOF)
     {
-        if (c != 127)
-            (*pw)[idx++] = c;
+        if (c != PM_BACKSPACE_KEY)
+            pw[idx++] = c;
         else if (idx > 0)
-            (*pw)[--idx] = 0;
+            pw[--idx] = 0;
+        if (idx >= 32)
+            break;
     }
 
 #ifndef _WIN32
@@ -279,4 +280,11 @@ int getpasswd(uint8_t **pw)
 #endif // _WIN32
 
     return 1;
+}
+
+void input_key(uint8_t *aes_key, Flags *f)
+{
+    if (f == 0 || !f->copy.exists)
+        fprintf(stdout, "%s\n", "key?");
+    getpasswd(aes_key);
 }
