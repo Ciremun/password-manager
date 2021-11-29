@@ -74,7 +74,7 @@ char pm_version[32] =
 #else
     "-"
 #endif // _WIN32
-    "DPM_VERSION=";
+    "DPM_VERSION=unknown";
 
 int main(int argc, char **argv)
 {
