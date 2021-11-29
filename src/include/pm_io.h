@@ -1,5 +1,5 @@
-#ifndef MEM_H_
-#define MEM_H_
+#ifndef PM_IO_H_
+#define PM_IO_H_
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -29,11 +29,11 @@ File open_file(const char *path);
 int close_file(handle_t h);
 int file_exists(const char *path);
 int truncate_file(handle_t h, size_t new_size);
-int get_file_size(handle_t h, size_t *out_size);
+int get_file_size(File *f);
 char *map_file(File f);
 int unmap_file(const char *map_start, size_t size);
 
-#endif // MEM_H_
+#endif // PM_IO_H_
 
 #ifdef PM_IO_IMPLEMENTATION
 
@@ -53,7 +53,7 @@ File open_file(const char *path)
     {
         f.size = 0;
     }
-    if (dwCreationDisposition == OPEN_EXISTING && !get_file_size(f.handle, &f.size))
+    if (dwCreationDisposition == OPEN_EXISTING && !get_file_size(&f))
     {
         exit(1);
     }
@@ -73,7 +73,7 @@ File open_file(const char *path)
         error("open failed: %s\n", strerror(errno));
         exit(1);
     }
-    if (exists && !get_file_size(f.handle, &f.size))
+    if (exists && !get_file_size(&f))
     {
         exit(1);
     }
@@ -136,24 +136,24 @@ int truncate_file(handle_t h, size_t new_size)
     return 1;
 }
 
-int get_file_size(handle_t h, size_t *out_size)
+int get_file_size(File *f)
 {
 #ifdef _WIN32
     LARGE_INTEGER lpFileSize;
-    if (!GetFileSizeEx(h, &lpFileSize))
+    if (!GetFileSizeEx(f->handle, &lpFileSize))
     {
         error("GetFileSizeEx failed: %ld\n", GetLastError());
         return 0;
     }
-    *out_size = lpFileSize.QuadPart;
+    f->size = lpFileSize.QuadPart;
 #else
     struct stat statbuf;
-    if (fstat(h, &statbuf) < 0)
+    if (fstat(f->handle, &statbuf) < 0)
     {
         error("fstat failed: %s\n", strerror(errno));
         return 0;
     }
-    *out_size = statbuf.st_size;
+    f->size = statbuf.st_size;
 #endif // _WIN32
     return 1;
 }
