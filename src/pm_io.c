@@ -1,5 +1,7 @@
 #include "pm_io.h"
 
+#include "assert.h"
+
 char *data_store = 0;
 
 File open_file(const char *path, flag_t access)
@@ -51,8 +53,8 @@ File open_or_create_file(const char *path, flag_t access, int create)
         break;
     default:
     {
-        f.handle = PM_BAD_FILE_HANDLE;
-        return f;
+        assert(0 && "unreachable");
+        exit(1);
     }
     break;
     }
@@ -82,8 +84,8 @@ File open_or_create_file(const char *path, flag_t access, int create)
         break;
     default:
     {
-        f.handle = PM_BAD_FILE_HANDLE;
-        return f;
+        assert(0 && "unreachable");
+        exit(1);
     }
     }
 
@@ -139,7 +141,7 @@ int file_exists(const char *path)
 int truncate_file(File *f, size_t new_size)
 {
 #ifdef _WIN32
-    if (SetFilePointer(f->handle, new_size, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer(f->handle, (LONG)new_size, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
     {
         error("SetFilePointer failed (%ld)", GetLastError());
         return 0;

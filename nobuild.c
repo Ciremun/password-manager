@@ -7,7 +7,7 @@
 
 #define SOURCES "src/pm.c"
 #define FLAGS "-Wall", "-Wextra", "-pedantic", "-std=c99", "-Isrc/include/"
-#define MSVC_FLAGS "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
+#define MSVC_FLAGS "/W3", "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
 #define DEFAULT_DATA_STORE ".pm_data"
 
 #define STR_HELPER(x) #x
@@ -117,13 +117,13 @@ int main(int argc, char **argv)
         if (msvc)
         {
             pm_version[0] = '/';
-            CMD("cl.exe", pm_version, "/Fe" OUTPUT, "/O2", "src/pm_main.c", SOURCES,
+            CMD("cl.exe", "/D_CRT_SECURE_NO_WARNINGS", "/DNDEBUG", pm_version, "/Fe" OUTPUT, "/O2", "src/pm_main.c", SOURCES,
                 MSVC_FLAGS);
         }
         else
         {
             pm_version[0] = '-';
-            CMD(cc, "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
+            CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
                 "-O3");
         }
     }
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     else
     {
         pm_version[0] = '-';
-        CMD(cc, "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
+        CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
     }
 #endif
     return 0;

@@ -5,7 +5,7 @@
 
 int random_int()
 {
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     rand();
     int x = 33;
     while (x > 32)
@@ -15,7 +15,7 @@ int random_int()
 
 void random_string(int sz, char *out)
 {
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX"
                             "YZ0123456789!@#$%^&*()-+";
     int l = (int)(sizeof(charset) - 1);
