@@ -92,7 +92,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             return 1;
         }
 
-        size_t key_len = strlen(f.key.value) + 1;
+        size_t key_len = strlen(f.key.value);
         memcpy(aes_key, f.key.value, key_len < 32 ? key_len : 32);
     }
 
