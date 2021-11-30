@@ -48,6 +48,8 @@ LPSTR GetLastErrorAsString(void);
         return_code_if_error(cmd_run_sync(cmd));                \
     } while (0)
 
+#define PM_GIT_CONFIG_PATH ".git/config"
+
 int verify_remote(String remote);
 int pull_changes(String remote);
 int upload_changes(String remote);

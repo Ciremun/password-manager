@@ -36,8 +36,7 @@ Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 
 int verify_remote(String remote)
 {
-    const char *git_config_path = ".git/config";
-    File f = open_or_create_file(git_config_path, PM_READ_ONLY, 0);
+    File f = open_or_create_file(PM_GIT_CONFIG_PATH, PM_READ_ONLY, 0);
     map_file(&f);
     for (size_t i = 0; i + 5 < f.size; ++i)
     {
