@@ -113,7 +113,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            CMD(cc, "-DTEST", "test.c", SOURCES, FLAGS, "-lUser32", "-otest",
+            CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, "-lUser32", "-otest",
                 "-O0", "-ggdb");
         }
         CMD(".\\test.exe");
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            CMD(cc, pm_version, "src/pm_main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
+            CMD(cc, "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
                 "-O3");
         }
     }
@@ -138,12 +138,12 @@ int main(int argc, char **argv)
     }
     if (test)
     {
-        CMD(cc, "-DTEST", "test.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
+        CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
         CMD("./test");
     }
     else
     {
-        CMD(cc, pm_version, "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
+        CMD(cc, "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
     }
 #endif
     return 0;

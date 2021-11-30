@@ -14,9 +14,6 @@ typedef HANDLE handle_t;
 #define PM_BACKSPACE_KEY 8
 #define PM_BAD_FILE_HANDLE INVALID_HANDLE_VALUE
 #else
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif // _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>

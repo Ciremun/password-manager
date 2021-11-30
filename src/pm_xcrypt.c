@@ -3,9 +3,9 @@
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 
-#ifdef _WIN32
 int copy_to_clipboard(const char *password, size_t size)
 {
+#ifdef _WIN32
     if (!OpenClipboard(0))
     {
         return 0;
@@ -17,9 +17,12 @@ int copy_to_clipboard(const char *password, size_t size)
     SetClipboardData(CF_TEXT, hMem);
     CloseClipboard();
     GlobalFree(hMem);
+#else
+    fwrite(password, sizeof(char), size - 1, stdout);
+    fflush(stdout);
+#endif // _WIN32
     return 1;
 }
-#endif // _WIN32
 
 void encrypt_and_replace(Flags *f, String data, uint8_t *aes_key, char *label)
 {
