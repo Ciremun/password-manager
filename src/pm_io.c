@@ -145,7 +145,6 @@ int truncate_file(handle_t h, size_t new_size)
         CloseHandle(h);
         return 0;
     }
-
     if (SetEndOfFile(h) == 0)
     {
         error("SetEndOfFile failed: %ld\n", GetLastError());
