@@ -129,6 +129,10 @@ void encrypt_and_replace(Flags *fl, String s, uint8_t *aes_key, char *label)
 
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 {
+    if (!fl->binary.exists)
+        pull_changes(sync_remote_url);
+
+    File f = create_file(data_store, PM_READ_WRITE);
     input_key(aes_key, fl);
     xcrypt_buffer(s.data, aes_key, s.length);
 
@@ -137,15 +141,14 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
     }
     else
     {
-        pull_changes(sync_remote_url);
-        File f = create_file(data_store, PM_READ_WRITE);
         size_t b64_encoded_len;
         char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
-        TRUNCATE_FILE_OR_EXIT(f.handle, f.size + b64_encoded_len + 1);
+        size_t initial_size = f.size;
+        TRUNCATE_FILE_OR_EXIT(&f, f.size + b64_encoded_len + 1);
         MAP_FILE_OR_EXIT(&f);
-        memcpy(f.start + f.size, b64_encoded_str, b64_encoded_len);
+        memcpy(f.start + initial_size, b64_encoded_str, b64_encoded_len);
         free(b64_encoded_str);
-        f.start[f.size + b64_encoded_len] = '\n';
+        f.start[initial_size + b64_encoded_len] = '\n';
         unmap_and_close_file(f);
         upload_changes(sync_remote_url);
     }

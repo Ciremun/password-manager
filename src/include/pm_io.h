@@ -33,7 +33,7 @@ void exit_test_case(int exit_code);
 #define error(fmt, ...)
 #define info(fmt, ...)
 #else
-#define error(fmt, ...) fprintf(stderr, "error: " fmt "\n", __VA_ARGS__)
+#define error(fmt, ...) fprintf(stderr, "error " fmt "\n", __VA_ARGS__)
 #define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
 #endif // TEST
 
@@ -46,11 +46,11 @@ void exit_test_case(int exit_code);
             exit(1);               \
     } while (0)
 
-#define TRUNCATE_FILE_OR_EXIT(h, new_size) \
-    do                                     \
-    {                                      \
-        if (!truncate_file(h, new_size))   \
-            exit(1);                       \
+#define TRUNCATE_FILE_OR_EXIT(file_ptr, new_size) \
+    do                                            \
+    {                                             \
+        if (!truncate_file(file_ptr, new_size))   \
+            exit(1);                              \
     } while (0)
 
 #define EXIT_IF_BAD_FILE_HANDLE(handle)   \
