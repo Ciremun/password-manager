@@ -49,6 +49,13 @@ void exit_test_case(int exit_code);
             exit(1);           \
     } while (0)
 
+#define TRUNCATE_FILE_OR_EXIT(h, new_size) \
+    do                                     \
+    {                                      \
+        if (!truncate_file(h, new_size))   \
+            exit(1);                       \
+    } while (0)
+
 #define EXIT_IF_BAD_FILE_HANDLE(handle)   \
     do                                    \
     {                                     \
