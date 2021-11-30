@@ -137,15 +137,15 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
     else
     {
         File f = create_file(data_store, PM_READ_WRITE);
-        size_t s_b64_len;
-        char *s_b64 = b64_encode(s.data, s.length, &s_b64_len);
-        TRUNCATE_FILE_OR_EXIT(f.handle, f.size + s_b64_len + 1);
+        size_t b64_encoded_len;
+        char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
+        TRUNCATE_FILE_OR_EXIT(f.handle, f.size + b64_encoded_len + 1);
         MAP_FILE_OR_EXIT(&f);
-        memcpy(f.start + f.size, s_b64, s_b64_len);
-        f.start[f.size + s_b64_len] = '\n';
+        memcpy(f.start + f.size, b64_encoded_str, b64_encoded_len);
+        f.start[f.size + b64_encoded_len] = '\n';
         unmap_and_close_file(f);
         upload_changes(sync_remote_url);
-        free(s_b64);
+        free(b64_encoded_str);
     }
 
     // if (!f->binary.exists)
@@ -243,14 +243,14 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     {
         if (file_copy[p] == '\n')
         {
-            size_t decoded_b64_len;
-            uint8_t *decoded_b64 = b64_decode_ex(file_copy + i, p - i, &decoded_b64_len);
-            xcrypt_buffer(decoded_b64, aes_key, decoded_b64_len);
-            if (fwrite(decoded_b64, 1, decoded_b64_len, stdout) != decoded_b64_len)
+            size_t b64_decoded_len;
+            uint8_t *b64_decoded_str = b64_decode_ex(file_copy + i, p - i, &b64_decoded_len);
+            xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
+            if (fwrite(b64_decoded_str, 1, b64_decoded_len, stdout) != b64_decoded_len)
                 error("%s", "fwrite failed");
             i = p + 1;
             fputc('\n', stdout);
-            free(decoded_b64);
+            free(b64_decoded_str);
         }
         p++;
     } while (p < f.size);
