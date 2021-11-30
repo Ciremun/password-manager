@@ -142,13 +142,11 @@ int truncate_file(handle_t h, size_t new_size)
     if (SetFilePointer(h, new_size, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
     {
         error("SetFilePointer failed: %ld\n", GetLastError());
-        CloseHandle(h);
         return 0;
     }
     if (SetEndOfFile(h) == 0)
     {
         error("SetEndOfFile failed: %ld\n", GetLastError());
-        CloseHandle(h);
         return 0;
     }
 #else
