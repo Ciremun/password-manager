@@ -92,12 +92,8 @@ int run(uint8_t *aes_key, int argc, char **argv)
             return 1;
         }
 
-        size_t aes_key_length = strlen(f.key.value) + 1;
-        if (aes_key_length > 128)
-            aes_key = (uint8_t *)malloc(aes_key_length);
-        else
-            aes_key = (uint8_t *)malloc(128);
-        memcpy(aes_key, f.key.value, aes_key_length);
+        size_t key_len = strlen(f.key.value) + 1;
+        memcpy(aes_key, f.key.value, key_len < 32 ? key_len : 32);
     }
 
     if (f.key_file.exists)
