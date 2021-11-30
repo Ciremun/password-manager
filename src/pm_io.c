@@ -2,6 +2,34 @@
 
 char *data_store = 0;
 
+File open_file(const char *path, flag_t access)
+{
+    File f = open_or_create_file(path, access, 0);
+    EXIT_IF_BAD_FILE_HANDLE(f.handle);
+    return f;
+}
+
+File create_file(const char *path, flag_t access)
+{
+    File f = open_or_create_file(path, access, 1);
+    EXIT_IF_BAD_FILE_HANDLE(f.handle);
+    return f;
+}
+
+File open_and_map_file(const char *path, flag_t access)
+{
+    File f = open_file(path, access);
+    MAP_FILE_OR_EXIT(&f);
+    return f;
+}
+
+File create_and_map_file(const char *path, flag_t access)
+{
+    File f = create_file(path, access);
+    MAP_FILE_OR_EXIT(&f);
+    return f;
+}
+
 File open_or_create_file(const char *path, flag_t access, int create)
 {
     File f = {0};
@@ -22,7 +50,11 @@ File open_or_create_file(const char *path, flag_t access, int create)
         dwDesiredAccess = GENERIC_READ;
         break;
     default:
-        exit(1);
+    {
+        f.handle = PM_BAD_FILE_HANDLE;
+        return f;
+    }
+    break;
     }
 
     f.handle = CreateFileA(path, dwDesiredAccess, 0, 0, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, 0);
@@ -32,7 +64,11 @@ File open_or_create_file(const char *path, flag_t access, int create)
         return f;
     }
     if (dwCreationDisposition == OPEN_EXISTING && !get_file_size(&f))
-        exit(1);
+    {
+        close_file(f.handle);
+        f.handle = PM_BAD_FILE_HANDLE;
+        return f;
+    }
 #else
     int flags;
 
@@ -45,7 +81,10 @@ File open_or_create_file(const char *path, flag_t access, int create)
         flags = O_RDONLY;
         break;
     default:
-        exit(1);
+    {
+        f.handle = PM_BAD_FILE_HANDLE;
+        return f;
+    }
     }
 
     if (create && !file_exists(path))
@@ -58,21 +97,26 @@ File open_or_create_file(const char *path, flag_t access, int create)
         return f;
     }
     if (!(flags & O_CREAT) && !get_file_size(&f))
-        exit(1);
+    {
+        close_file(f.handle);
+        f.handle = PM_BAD_FILE_HANDLE;
+        return f;
+    }
 #endif // _WIN32
+    f.access = access;
     return f;
 }
 
-int close_file(File f)
+int close_file(handle_t handle)
 {
 #ifdef _WIN32
-    if (CloseHandle(f.handle) == 0)
+    if (CloseHandle(handle) == 0)
     {
         error("CloseHandle failed: %ld\n", GetLastError());
         return 0;
     }
 #else
-    if (close(f.handle) < 0)
+    if (close(handle) < 0)
     {
         error("close failed: %s\n", strerror(errno));
         return 0;
@@ -140,7 +184,7 @@ int get_file_size(File *f)
     return 1;
 }
 
-void map_file(File *f)
+int map_file(File *f)
 {
 #ifdef _WIN32
     DWORD flProtect;
@@ -153,7 +197,7 @@ void map_file(File *f)
         flProtect = PAGE_READONLY;
         break;
     default:
-        exit(1);
+        return 0;
     }
 
     f->hMap = CreateFileMappingA(f->handle, 0, flProtect, 0, 0, 0);
@@ -161,7 +205,7 @@ void map_file(File *f)
     {
         error("CreateFileMappingA failed: %ld\n", GetLastError());
         CloseHandle(f->handle);
-        exit(1);
+        return 0;
     }
 
     DWORD dwDesiredAccess;
@@ -174,7 +218,7 @@ void map_file(File *f)
         dwDesiredAccess = FILE_MAP_READ;
         break;
     default:
-        exit(1);
+        return 0;
     }
 
     f->start = (char *)MapViewOfFile(f->hMap, dwDesiredAccess, 0, 0, 0);
@@ -183,7 +227,7 @@ void map_file(File *f)
         error("MapViewOfFile failed: %ld\n", GetLastError());
         CloseHandle(f->hMap);
         CloseHandle(f->handle);
-        exit(1);
+        return 0;
     }
 #else
 
@@ -197,16 +241,17 @@ void map_file(File *f)
         prot = PROT_READ;
         break;
     default:
-        exit(1);
+        return 0;
     }
 
     if ((f->start = mmap(0, f->size, prot, MAP_SHARED,
-                          f->handle, 0)) == (void *)-1)
+                         f->handle, 0)) == (void *)-1)
     {
         error("mmap failed: %s\n", strerror(errno));
-        exit(1);
+        return 0;
     }
 #endif // _WIN32
+    return 1;
 }
 
 int unmap_file(File f)
@@ -230,6 +275,11 @@ int unmap_file(File f)
     }
 #endif // _WIN32
     return 1;
+}
+
+int unmap_and_close_file(File f)
+{
+    return unmap_file(f) && close_file(f.handle);
 }
 
 int getpasswd(uint8_t *pw)

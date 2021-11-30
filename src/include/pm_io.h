@@ -4,6 +4,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <conio.h>
+#include <windows.h>
+typedef HANDLE handle_t;
+#define PM_BACKSPACE_KEY 8
+#define PM_BAD_FILE_HANDLE INVALID_HANDLE_VALUE
+#else
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif // _GNU_SOURCE
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <termios.h>
+#include <unistd.h>
+typedef int handle_t;
+#define PM_BACKSPACE_KEY 127
+#define PM_BAD_FILE_HANDLE -1
+#endif // _WIN32
+
+#include "pm_parse.h"
 
 #ifdef TEST
 void exit_test_case(int exit_code);
@@ -15,42 +40,26 @@ void exit_test_case(int exit_code);
 #define info(fmt, ...) fprintf(stdout, "info: " fmt, __VA_ARGS__)
 #endif // TEST
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <conio.h>
-typedef HANDLE handle_t;
-#define PM_BACKSPACE_KEY 8
-#else
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif // _GNU_SOURCE
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <termios.h>
-typedef int handle_t;
-#define PM_BACKSPACE_KEY 127
-#endif // _WIN32
-
-#include <stdint.h>
-
-#include "pm_parse.h"
-
-#ifdef _WIN32
-#define PM_BAD_FILE_HANDLE INVALID_HANDLE_VALUE
-#else
-#define PM_BAD_FILE_HANDLE -1
-#endif // _WIN32
-
 #define DEFAULT_DATA_STORE ".pm_data"
+
+#define MAP_FILE_OR_EXIT(file) \
+    do                         \
+    {                          \
+        if (!map_file(file))   \
+            exit(1);           \
+    } while (0)
+
+#define EXIT_IF_BAD_FILE_HANDLE(handle)   \
+    do                                    \
+    {                                     \
+        if (handle == PM_BAD_FILE_HANDLE) \
+            exit(1);                      \
+    } while (0)
 
 typedef enum
 {
-    PM_READ_ONLY = 0,
-    PM_READ_WRITE
+    PM_READ_WRITE = 0,
+    PM_READ_ONLY,
 } flag_t;
 
 typedef struct
@@ -65,12 +74,17 @@ typedef struct
 } File;
 
 File open_or_create_file(const char *path, flag_t access, int create);
-int close_file(File f);
+File open_file(const char *path, flag_t access);
+File create_file(const char *path, flag_t access);
+File open_and_map_file(const char *path, flag_t access);
+File create_and_map_file(const char *path, flag_t access);
+int close_file(handle_t handle);
 int file_exists(const char *path);
 int truncate_file(handle_t h, size_t new_size);
 int get_file_size(File *f);
-void map_file(File *f);
+int map_file(File *f);
 int unmap_file(File f);
+int unmap_and_close_file(File f);
 int getpasswd(uint8_t *pw);
 void input_key(uint8_t *aes_key, Flags *f);
 

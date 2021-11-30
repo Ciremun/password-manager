@@ -36,8 +36,7 @@ Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 
 int verify_remote(String remote)
 {
-    File f = open_or_create_file(PM_GIT_CONFIG_PATH, PM_READ_ONLY, 0);
-    map_file(&f);
+    File f = open_and_map_file(PM_GIT_CONFIG_PATH, PM_READ_ONLY);
     for (size_t i = 0; i + 5 < f.size; ++i)
     {
         if (memcmp(f.start + i, "url = ", 6) == 0)
@@ -52,11 +51,12 @@ int verify_remote(String remote)
     }
 
 return_false:
+    unmap_and_close_file(f);
     error("provided remote (%s) doesn't match origin in .git/config\n", (char *)remote.data);
     return 0;
 
 return_true:
-    unmap_file(f);
+    unmap_and_close_file(f);
     return 1;
 }
 
