@@ -1,10 +1,12 @@
 #include "pm_parse.h"
 #include "pm_io.h"
 #include "pm_xcrypt.h"
+#include "pm_util.h"
+#include "pm_rand.h"
 
 #include <string.h>
 
-extern char *sync_remote_url;
+String sync_remote_url;
 extern char *data_store;
 
 int is_flag(char *arg, char *s, char *l)
@@ -60,7 +62,12 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
-    sync_remote_url = getenv("PM_SYNC_REMOTE_URL");
+    sync_remote_url = (String) {
+        .data = (uint8_t *)getenv("PM_SYNC_REMOTE_URL"),
+    };
+
+    if (sync_remote_url.data != 0)
+        sync_remote_url.length = strlen((char *)sync_remote_url.data);
 
     Flags f = {0};
     parse_flags(&f, argc, argv);
@@ -81,7 +88,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.key.value)
         {
-            error("%s\n", "key flag called without key value");
+            error("%s", "key flag called without key value");
             return 1;
         }
 
@@ -97,7 +104,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.key_file.value)
         {
-            error("%s\n", "key-file flag called without filename");
+            error("%s", "key-file flag called without filename");
             return 1;
         }
         // size_t aes_key_length = 0;
@@ -117,7 +124,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         else
         {
-            error("%s\n", "input flag called without file path");
+            error("%s", "input flag called without file path");
             return 1;
         }
     }
@@ -135,7 +142,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         else
         {
-            error("%s\n", "delete-label flag called without label");
+            error("%s", "delete-label flag called without label");
             return 1;
         }
     }
@@ -147,14 +154,14 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
             if (f.generate_password.exists)
             {
-                error("%s\n", "can't combine data-file and "
+                error("%s", "can't combine data-file and "
                               "generate-password flags");
                 return 1;
             }
 
             if (!f.data_file.value)
             {
-                error("%s\n", "data-file flag called without filename");
+                error("%s", "data-file flag called without filename");
                 return 1;
             }
 
@@ -192,26 +199,16 @@ int run(uint8_t *aes_key, int argc, char **argv)
             random_string((int)password_length, password_data);
             String password = {.data = (uint8_t *)password_data, .length = password_length};
             if (f.label.exists)
-            {
                 encrypt_and_replace(&f, password, aes_key, f.label.value);
-            }
             else
-            {
                 encrypt_and_write(&f, password, aes_key);
-            }
             if (f.copy.exists)
-            {
-#ifdef _WIN32
-                copy_to_clipboard(password.data, password_length + 1);
-#else
-                fprintf(stdout, "%s", password.data);
-#endif
-            }
+                copy_to_clipboard((char *)password.data, password_length + 1);
             return 0;
         }
         if (f.label.exists)
         {
-            error("%s\n", "label flag called without --data or --data-file or "
+            error("%s", "label flag called without --data or --data-file or "
                           "--generate-password");
             return 1;
         }
@@ -219,7 +216,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         {
             if (!f.find_label.value)
             {
-                error("%s\n", "find label flag called without name");
+                error("%s", "find label flag called without name");
                 return 1;
             }
             decrypt_and_print(&f, aes_key);
@@ -258,7 +255,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
             if (f.copy.exists)
             {
-                error("%s\n",
+                error("%s",
                       "copy is only supported along with -fl, -gp flags");
                 return 1;
             }
@@ -269,19 +266,19 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
     if (!f.data.value)
     {
-        error("%s\n", "data flag called without data");
+        error("%s", "data flag called without data");
         return 1;
     }
 
     if (f.data_file.exists)
     {
-        error("%s\n", "can't combine data and data-file flags");
+        error("%s", "can't combine data and data-file flags");
         return 1;
     }
 
     if (f.generate_password.exists)
     {
-        error("%s\n", "can't combine data and generate-password flags");
+        error("%s", "can't combine data and generate-password flags");
         return 1;
     }
 
@@ -289,14 +286,22 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (!f.label.value)
         {
-            error("%s\n", "label flag called without name");
+            error("%s", "label flag called without name");
             return 1;
         }
-        encrypt_and_replace(&f, (String){.data = (uint8_t *)f.data.value, .length = strlen(f.data.value)}, aes_key, f.label.value);
+        String s = {
+            .data = (uint8_t *)f.data.value,
+            .length = strlen(f.data.value),
+        };
+        encrypt_and_replace(&f, s, aes_key, f.label.value);
     }
     else
     {
-        encrypt_and_write(&f, (String){.data = (uint8_t *)f.data.value, .length = strlen(f.data.value)}, aes_key);
+        String s = {
+            .data = (uint8_t *)f.data.value,
+            .length = strlen(f.data.value),
+        };
+        encrypt_and_write(&f, s, aes_key);
     }
 
     return 0;

@@ -4,9 +4,6 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "pm_rand.h"
-#include "pm_util.h"
-
 typedef struct
 {
     char *value;

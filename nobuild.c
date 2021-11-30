@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define SOURCES "src/pm.c"
-#define FLAGS "-Wall", "-Wextra", "-pedantic", "-Isrc/include/"
+#define FLAGS "-Wall", "-Wextra", "-pedantic", "-std=c99", "-Isrc/include/"
 #define MSVC_FLAGS "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
 #define DEFAULT_DATA_STORE ".pm_data"
 
@@ -68,13 +68,7 @@
         }                                                                      \
     } while (0)
 
-char pm_version[32] =
-#ifdef _WIN32
-    "/"
-#else
-    "-"
-#endif // _WIN32
-    "DPM_VERSION=unknown";
+char pm_version[32] = "?DPM_VERSION=unknown";
 
 int main(int argc, char **argv)
 {
@@ -122,11 +116,13 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
+            pm_version[0] = '/';
             CMD("cl.exe", pm_version, "/Fe" OUTPUT, "/O2", "src/pm_main.c", SOURCES,
                 MSVC_FLAGS);
         }
         else
         {
+            pm_version[0] = '-';
             CMD(cc, "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
                 "-O3");
         }
@@ -143,6 +139,7 @@ int main(int argc, char **argv)
     }
     else
     {
+        pm_version[0] = '-';
         CMD(cc, "-D_GNU_SOURCE", pm_version, "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
     }
 #endif

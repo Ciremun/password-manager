@@ -33,17 +33,17 @@ void exit_test_case(int exit_code);
 #define error(fmt, ...)
 #define info(fmt, ...)
 #else
-#define error(fmt, ...) fprintf(stderr, "error: " fmt, __VA_ARGS__)
-#define info(fmt, ...) fprintf(stdout, "info: " fmt, __VA_ARGS__)
+#define error(fmt, ...) fprintf(stderr, "error: " fmt "\n", __VA_ARGS__)
+#define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
 #endif // TEST
 
 #define DEFAULT_DATA_STORE ".pm_data"
 
-#define MAP_FILE_OR_EXIT(file) \
-    do                         \
-    {                          \
-        if (!map_file(file))   \
-            exit(1);           \
+#define MAP_FILE_OR_EXIT(file_ptr) \
+    do                             \
+    {                              \
+        if (!map_file(file_ptr))   \
+            exit(1);               \
     } while (0)
 
 #define TRUNCATE_FILE_OR_EXIT(h, new_size) \

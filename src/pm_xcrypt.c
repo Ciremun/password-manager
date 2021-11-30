@@ -1,7 +1,10 @@
 #include "pm_xcrypt.h"
+#include "pm_b64.h"
+#include "pm_io.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
+extern String sync_remote_url;
 
 int copy_to_clipboard(const char *password, size_t size)
 {
@@ -24,7 +27,7 @@ int copy_to_clipboard(const char *password, size_t size)
     return 1;
 }
 
-void encrypt_and_replace(Flags *f, String data, uint8_t *aes_key, char *label)
+void encrypt_and_replace(Flags *fl, String s, uint8_t *aes_key, char *label)
 {
     // char **lines = NULL;
     // size_t idx = 0;
@@ -123,11 +126,27 @@ void encrypt_and_replace(Flags *f, String data, uint8_t *aes_key, char *label)
     // upload_changes(sync_remote_url);
 }
 
-void encrypt_and_write(Flags *f, String data, uint8_t *aes_key)
+void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 {
-    // input_key(&aes_key, f);
-    // AES_init_ctx_iv(&ctx, aes_key, aes_iv);
-    // AES_CTR_xcrypt_buffer(&ctx, data, data_length);
+    input_key(aes_key, fl);
+    xcrypt_buffer(s.data, aes_key, s.length);
+
+    if (fl->binary.exists)
+    {
+    }
+    else
+    {
+        File f = create_file(data_store, PM_READ_WRITE);
+        size_t s_b64_len;
+        char *s_b64 = b64_encode(s.data, s.length, &s_b64_len);
+        TRUNCATE_FILE_OR_EXIT(f.handle, f.size + s_b64_len + 1);
+        MAP_FILE_OR_EXIT(&f);
+        memcpy(f.start + f.size, s_b64, s_b64_len);
+        f.start[f.size + s_b64_len] = '\n';
+        unmap_and_close_file(f);
+        upload_changes(sync_remote_url);
+        free(s_b64);
+    }
 
     // if (!f->binary.exists)
     // {
@@ -210,8 +229,34 @@ void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length)
     AES_CTR_xcrypt_buffer(&ctx, line, length);
 }
 
-void decrypt_and_print(Flags *f, uint8_t *aes_key)
+void decrypt_and_print(Flags *fl, uint8_t *aes_key)
 {
+    input_key(aes_key, fl);
+    File f = open_and_map_file(data_store, PM_READ_ONLY);
+    uint8_t *file_copy = (uint8_t *)calloc(1, f.size + 1);
+    memcpy(file_copy, f.start, f.size);
+    unmap_and_close_file(f);
+
+    size_t i = 0;
+    size_t p = 0;
+    do
+    {
+        if (file_copy[p] == '\n')
+        {
+            size_t decoded_b64_len;
+            uint8_t *decoded_b64 = b64_decode_ex(file_copy + i, p - i, &decoded_b64_len);
+            xcrypt_buffer(decoded_b64, aes_key, decoded_b64_len);
+            if (fwrite(decoded_b64, 1, decoded_b64_len, stdout) != decoded_b64_len)
+                error("%s", "fwrite failed");
+            i = p + 1;
+            fputc('\n', stdout);
+            free(decoded_b64);
+        }
+        p++;
+    } while (p < f.size);
+    fflush(stdout);
+    free(file_copy);
+
     //     pull_changes(sync_remote_url);
     //     size_t nch = 0;
     //     char *str = read_file_as_str(data_store, &nch);
@@ -292,7 +337,7 @@ void decrypt_and_print(Flags *f, uint8_t *aes_key)
     // #ifdef _WIN32
     //                 if (!copy_to_clipboard(password, password_length + 1))
     //                 {
-    //                     error("%s\n", "couldn't copy to clipboard");
+    //                     error("%s", "couldn't copy to clipboard");
     //                 }
     // #else
     //                 fwrite(password, sizeof(char), password_length, stdout);
@@ -319,7 +364,7 @@ void decrypt_and_print(Flags *f, uint8_t *aes_key)
     //             }
     //             else
     //             {
-    //                 error("%s\n", "output flag called without filename");
+    //                 error("%s", "output flag called without filename");
     //                 return;
     //             }
     //         }

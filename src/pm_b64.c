@@ -1,20 +1,21 @@
 #include "pm_b64.h"
 
-uint8_t *b64_decode_ex(const uint8_t *src, size_t len, size_t *decsize)
+#include <ctype.h>
+#include <stdlib.h>
+
+uint8_t *b64_decode_ex(const uint8_t *src, size_t len, size_t *out_len)
 {
     int i = 0;
     int j = 0;
     int l = 0;
-    size_t size = 0;
-    uint8_t *dec = NULL;
+    size_t ln = 0;
+    uint8_t *dec = 0;
     uint8_t buf[3];
     uint8_t tmp[4];
 
     dec = (uint8_t *)malloc(len * 3 / 4);
-    if (NULL == dec)
-    {
-        return NULL;
-    }
+    if (dec == 0)
+        return 0;
 
     while (len--)
     {
@@ -49,7 +50,7 @@ uint8_t *b64_decode_ex(const uint8_t *src, size_t len, size_t *decsize)
 
             for (i = 0; i < 3; ++i)
             {
-                dec[size++] = buf[i];
+                dec[ln++] = buf[i];
             }
 
             i = 0;
@@ -81,34 +82,30 @@ uint8_t *b64_decode_ex(const uint8_t *src, size_t len, size_t *decsize)
 
         for (j = 0; (j < i - 1); ++j)
         {
-            dec[size++] = buf[j];
+            dec[ln++] = buf[j];
         }
     }
 
-    dec[size] = '\0';
+    dec[ln] = '\0';
 
-    if (decsize != NULL)
-    {
-        *decsize = size;
-    }
+    if (out_len != 0)
+        *out_len = ln;
 
     return dec;
 }
 
-char *b64_encode(const uint8_t *src, size_t len, size_t *encsize)
+char *b64_encode(const uint8_t *src, size_t len, size_t *out_len)
 {
     int i = 0;
     int j = 0;
-    char *enc = NULL;
-    size_t size = 0;
+    char *enc = 0;
+    size_t ln = 0;
     uint8_t buf[4];
     uint8_t tmp[3];
 
     enc = (char *)malloc(((4 * len / 3) + 3) & ~3);
-    if (NULL == enc)
-    {
-        return NULL;
-    }
+    if (enc == 0)
+        return 0;
 
     while (len--)
     {
@@ -123,7 +120,7 @@ char *b64_encode(const uint8_t *src, size_t len, size_t *encsize)
 
             for (i = 0; i < 4; ++i)
             {
-                enc[size++] = b64_table[buf[i]];
+                enc[ln++] = b64_table[buf[i]];
             }
 
             i = 0;
@@ -144,21 +141,19 @@ char *b64_encode(const uint8_t *src, size_t len, size_t *encsize)
 
         for (j = 0; (j < i + 1); ++j)
         {
-            enc[size++] = b64_table[buf[j]];
+            enc[ln++] = b64_table[buf[j]];
         }
 
         while ((i++ < 3))
         {
-            enc[size++] = '=';
+            enc[ln++] = '=';
         }
     }
 
-    enc[size] = '\0';
+    enc[ln] = '\0';
 
-    if (encsize != NULL)
-    {
-        *encsize = size;
-    }
+    if (out_len != 0)
+        *out_len = ln;
 
     return enc;
 }

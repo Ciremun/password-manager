@@ -1,5 +1,6 @@
 #include "pm_rand.h"
 
+#include <time.h>
 #include <stdlib.h>
 
 int random_int()

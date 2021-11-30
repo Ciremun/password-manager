@@ -21,8 +21,6 @@
 #include "pm_sync.h"
 #include "pm_io.h"
 
-char *sync_remote_url = 0;
-
 #ifndef _WIN32
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 {
@@ -36,6 +34,8 @@ Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)
 
 int verify_remote(String remote)
 {
+    if (remote.data == 0)
+        return 0;
     File f = open_and_map_file(PM_GIT_CONFIG_PATH, PM_READ_ONLY);
     for (size_t i = 0; i + 5 < f.size; ++i)
     {
@@ -52,7 +52,7 @@ int verify_remote(String remote)
 
 return_false:
     unmap_and_close_file(f);
-    error("provided remote (%s) doesn't match origin in .git/config\n", (char *)remote.data);
+    error("provided remote (%s) doesn't match origin in .git/config", (char *)remote.data);
     return 0;
 
 return_true:
@@ -65,7 +65,7 @@ int pull_changes(String remote)
     if (!verify_remote(remote))
         return -1;
     CMD("git", "checkout", "master", "--quiet");
-    CMD("git", "pull", remote, "master", "--quiet");
+    CMD("git", "pull", remote.data, "master", "--quiet");
     return 0;
 }
 
@@ -74,7 +74,7 @@ int upload_changes(String remote)
     if (!verify_remote(remote))
         return -1;
     CMD("git", "commit", "-am", "auto_upload", "--quiet");
-    CMD("git", "push", remote, "master", "--quiet");
+    CMD("git", "push", remote.data, "master", "--quiet");
     return 0;
 }
 

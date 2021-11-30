@@ -8,16 +8,14 @@
 #include <stdio.h>
 #endif // _WIN32
 
-#include "pm_parse.h"
 #include "pm_util.h"
-#include "pm_b64.h"
-#include "pm_aes.h"
+#include "pm_parse.h"
 
 uint8_t *decrypt_base64(String line, uint8_t *aes_key, size_t *decoded_line_length);
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
-void decrypt_and_print(Flags *f, uint8_t *aes_key);
-void encrypt_and_write(Flags *f, String data, uint8_t *aes_key);
-void encrypt_and_replace(Flags *f, String data, uint8_t *aes_key, char *label);
+void decrypt_and_print(Flags *fl, uint8_t *aes_key);
+void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key);
+void encrypt_and_replace(Flags *fl, String s, uint8_t *aes_key, char *label);
 void delete_label(char *label, uint8_t *aes_key);
 int copy_to_clipboard(const char *password, size_t size);
 
