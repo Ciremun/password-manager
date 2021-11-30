@@ -93,7 +93,7 @@ File open_or_create_file(const char *path, flag_t access, int create)
     f.handle = open(path, flags, 0600);
     if (f.handle < 0)
     {
-        error("open failed: %s", strerror(errno));
+        error("open failed (%s: %s)", path, strerror(errno));
         return f;
     }
     if (!(flags & O_CREAT) && !get_file_size(&f))
@@ -112,13 +112,13 @@ int close_file(handle_t handle)
 #ifdef _WIN32
     if (CloseHandle(handle) == 0)
     {
-        error("CloseHandle failed: %ld", GetLastError());
+        error("CloseHandle failed (%ld)", GetLastError());
         return 0;
     }
 #else
     if (close(handle) < 0)
     {
-        error("close failed: %s", strerror(errno));
+        error("close failed (%s)", strerror(errno));
         return 0;
     }
 #endif // _WIN32
@@ -141,18 +141,18 @@ int truncate_file(File *f, size_t new_size)
 #ifdef _WIN32
     if (SetFilePointer(f->handle, new_size, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
     {
-        error("SetFilePointer failed: %ld", GetLastError());
+        error("SetFilePointer failed (%ld)", GetLastError());
         return 0;
     }
     if (SetEndOfFile(f->handle) == 0)
     {
-        error("SetEndOfFile failed: %ld", GetLastError());
+        error("SetEndOfFile failed (%ld)", GetLastError());
         return 0;
     }
 #else
     if ((ftruncate(f->handle, new_size)) < 0)
     {
-        error("ftruncate failed: %s", strerror(errno));
+        error("ftruncate failed (%s)", strerror(errno));
         return 0;
     }
 #endif // _WIN32
@@ -166,7 +166,7 @@ int get_file_size(File *f)
     LARGE_INTEGER lpFileSize;
     if (!GetFileSizeEx(f->handle, &lpFileSize))
     {
-        error("GetFileSizeEx failed: %ld", GetLastError());
+        error("GetFileSizeEx failed (%ld)", GetLastError());
         return 0;
     }
     f->size = lpFileSize.QuadPart;
@@ -174,7 +174,7 @@ int get_file_size(File *f)
     struct stat statbuf;
     if (fstat(f->handle, &statbuf) < 0)
     {
-        error("fstat failed: %s", strerror(errno));
+        error("fstat failed (%s)", strerror(errno));
         return 0;
     }
     f->size = statbuf.st_size;
@@ -201,7 +201,7 @@ int map_file(File *f)
     f->hMap = CreateFileMappingA(f->handle, 0, flProtect, 0, 0, 0);
     if (f->hMap == 0)
     {
-        error("CreateFileMappingA failed: %ld", GetLastError());
+        error("CreateFileMappingA failed (%ld)", GetLastError());
         CloseHandle(f->handle);
         return 0;
     }
@@ -222,7 +222,7 @@ int map_file(File *f)
     f->start = (uint8_t *)MapViewOfFile(f->hMap, dwDesiredAccess, 0, 0, 0);
     if (f->start == 0)
     {
-        error("MapViewOfFile failed: %ld", GetLastError());
+        error("MapViewOfFile failed (%ld)", GetLastError());
         CloseHandle(f->hMap);
         CloseHandle(f->handle);
         return 0;
@@ -245,7 +245,7 @@ int map_file(File *f)
     if ((f->start = mmap(0, f->size, prot, MAP_SHARED,
                          f->handle, 0)) == (void *)-1)
     {
-        error("mmap failed: %s", strerror(errno));
+        error("mmap failed (%s)", strerror(errno));
         return 0;
     }
 #endif // _WIN32
@@ -257,18 +257,18 @@ int unmap_file(File f)
 #ifdef _WIN32
     if (UnmapViewOfFile(f.start) == 0)
     {
-        error("UnmapViewOfFile failed: %ld", GetLastError());
+        error("UnmapViewOfFile failed (%ld)", GetLastError());
         return 0;
     }
     if (CloseHandle(f.hMap) == 0)
     {
-        error("CloseHandle failed: %ld", GetLastError());
+        error("CloseHandle failed (%ld)", GetLastError());
         return 0;
     }
 #else
     if (munmap(f.start, f.size) < 0)
     {
-        error("munmap failed: %s", strerror(errno));
+        error("munmap failed (%s)", strerror(errno));
         return 0;
     }
 #endif // _WIN32
@@ -291,7 +291,7 @@ int getpasswd(uint8_t *pw)
 
     if (tcgetattr(0, &old_kbd_mode))
     {
-        error("%s tcgetattr failed", __func__);
+        error("tcgetattr failed (%s)", strerror(errno));
         return 0;
     }
     memcpy(&new_kbd_mode, &old_kbd_mode, sizeof(struct termios));
@@ -301,7 +301,7 @@ int getpasswd(uint8_t *pw)
     new_kbd_mode.c_cc[VMIN] = 1;
     if (tcsetattr(0, TCSANOW, &new_kbd_mode))
     {
-        error("%s tcsetattr failed", __func__);
+        error("tcsetattr failed (%s)", strerror(errno));
         return 0;
     }
 #endif // _WIN32
@@ -324,7 +324,7 @@ int getpasswd(uint8_t *pw)
 #ifndef _WIN32
     if (tcsetattr(0, TCSANOW, &old_kbd_mode))
     {
-        error("%s tcsetattr failed", __func__);
+        error("tcsetattr failed (%s)", strerror(errno));
         return 0;
     }
 #endif // _WIN32

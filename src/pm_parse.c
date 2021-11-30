@@ -161,13 +161,21 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 return 1;
             }
 
-            // char *data = read_file_as_str(f.data_file.value, &nch);
+            File file = open_and_map_file(f.data_file.value, PM_READ_ONLY);
+            String s = {
+                .data = calloc(1, file.size + 1),
+                .length = file.size,
+            };
+            ASSERT_NOT_NULL(s.data);
+            memcpy(s.data, file.start, file.size);
 
-            // if (f.label.exists)
-            //     encrypt_and_replace(&f, f.label.value, data, aes_key, nch);
-            // else
-            //     encrypt_and_write(&f, (uint8_t *)data, aes_key, nch);
+            if (f.label.exists)
+                encrypt_and_replace(&f, s, aes_key, f.label.value);
+            else
+                encrypt_and_write(&f, s, aes_key);
 
+            free(s.data);
+            unmap_and_close_file(file);
             return 0;
         }
         if (f.generate_password.exists)

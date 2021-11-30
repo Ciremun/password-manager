@@ -33,7 +33,7 @@ void exit_test_case(int exit_code);
 #define error(fmt, ...)
 #define info(fmt, ...)
 #else
-#define error(fmt, ...) fprintf(stderr, "error " fmt "\n", __VA_ARGS__)
+#define error(fmt, ...) fprintf(stderr, "error: " fmt "\n", __VA_ARGS__)
 #define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
 #endif // TEST
 
@@ -58,6 +58,16 @@ void exit_test_case(int exit_code);
     {                                     \
         if (handle == PM_BAD_FILE_HANDLE) \
             exit(1);                      \
+    } while (0)
+
+#define ASSERT_NOT_NULL(ptr)                                         \
+    do                                                               \
+    {                                                                \
+        if (ptr == 0)                                                \
+        {                                                            \
+            error("memory allocation failed (%s)", strerror(errno)); \
+            exit(1);                                                 \
+        }                                                            \
     } while (0)
 
 typedef enum

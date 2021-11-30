@@ -126,7 +126,7 @@ int run_test_in_fork(Args *a)
     }
     else if (pid == -1)
     {
-        fprintf(stderr, "fork failed: %s\n", strerror(errno));
+        fprintf(stderr, "fork failed (%s)\n", strerror(errno));
         return -1;
     }
     else

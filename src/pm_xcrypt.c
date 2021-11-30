@@ -138,6 +138,10 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 
     if (fl->binary.exists)
     {
+        TRUNCATE_FILE_OR_EXIT(&f, s.length);
+        MAP_FILE_OR_EXIT(&f);
+        memcpy(f.start, s.data, s.length);
+        unmap_and_close_file(f);
     }
     else
     {
@@ -229,9 +233,44 @@ void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length)
 
 void decrypt_and_print(Flags *fl, uint8_t *aes_key)
 {
-    input_key(aes_key, fl);
     pull_changes(sync_remote_url);
-    File f = open_and_map_file(data_store, PM_READ_WRITE);
+    FILE *o;
+    if (fl->output.exists)
+    {
+        if (fl->output.value)
+        {
+            o = fopen(fl->output.value, "wb");
+            if (o == NULL)
+            {
+                error("opening file (%s: %s)", fl->output.value, strerror(errno));
+                exit(1);
+            }
+        }
+        else
+        {
+            error("%s", "output flag called without filename");
+            return;
+        }
+    }
+    else
+    {
+        o = stdout;
+    }
+
+    File f = open_and_map_file(data_store, PM_READ_ONLY);
+    input_key(aes_key, fl);
+
+    if (fl->binary.exists)
+    {
+        uint8_t *file_copy = calloc(1, f.size);
+        ASSERT_NOT_NULL(file_copy);
+        memcpy(file_copy, f.start, f.size);
+        xcrypt_buffer(file_copy, aes_key, f.size);
+        if (fwrite(file_copy, 1, f.size, o) != f.size)
+            error("%s", "fwrite failed");
+        free(file_copy);
+        goto end;
+    }
 
     size_t i = 0;
     size_t p = 0;
@@ -250,7 +289,14 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
         }
         p++;
     } while (p < f.size);
+
+end:
+
     fflush(stdout);
+
+    if (fl->output.exists)
+        fclose(o);
+
     unmap_and_close_file(f);
 
     //     pull_changes(sync_remote_url);
