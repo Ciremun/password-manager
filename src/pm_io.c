@@ -333,9 +333,9 @@ int getpasswd(uint8_t *pw)
 
 void input_key(uint8_t *aes_key, Flags *f)
 {
-    if (f == 0 || !f->copy.exists)
-        fprintf(stdout, "%s\n", "key?");
     if (f != 0 && (f->key.exists || f->key_file.exists))
         return;
+    if (f == 0 || !f->copy.exists)
+        fprintf(stdout, "%s\n", "key?");
     getpasswd(aes_key);
 }
