@@ -84,7 +84,7 @@ File open_and_map_file(const char *path, flag_t access);
 File create_and_map_file(const char *path, flag_t access);
 int close_file(handle_t handle);
 int file_exists(const char *path);
-int truncate_file(handle_t h, size_t new_size);
+int truncate_file(File *f, size_t new_size);
 int get_file_size(File *f);
 int map_file(File *f);
 int unmap_file(File f);

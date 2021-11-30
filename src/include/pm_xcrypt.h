@@ -11,7 +11,6 @@
 #include "pm_util.h"
 #include "pm_parse.h"
 
-uint8_t *decrypt_base64(String line, uint8_t *aes_key, size_t *decoded_line_length);
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
 void decrypt_and_print(Flags *fl, uint8_t *aes_key);
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key);

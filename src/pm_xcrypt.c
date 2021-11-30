@@ -1,6 +1,7 @@
 #include "pm_xcrypt.h"
 #include "pm_b64.h"
 #include "pm_io.h"
+#include "pm_sync.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
@@ -136,16 +137,17 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
     }
     else
     {
+        pull_changes(sync_remote_url);
         File f = create_file(data_store, PM_READ_WRITE);
         size_t b64_encoded_len;
         char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
         TRUNCATE_FILE_OR_EXIT(f.handle, f.size + b64_encoded_len + 1);
         MAP_FILE_OR_EXIT(&f);
         memcpy(f.start + f.size, b64_encoded_str, b64_encoded_len);
+        free(b64_encoded_str);
         f.start[f.size + b64_encoded_len] = '\n';
         unmap_and_close_file(f);
         upload_changes(sync_remote_url);
-        free(b64_encoded_str);
     }
 
     // if (!f->binary.exists)
@@ -216,13 +218,6 @@ void delete_label(char *find_label, uint8_t *aes_key)
     // upload_changes(sync_remote_url);
 }
 
-uint8_t *decrypt_base64(String line, uint8_t *aes_key, size_t *decoded_line_length)
-{
-    uint8_t *decoded_line = b64_decode_ex(line.data, line.length, decoded_line_length);
-    xcrypt_buffer(decoded_line, aes_key, *decoded_line_length);
-    return decoded_line;
-}
-
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length)
 {
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
@@ -232,19 +227,17 @@ void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length)
 void decrypt_and_print(Flags *fl, uint8_t *aes_key)
 {
     input_key(aes_key, fl);
-    File f = open_and_map_file(data_store, PM_READ_ONLY);
-    uint8_t *file_copy = (uint8_t *)calloc(1, f.size + 1);
-    memcpy(file_copy, f.start, f.size);
-    unmap_and_close_file(f);
+    pull_changes(sync_remote_url);
+    File f = open_and_map_file(data_store, PM_READ_WRITE);
 
     size_t i = 0;
     size_t p = 0;
     do
     {
-        if (file_copy[p] == '\n')
+        if (f.start[p] == '\n')
         {
             size_t b64_decoded_len;
-            uint8_t *b64_decoded_str = b64_decode_ex(file_copy + i, p - i, &b64_decoded_len);
+            uint8_t *b64_decoded_str = b64_decode_ex(f.start + i, p - i, &b64_decoded_len);
             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
             if (fwrite(b64_decoded_str, 1, b64_decoded_len, stdout) != b64_decoded_len)
                 error("%s", "fwrite failed");
@@ -255,7 +248,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
         p++;
     } while (p < f.size);
     fflush(stdout);
-    free(file_copy);
+    unmap_and_close_file(f);
 
     //     pull_changes(sync_remote_url);
     //     size_t nch = 0;

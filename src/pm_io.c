@@ -136,26 +136,27 @@ int file_exists(const char *path)
 #endif // _WIN32
 }
 
-int truncate_file(handle_t h, size_t new_size)
+int truncate_file(File *f, size_t new_size)
 {
 #ifdef _WIN32
-    if (SetFilePointer(h, new_size, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer(f->handle, new_size, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
     {
         error("SetFilePointer failed: %ld", GetLastError());
         return 0;
     }
-    if (SetEndOfFile(h) == 0)
+    if (SetEndOfFile(f->handle) == 0)
     {
         error("SetEndOfFile failed: %ld", GetLastError());
         return 0;
     }
 #else
-    if ((ftruncate(h, new_size)) < 0)
+    if ((ftruncate(f->handle, new_size)) < 0)
     {
         error("ftruncate failed: %s", strerror(errno));
         return 0;
     }
 #endif // _WIN32
+    f->size = new_size;
     return 1;
 }
 
