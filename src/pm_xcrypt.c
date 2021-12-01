@@ -292,7 +292,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
 
 end:
 
-    fflush(stdout);
+    fflush(o);
 
     if (fl->output.exists)
         fclose(o);
