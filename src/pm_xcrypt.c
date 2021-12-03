@@ -285,7 +285,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
             uint8_t *b64_decoded_str = b64_decode_ex(f.start + i, p - i, &b64_decoded_len);
             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
 	    if (fl->find_label.exists &&
-                label_len+1 < b64_decoded_len && (memcmp(b64_decoded_str, fl->find_label.value, label_len) != 0))
+                (label_len+1 >= b64_decoded_len || (memcmp(b64_decoded_str, fl->find_label.value, label_len) != 0)))
                 goto skip_write;
             if (fwrite(b64_decoded_str, 1, b64_decoded_len, o) != b64_decoded_len)
                 error("%s", "fwrite failed");
