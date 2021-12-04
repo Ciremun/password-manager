@@ -7,7 +7,7 @@ extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 extern String sync_remote_url;
 
-void encrypt_and_replace(Flags *fl, String s, uint8_t *aes_key, char *label)
+void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
 {
     // char **lines = NULL;
     // size_t idx = 0;
@@ -137,61 +137,38 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
     }
 }
 
-void delete_label(char *find_label, uint8_t *aes_key)
+void delete_label(Flags *fl, String label, uint8_t *aes_key)
 {
-    // int found_label = 0;
-    // size_t total_lines = 0;
-    // char **lines = NULL;
-    // read_file(data_store, &lines, &total_lines);
-    // input_key(&aes_key, NULL);
-    // size_t line_idx = 0;
-    // for (; line_idx < total_lines; ++line_idx)
-    // {
-    //     size_t decoded_line_length = 0;
-    //     size_t line_length = strlen(lines[line_idx]);
-    //     unsigned char *decoded_line = decrypt_base64(
-    //         lines[line_idx], aes_key, line_length, &decoded_line_length);
-    //     char *label = (char *)malloc(decoded_line_length * sizeof(decoded_line) + 1);
-    //     for (size_t j = 0; j < decoded_line_length; j++)
-    //     {
-    //         if (decoded_line[j] == ' ')
-    //         {
-    //             label[j] = '\0';
-    //             break;
-    //         }
-    //         label[j] = decoded_line[j];
-    //     }
-    //     if (strcmp(label, find_label) == 0)
-    //     {
-    //         found_label = 1;
-    //         break;
-    //     }
-    // }
-    // if (found_label)
-    // {
-    //     FILE *f = 0;
-    //     if (!(f = fopen(data_store, "wb")))
-    //         PANIC_OPEN_FILE(data_store);
-    //     for (size_t i = 0; i < total_lines; ++i)
-    //     {
-    //         if (i == line_idx)
-    //             continue;
-    //         size_t line_length = strlen(lines[i]);
-    //         for (size_t j = 0; j < line_length; ++j)
-    //             putc(lines[i][j], f);
-    //         putc('\n', f);
-    //     }
-    //     fclose(f);
-    // }
-    // else
-    // {
-    //     info("%s\n", "no results");
-    // }
-    // for (size_t i = 0; i < total_lines; i++)
-    //     free(lines[i]);
-    // free(lines);
+//     File f = open_and_map_file(data_store, PM_READ_WRITE);
+//     input_key(aes_key, fl);
 
-    // upload_changes(sync_remote_url);
+//     size_t i = 0;
+//     size_t p = 0;
+//     do
+//     {
+//         if (f.start[p] == '\n')
+//         {
+//             size_t b64_decoded_len;
+//             uint8_t *b64_decoded_str = b64_decode(f.start + i, p - i, &b64_decoded_len);
+//             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
+//             if ((label.length + 1 >= b64_decoded_len) ||
+//                 (memcmp(b64_decoded_str, fl->find_label.value, label.length) != 0))
+//                 goto skip_line;
+//             size_t label_len = 0;
+//             while (b64_decoded_str[++label_len] != ' ')
+//                 if (label_len > b64_decoded_len)
+//                     goto skip_line;
+            
+// skip_line:
+//             i = p + 1;
+//             free(b64_decoded_str);
+//         }
+//         p++;
+//     } while (p < f.size);
+
+//     info("%s", "no results");
+//     unmap_and_close_file(f);
+//     upload_changes(sync_remote_url);
 }
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length)

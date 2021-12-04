@@ -14,7 +14,7 @@
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
 void decrypt_and_print(Flags *fl, uint8_t *aes_key);
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key);
-void encrypt_and_replace(Flags *fl, String s, uint8_t *aes_key, char *label);
-void delete_label(char *label, uint8_t *aes_key);
+void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key);
+void delete_label(Flags *fl, String label, uint8_t *aes_key);
 
 #endif // PM_XCRYPT_H_

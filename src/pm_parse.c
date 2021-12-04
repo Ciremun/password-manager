@@ -129,7 +129,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         if (f.delete_label.value)
         {
-            delete_label(f.delete_label.value, aes_key);
+            delete_label(&f, PM_STR(f.delete_label.value), aes_key);
             return 0;
         }
         else
@@ -197,7 +197,10 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
             uint8_t *password_data = (uint8_t *)malloc(password_length + 1);
             random_string((int)password_length, password_data);
-            String password = {.data = password_data, .length = password_length};
+            String password = {
+                .data = password_data,
+                .length = password_length,
+            };
             if (f.label.exists)
                 encrypt_and_replace(&f, password, aes_key, f.label.value);
             else
@@ -290,19 +293,11 @@ int run(uint8_t *aes_key, int argc, char **argv)
             error("%s", "label flag called without name");
             return 1;
         }
-        String s = {
-            .data = (uint8_t *)f.data.value,
-            .length = strlen(f.data.value),
-        };
-        encrypt_and_replace(&f, s, aes_key, f.label.value);
+        encrypt_and_replace(&f, PM_STR(f.data.value), PM_STR(f.label.value), aes_key);
     }
     else
     {
-        String s = {
-            .data = (uint8_t *)f.data.value,
-            .length = strlen(f.data.value),
-        };
-        encrypt_and_write(&f, s, aes_key);
+        encrypt_and_write(&f, PM_STR(f.data.value), aes_key);
     }
 
     return 0;

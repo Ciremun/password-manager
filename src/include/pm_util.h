@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define PM_STR(s) (String){ .data = (uint8_t *)s, .length = strlen(s) }
+
 typedef struct
 {
     uint8_t *data;
