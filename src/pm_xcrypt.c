@@ -135,16 +135,6 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
         unmap_and_close_file(f);
         upload_changes(sync_remote_url);
     }
-
-    // if (!f->binary.exists)
-    // {
-    //     size_t encsize;
-    //     char *encoded_data = b64_encode(data, data_length, &encsize);
-    //     write_file(data_store, "a", encoded_data, encsize);
-    //     upload_changes(sync_remote_url);
-    // }
-    // else
-    //     write_file(data_store, "a", data, data_length);
 }
 
 void delete_label(char *find_label, uint8_t *aes_key)
@@ -264,7 +254,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
         if (f.start[p] == '\n')
         {
             size_t b64_decoded_len;
-            uint8_t *b64_decoded_str = b64_decode_ex(f.start + i, p - i, &b64_decoded_len);
+            uint8_t *b64_decoded_str = b64_decode(f.start + i, p - i, &b64_decoded_len);
             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
             if (fl->find_label.exists)
             {
@@ -300,134 +290,4 @@ end:
     if (fl->output.exists)
         fclose(o);
     unmap_and_close_file(f);
-
-    //     pull_changes(sync_remote_url);
-    //     size_t nch = 0;
-    //     char *str = read_file_as_str(data_store, &nch);
-    //     input_key(&aes_key, f);
-    //     if (f->binary.exists)
-    //     {
-    //         xcrypt_buffer((uint8_t *)str, aes_key, nch);
-    //         Lines lines = {
-    //             .array = (Line *)malloc(sizeof(Line)),
-    //             .count = 1,
-    //         };
-    //         lines.array[0] = (Line){.data = str, .length = nch};
-    //         return lines;
-    //     }
-    //     size_t i = 0;
-    //     size_t query_len = f->find_label.value != NULL ? strlen(f->find_label.value) : 0;
-    //     size_t total_lines = 0;
-    //     for (size_t j = 0; j < nch; ++j)
-    //         if (str[j] == '\n')
-    //             total_lines++;
-    //     Lines lines = {
-    //         .array = (Line *)malloc(sizeof(Line) * total_lines),
-    //         .count = 0,
-    //     };
-    //     while (i < nch)
-    //     {
-    //         size_t start = i;
-    //         do
-    //         {
-    //             i++;
-    //         } while (i < nch && str[i] != '\n');
-    //         size_t line_length = i - start - 1;
-    //         if (str[i] == '\n')
-    //             i++;
-    //         size_t decsize = 0;
-    //         unsigned char *decoded_data = decrypt_base64(str + start, aes_key, line_length, &decsize);
-    //         if (f->find_label.value != NULL)
-    //         {
-    //             char *label = (char *)malloc(decsize);
-    //             size_t find_label_length = 0;
-    //             int found_label = 0;
-    //             for (size_t j = 0; j < decsize; j++)
-    //             {
-    //                 if (decoded_data[j] == ' ')
-    //                 {
-    //                     found_label = 1;
-    //                     label[j] = '\0';
-    //                     break;
-    //                 }
-    //                 label[j] = decoded_data[j];
-    //                 label_length++;
-    //             }
-    //             if (!found_label)
-    //             {
-    //                 continue;
-    //             }
-    //             if (query_len > label_length)
-    //             {
-    //                 continue;
-    //             }
-    //             int do_continue = 0;
-    //             for (size_t j = 0; j < query_len; j++)
-    //             {
-    //                 if (f->find_label.value[j] != label[j])
-    //                 {
-    //                     do_continue++;
-    //                     break;
-    //                 }
-    //             }
-    //             if (do_continue)
-    //             {
-    //                 continue;
-    //             }
-    //             if (f->copy.exists)
-    //             {
-    //                 const char *password = (const char *)decoded_data + label_length + 1;
-    //                 size_t password_length = decsize - label_length - 1;
-    // #ifdef _WIN32
-    //                 if (!copy_to_clipboard(password, password_length + 1))
-    //                 {
-    //                     error("%s", "couldn't copy to clipboard");
-    //                 }
-    // #else
-    //                 fwrite(password, sizeof(char), password_length, stdout);
-    // #endif // _WIN32
-    //                 exit(0);
-    //             }
-    //         }
-    //         lines.array[lines.count++] = (Line){.data = (char *)decoded_data, .length = decsize};
-    //     }
-    //     if (f->copy.exists)
-    //         lines.count = 0;
-    //     if (lines.count)
-    //     {
-    //         FILE *o;
-    //         if (f->output.exists)
-    //         {
-    //             if (f->output.value)
-    //             {
-    //                 o = fopen(f->output.value, "wb");
-    //                 if (o == NULL)
-    //                 {
-    //                     PANIC_OPEN_FILE(f->output.value);
-    //                 }
-    //             }
-    //             else
-    //             {
-    //                 error("%s", "output flag called without filename");
-    //                 return;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             o = stdout;
-    //         }
-    //         for (size_t i = 0; i < lines.count; ++i)
-    //         {
-    //             fwrite(lines.array[i].data, sizeof(char), lines.array[i].length, o);
-    //             fputc('\n', o);
-    //         }
-    //         if (f->output.exists)
-    //         {
-    //             fclose(o);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         info("%s\n", "no results");
-    //     }
 }

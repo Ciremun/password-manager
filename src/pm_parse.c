@@ -103,13 +103,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
             error("%s", "key-file flag called without filename");
             return 1;
         }
-        // size_t aes_key_length = 0;
-        // char *key_file = read_file_as_str(f.key_file.value, &aes_key_length);
-        // if (aes_key_length > 128)
-        //     aes_key = (uint8_t *)malloc(aes_key_length);
-        // else
-        //     aes_key = (uint8_t *)malloc(128);
-        // memcpy(aes_key, key_file, aes_key_length);
+        File kf = open_and_map_file(f.key_file.value, PM_READ_ONLY);
+        memcpy(aes_key, kf.start, kf.size < 32 ? kf.size : 32);
+        unmap_and_close_file(kf);
     }
 
     if (f.input.exists)
@@ -208,6 +204,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 encrypt_and_write(&f, password, aes_key);
             if (f.copy.exists)
                 copy_to_clipboard(password.data, password_length + 1);
+            free(password_data);
             return 0;
         }
         if (f.label.exists)

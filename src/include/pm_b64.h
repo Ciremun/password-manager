@@ -21,7 +21,7 @@ extern "C"
 #endif // __cplusplus
 
     char *b64_encode(const uint8_t *, size_t, size_t *);
-    uint8_t *b64_decode_ex(const uint8_t *, size_t, size_t *);
+    uint8_t *b64_decode(const uint8_t *, size_t, size_t *);
 
 #ifdef __cplusplus
 }
