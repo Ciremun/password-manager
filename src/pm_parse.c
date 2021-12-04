@@ -199,15 +199,15 @@ int run(uint8_t *aes_key, int argc, char **argv)
             {
                 password_length = (unsigned long)random_int();
             }
-            char *password_data = (char *)malloc(password_length + 1);
+            uint8_t *password_data = (uint8_t *)malloc(password_length + 1);
             random_string((int)password_length, password_data);
-            String password = {.data = (uint8_t *)password_data, .length = password_length};
+            String password = {.data = password_data, .length = password_length};
             if (f.label.exists)
                 encrypt_and_replace(&f, password, aes_key, f.label.value);
             else
                 encrypt_and_write(&f, password, aes_key);
             if (f.copy.exists)
-                copy_to_clipboard((char *)password.data, password_length + 1);
+                copy_to_clipboard(password.data, password_length + 1);
             return 0;
         }
         if (f.label.exists)

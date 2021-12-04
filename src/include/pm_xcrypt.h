@@ -16,6 +16,5 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key);
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key);
 void encrypt_and_replace(Flags *fl, String s, uint8_t *aes_key, char *label);
 void delete_label(char *label, uint8_t *aes_key);
-int copy_to_clipboard(const char *password, size_t size);
 
 #endif // PM_XCRYPT_H_

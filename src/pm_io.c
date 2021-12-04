@@ -342,3 +342,25 @@ void input_key(uint8_t *aes_key, Flags *f)
         fprintf(stdout, "%s\n", "key?");
     getpasswd(aes_key);
 }
+
+int copy_to_clipboard(uint8_t *password, size_t size)
+{
+#ifdef _WIN32
+    if (!OpenClipboard(0))
+    {
+        return 0;
+    }
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
+    memcpy(GlobalLock(hMem), password, size);
+    GlobalUnlock(hMem);
+    EmptyClipboard();
+    SetClipboardData(CF_TEXT, hMem);
+    CloseClipboard();
+    GlobalFree(hMem);
+#else
+    if (fwrite(password, sizeof(char), size - 1, stdout) != size - 1)
+        return 0;
+    fflush(stdout);
+#endif // _WIN32
+    return 1;
+}

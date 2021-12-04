@@ -101,5 +101,6 @@ int unmap_file(File f);
 int unmap_and_close_file(File f);
 int getpasswd(uint8_t *pw);
 void input_key(uint8_t *aes_key, Flags *f);
+int copy_to_clipboard(uint8_t *password, size_t size);
 
 #endif // PM_IO_H_

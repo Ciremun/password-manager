@@ -7,27 +7,6 @@ extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 extern String sync_remote_url;
 
-int copy_to_clipboard(const char *password, size_t size)
-{
-#ifdef _WIN32
-    if (!OpenClipboard(0))
-    {
-        return 0;
-    }
-    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
-    memcpy(GlobalLock(hMem), password, size);
-    GlobalUnlock(hMem);
-    EmptyClipboard();
-    SetClipboardData(CF_TEXT, hMem);
-    CloseClipboard();
-    GlobalFree(hMem);
-#else
-    fwrite(password, sizeof(char), size - 1, stdout);
-    fflush(stdout);
-#endif // _WIN32
-    return 1;
-}
-
 void encrypt_and_replace(Flags *fl, String s, uint8_t *aes_key, char *label)
 {
     // char **lines = NULL;
@@ -260,6 +239,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     File f = open_and_map_file(data_store, PM_READ_ONLY);
     input_key(aes_key, fl);
 
+    int found_label = 0;
     if (fl->binary.exists)
     {
         uint8_t *file_copy = calloc(1, f.size);
@@ -268,15 +248,17 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
         xcrypt_buffer(file_copy, aes_key, f.size);
         if (fwrite(file_copy, 1, f.size, o) != f.size)
             error("%s", "fwrite failed");
+        fflush(o);
         free(file_copy);
         goto end;
     }
 
+    size_t find_label_len = 0;
+    if (fl->find_label.exists)
+        find_label_len = strlen(fl->find_label.value);
+
     size_t i = 0;
     size_t p = 0;
-    size_t label_len;
-    if (fl->find_label.exists)
-        label_len = strlen(fl->find_label.value);
     do
     {
         if (f.start[p] == '\n')
@@ -284,9 +266,24 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
             size_t b64_decoded_len;
             uint8_t *b64_decoded_str = b64_decode_ex(f.start + i, p - i, &b64_decoded_len);
             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
-            if (fl->find_label.exists &&
-                (label_len + 1 >= b64_decoded_len || (memcmp(b64_decoded_str, fl->find_label.value, label_len) != 0)))
-                goto skip_write;
+            if (fl->find_label.exists)
+            {
+                if ((find_label_len + 1 >= b64_decoded_len) ||
+                    (memcmp(b64_decoded_str, fl->find_label.value, find_label_len) != 0))
+                    goto skip_write;
+                size_t label_len = 0;
+                while (b64_decoded_str[++label_len] != ' ')
+                    if (label_len > b64_decoded_len)
+                        goto skip_write;
+                found_label = 1;
+                if (fl->copy.exists)
+                {
+                    if (!copy_to_clipboard(b64_decoded_str + label_len + 1, b64_decoded_len - label_len))
+                        error("%s", "couldn't copy to clipboard");
+                    free(b64_decoded_str);
+                    goto end;
+                }
+            }
             if (fwrite(b64_decoded_str, 1, b64_decoded_len, o) != b64_decoded_len)
                 error("%s", "fwrite failed");
             fputc('\n', o);
@@ -296,14 +293,12 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
         }
         p++;
     } while (p < f.size);
-
-end:
-
     fflush(o);
-
+end:
+    if (fl->find_label.exists && !found_label)
+        info("%s", "no results");
     if (fl->output.exists)
         fclose(o);
-
     unmap_and_close_file(f);
 
     //     pull_changes(sync_remote_url);
@@ -345,7 +340,7 @@ end:
     //         if (f->find_label.value != NULL)
     //         {
     //             char *label = (char *)malloc(decsize);
-    //             size_t label_length = 0;
+    //             size_t find_label_length = 0;
     //             int found_label = 0;
     //             for (size_t j = 0; j < decsize; j++)
     //             {
