@@ -1,4 +1,5 @@
 #include "pm_b64.h"
+#include "pm_util.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -13,9 +14,8 @@ uint8_t *b64_decode(const uint8_t *src, size_t len, size_t *out_len)
     uint8_t buf[3];
     uint8_t tmp[4];
 
-    dec = (uint8_t *)malloc(len * 3 / 4 + 1);
-    if (dec == 0)
-        return 0;
+    dec = (uint8_t *)calloc(1, len * 3 / 4 + 1);
+    ASSERT_ALLOC(dec);
 
     while (len--)
     {
@@ -103,9 +103,8 @@ char *b64_encode(const uint8_t *src, size_t len, size_t *out_len)
     uint8_t buf[4];
     uint8_t tmp[3];
 
-    enc = (char *)malloc((((4 * len / 3) + 3) & ~3) + 1);
-    if (enc == 0)
-        return 0;
+    enc = (char *)calloc(1, (((4 * len / 3) + 3) & ~3) + 1);
+    ASSERT_ALLOC(enc);
 
     while (len--)
     {
