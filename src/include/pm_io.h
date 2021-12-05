@@ -2,7 +2,6 @@
 #define PM_IO_H_
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,7 +13,6 @@ typedef HANDLE handle_t;
 #define PM_BACKSPACE_KEY 8
 #define PM_BAD_FILE_HANDLE INVALID_HANDLE_VALUE
 #else
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -26,16 +24,6 @@ typedef int handle_t;
 #endif // _WIN32
 
 #include "pm_parse.h"
-
-#ifdef TEST
-void exit_test_case(int exit_code);
-#define exit exit_test_case
-#define error(fmt, ...)
-#define info(fmt, ...)
-#else
-#define error(fmt, ...) fprintf(stderr, "error: " fmt "\n", __VA_ARGS__)
-#define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
-#endif // TEST
 
 #define DEFAULT_DATA_STORE ".pm_data"
 
@@ -79,16 +67,6 @@ void exit_test_case(int exit_code);
     {                                     \
         if (handle == PM_BAD_FILE_HANDLE) \
             exit(1);                      \
-    } while (0)
-
-#define ASSERT_ALLOC(ptr)                                            \
-    do                                                               \
-    {                                                                \
-        if (ptr == 0)                                                \
-        {                                                            \
-            error("memory allocation failed (%s)", strerror(errno)); \
-            exit(1);                                                 \
-        }                                                            \
     } while (0)
 
 typedef enum
