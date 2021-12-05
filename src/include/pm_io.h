@@ -39,18 +39,39 @@ void exit_test_case(int exit_code);
 
 #define DEFAULT_DATA_STORE ".pm_data"
 
-#define MAP_FILE_OR_EXIT(file_ptr) \
-    do                             \
-    {                              \
-        if (!map_file(file_ptr))   \
-            exit(1);               \
+#define UNMAP_AND_CLOSE_FILE(file)       \
+    do                                   \
+    {                                    \
+        if (!unmap_and_close_file(file)) \
+            exit(1);                     \
     } while (0)
 
-#define TRUNCATE_FILE_OR_EXIT(file_ptr, new_size) \
-    do                                            \
-    {                                             \
-        if (!truncate_file(file_ptr, new_size))   \
-            exit(1);                              \
+#define CLOSE_FILE(handle)       \
+    do                           \
+    {                            \
+        if (!close_file(handle)) \
+            exit(1);             \
+    } while (0)
+
+#define UNMAP_FILE(file)       \
+    do                         \
+    {                          \
+        if (!unmap_file(file)) \
+            exit(1);           \
+    } while (0)
+
+#define MAP_FILE_(file_ptr)       \
+    do                           \
+    {                            \
+        if (!map_file(file_ptr)) \
+            exit(1);             \
+    } while (0)
+
+#define TRUNCATE_FILE(file_ptr, new_size)       \
+    do                                          \
+    {                                           \
+        if (!truncate_file(file_ptr, new_size)) \
+            exit(1);                            \
     } while (0)
 
 #define EXIT_IF_BAD_FILE_HANDLE(handle)   \
@@ -60,7 +81,7 @@ void exit_test_case(int exit_code);
             exit(1);                      \
     } while (0)
 
-#define ASSERT_NOT_NULL(ptr)                                         \
+#define ASSERT_ALLOC(ptr)                                            \
     do                                                               \
     {                                                                \
         if (ptr == 0)                                                \

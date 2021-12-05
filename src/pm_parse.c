@@ -105,7 +105,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         File kf = open_and_map_file(f.key_file.value, PM_READ_ONLY);
         memcpy(aes_key, kf.start, kf.size < 32 ? kf.size : 32);
-        unmap_and_close_file(kf);
+        UNMAP_AND_CLOSE_FILE(kf);
     }
 
     if (f.input.exists)
@@ -162,16 +162,16 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 .data = calloc(1, file.size + 1),
                 .length = file.size,
             };
-            ASSERT_NOT_NULL(s.data);
+            ASSERT_ALLOC(s.data);
             memcpy(s.data, file.start, file.size);
 
             if (f.label.exists)
-                encrypt_and_replace(&f, s, aes_key, f.label.value);
+                encrypt_and_replace(&f, s, PM_STR(f.label.value), aes_key);
             else
                 encrypt_and_write(&f, s, aes_key);
 
             free(s.data);
-            unmap_and_close_file(file);
+            UNMAP_AND_CLOSE_FILE(file);
             return 0;
         }
         if (f.generate_password.exists)
@@ -196,13 +196,13 @@ int run(uint8_t *aes_key, int argc, char **argv)
                 password_length = (unsigned long)random_int();
             }
             uint8_t *password_data = (uint8_t *)malloc(password_length + 1);
-            random_string((int)password_length, password_data);
+            random_string(password_length, password_data);
             String password = {
                 .data = password_data,
                 .length = password_length,
             };
             if (f.label.exists)
-                encrypt_and_replace(&f, password, aes_key, f.label.value);
+                encrypt_and_replace(&f, password, PM_STR(f.label.value), aes_key);
             else
                 encrypt_and_write(&f, password, aes_key);
             if (f.copy.exists)

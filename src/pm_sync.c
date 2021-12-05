@@ -51,12 +51,12 @@ int verify_remote(String remote)
     }
 
 return_false:
-    unmap_and_close_file(f);
+    UNMAP_AND_CLOSE_FILE(f);
     error("provided remote (%s) doesn't match origin in .git/config", (char *)remote.data);
     return 0;
 
 return_true:
-    unmap_and_close_file(f);
+    UNMAP_AND_CLOSE_FILE(f);
     return 1;
 }
 

@@ -21,14 +21,14 @@ File create_file(const char *path, flag_t access)
 File open_and_map_file(const char *path, flag_t access)
 {
     File f = open_file(path, access);
-    MAP_FILE_OR_EXIT(&f);
+    MAP_FILE_(&f);
     return f;
 }
 
 File create_and_map_file(const char *path, flag_t access)
 {
     File f = create_file(path, access);
-    MAP_FILE_OR_EXIT(&f);
+    MAP_FILE_(&f);
     return f;
 }
 

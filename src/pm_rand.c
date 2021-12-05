@@ -13,13 +13,13 @@ int random_int()
     return x;
 }
 
-void random_string(int sz, char *out)
+void random_string(size_t sz, uint8_t *out)
 {
     srand((unsigned int)time(NULL));
     static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX"
                             "YZ0123456789!@#$%^&*()-+";
-    int l = (int)(sizeof(charset) - 1);
-    for (int n = 0; n < sz; n++)
+    size_t l = sizeof(charset) - 1;
+    for (size_t n = 0; n < sz; n++)
         out[n] = charset[rand() % l];
     out[sz] = '\0';
 }

@@ -117,58 +117,65 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 
     if (fl->binary.exists)
     {
-        TRUNCATE_FILE_OR_EXIT(&f, s.length);
-        MAP_FILE_OR_EXIT(&f);
+        TRUNCATE_FILE(&f, s.length);
+        MAP_FILE_(&f);
         memcpy(f.start, s.data, s.length);
-        unmap_and_close_file(f);
+        UNMAP_AND_CLOSE_FILE(f);
     }
     else
     {
         size_t b64_encoded_len;
         char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
         size_t initial_size = f.size;
-        TRUNCATE_FILE_OR_EXIT(&f, f.size + b64_encoded_len + 1);
-        MAP_FILE_OR_EXIT(&f);
+        TRUNCATE_FILE(&f, f.size + b64_encoded_len + 1);
+        MAP_FILE_(&f);
         memcpy(f.start + initial_size, b64_encoded_str, b64_encoded_len);
         free(b64_encoded_str);
         f.start[initial_size + b64_encoded_len] = '\n';
-        unmap_and_close_file(f);
+        UNMAP_AND_CLOSE_FILE(f);
         upload_changes(sync_remote_url);
     }
 }
 
 void delete_label(Flags *fl, String label, uint8_t *aes_key)
 {
-//     File f = open_and_map_file(data_store, PM_READ_WRITE);
-//     input_key(aes_key, fl);
+    File f = open_and_map_file(data_store, PM_READ_WRITE);
+    input_key(aes_key, fl);
 
-//     size_t i = 0;
-//     size_t p = 0;
-//     do
-//     {
-//         if (f.start[p] == '\n')
-//         {
-//             size_t b64_decoded_len;
-//             uint8_t *b64_decoded_str = b64_decode(f.start + i, p - i, &b64_decoded_len);
-//             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
-//             if ((label.length + 1 >= b64_decoded_len) ||
-//                 (memcmp(b64_decoded_str, fl->find_label.value, label.length) != 0))
-//                 goto skip_line;
-//             size_t label_len = 0;
-//             while (b64_decoded_str[++label_len] != ' ')
-//                 if (label_len > b64_decoded_len)
-//                     goto skip_line;
-            
-// skip_line:
-//             i = p + 1;
-//             free(b64_decoded_str);
-//         }
-//         p++;
-//     } while (p < f.size);
+    size_t line_start = 0;
+    size_t line_end = 0;
+    do
+    {
+        if (f.start[line_end] == '\n')
+        {
+            size_t line_length = line_end - line_start;
+            size_t b64_decoded_len;
+            uint8_t *b64_decoded_str = b64_decode(f.start + line_start, line_length, &b64_decoded_len);
+            xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
+            if ((label.length + 1 >= b64_decoded_len) ||
+                (memcmp(b64_decoded_str, fl->delete_label.value, label.length) != 0))
+                goto skip_line;
+            size_t label_len = 0;
+            while (b64_decoded_str[++label_len] != ' ')
+                if (label_len > b64_decoded_len)
+                    goto skip_line;
+            free(b64_decoded_str);
+            memcpy(f.start + line_start, f.start + line_start + line_length + 1, f.size - line_end - 1);
+            UNMAP_FILE(f);
+            TRUNCATE_FILE(&f, f.size - line_length - 1);
+            CLOSE_FILE(f.handle);
+            goto end;
+skip_line:
+            line_start = line_end + 1;
+            free(b64_decoded_str);
+        }
+        line_end++;
+    } while (line_end < f.size);
 
-//     info("%s", "no results");
-//     unmap_and_close_file(f);
-//     upload_changes(sync_remote_url);
+    info("%s", "no results");
+    UNMAP_AND_CLOSE_FILE(f);
+end:
+    upload_changes(sync_remote_url);
 }
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length)
@@ -210,7 +217,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     if (fl->binary.exists)
     {
         uint8_t *file_copy = calloc(1, f.size);
-        ASSERT_NOT_NULL(file_copy);
+        ASSERT_ALLOC(file_copy);
         memcpy(file_copy, f.start, f.size);
         xcrypt_buffer(file_copy, aes_key, f.size);
         if (fwrite(file_copy, 1, f.size, o) != f.size)
@@ -266,5 +273,5 @@ end:
         info("%s", "no results");
     if (fl->output.exists)
         fclose(o);
-    unmap_and_close_file(f);
+    UNMAP_AND_CLOSE_FILE(f);
 }
