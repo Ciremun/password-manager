@@ -231,14 +231,14 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     if (fl->find_label.exists)
         find_label_len = strlen(fl->find_label.value);
 
-    size_t i = 0;
-    size_t p = 0;
+    size_t line_start = 0;
+    size_t line_end = 0;
     do
     {
-        if (f.start[p] == '\n')
+        if (f.start[line_end] == '\n')
         {
             size_t b64_decoded_len;
-            uint8_t *b64_decoded_str = b64_decode(f.start + i, p - i, &b64_decoded_len);
+            uint8_t *b64_decoded_str = b64_decode(f.start + line_start, line_end - line_start, &b64_decoded_len);
             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
             if (fl->find_label.exists)
             {
@@ -262,11 +262,11 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
                 error("%s", "fwrite failed");
             fputc('\n', o);
         skip_write:
-            i = p + 1;
+            line_start = line_end + 1;
             free(b64_decoded_str);
         }
-        p++;
-    } while (p < f.size);
+        line_end++;
+    } while (line_end < f.size);
     fflush(o);
 end:
     if (fl->find_label.exists && !found_label)
