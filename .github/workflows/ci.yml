@@ -1,163 +1,163 @@
-name: CI
-on: [push, pull_request, workflow_dispatch]
+# name: CI
+# on: [push, pull_request, workflow_dispatch]
 
-jobs:
-  test-ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: cc nobuild.c -o nobuild && ./nobuild test
-  test-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild test
-        env:
-          CC: clang
-  test-win:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: seanmiddleditch/gha-setup-vsdevenv@master
-      - name: build
-        shell: cmd
-        run: |
-          cl.exe nobuild.c && nobuild.exe test
-  ubuntu-gcc:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-linux-gcc
-          path: |
-            pm*
-        env:
-          CC: gcc
-  ubuntu-clang:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-linux-clang
-          path: |
-            pm*
-        env:
-          CC: clang
-  ubuntu-armv7a-linux-android29-clang:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r23
-          add-to-path: false
-      - name: Set outputs
-        id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      - run: |
-          cc -DPM_CROSSCOMPILING nobuild.c -onobuild && ./nobuild
-          $NDK/bin/armv7a-linux-androideabi29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm.c src/pm_main.c -opm-linux-clang-unknown-armv7a -O3
-        env:
-          NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-linux-clang-unknown-armv7a
-          path: |
-            pm*
-  ubuntu-aarch64-linux-android29-clang:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r23
-          add-to-path: false
-      - name: Set outputs
-        id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      - run: |
-          cc -DPM_CROSSCOMPILING nobuild.c -onobuild && ./nobuild
-          $NDK/bin/aarch64-linux-android29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm.c src/pm_main.c -opm-linux-clang-unknown-aarch64 -O3
-        env:
-          NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-linux-clang-unknown-aarch64
-          path: |
-            pm*
-  macos-clang:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: build
-        run: |
-          cc nobuild.c -onobuild && ./nobuild
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-macos-clang
-          path: |
-            pm*
-        env:
-          CC: clang
-  windows-msvc:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: seanmiddleditch/gha-setup-vsdevenv@master
-      - name: build
-        shell: cmd
-        run: |
-          cl nobuild.c && nobuild.exe
-      - name: password-manager
-        uses: actions/upload-artifact@v2
-        with:
-          name: pm-win-msvc
-          path: |
-            pm*
-  upload_to_my_repo:
-    needs: [ubuntu-gcc, ubuntu-aarch64-linux-android29-clang, windows-msvc]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: download pm-linux-gcc
-        uses: actions/download-artifact@v2
-        with:
-          name: pm-linux-gcc
-      - name: download pm-win-msvc
-        uses: actions/download-artifact@v2
-        with:
-          name: pm-win-msvc
-      - name: download pm-linux-clang-unknown-aarch64
-        uses: actions/download-artifact@v2
-        with:
-          name: pm-linux-clang-unknown-aarch64
-      - name: upload artifacts to my repo
-        run: |
-          git clone git@github.com:Ciremun/pm-data.git data
-          cd data
-          git config --global user.name ${{ secrets.USER_NAME }}
-          git config --global user.email ${{ secrets.USER_EMAIL }}
-          cp ../pm* .
-          git commit -am "auto_update_binary"
-          git push
+# jobs:
+#   test-ubuntu:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: build
+#         run: cc nobuild.c -o nobuild && ./nobuild test
+#   test-macos:
+#     runs-on: macos-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: build
+#         run: |
+#           cc nobuild.c -onobuild && ./nobuild test
+#         env:
+#           CC: clang
+#   test-win:
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: seanmiddleditch/gha-setup-vsdevenv@master
+#       - name: build
+#         shell: cmd
+#         run: |
+#           cl.exe nobuild.c && nobuild.exe test
+#   ubuntu-gcc:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: build
+#         run: |
+#           cc nobuild.c -onobuild && ./nobuild
+#       - name: password-manager
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: pm-linux-gcc
+#           path: |
+#             pm*
+#         env:
+#           CC: gcc
+#   ubuntu-clang:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: build
+#         run: |
+#           cc nobuild.c -onobuild && ./nobuild
+#       - name: password-manager
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: pm-linux-clang
+#           path: |
+#             pm*
+#         env:
+#           CC: clang
+#   ubuntu-armv7a-linux-android29-clang:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: nttld/setup-ndk@v1
+#         id: setup-ndk
+#         with:
+#           ndk-version: r23
+#           add-to-path: false
+#       - name: Set outputs
+#         id: vars
+#         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+#       - run: |
+#           cc -DPM_CROSSCOMPILING nobuild.c -onobuild && ./nobuild
+#           $NDK/bin/armv7a-linux-androideabi29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm.c src/pm_main.c -opm-linux-clang-unknown-armv7a -O3
+#         env:
+#           NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
+#       - name: password-manager
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: pm-linux-clang-unknown-armv7a
+#           path: |
+#             pm*
+#   ubuntu-aarch64-linux-android29-clang:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: nttld/setup-ndk@v1
+#         id: setup-ndk
+#         with:
+#           ndk-version: r23
+#           add-to-path: false
+#       - name: Set outputs
+#         id: vars
+#         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+#       - run: |
+#           cc -DPM_CROSSCOMPILING nobuild.c -onobuild && ./nobuild
+#           $NDK/bin/aarch64-linux-android29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm.c src/pm_main.c -opm-linux-clang-unknown-aarch64 -O3
+#         env:
+#           NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
+#       - name: password-manager
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: pm-linux-clang-unknown-aarch64
+#           path: |
+#             pm*
+#   macos-clang:
+#     runs-on: macos-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: build
+#         run: |
+#           cc nobuild.c -onobuild && ./nobuild
+#       - name: password-manager
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: pm-macos-clang
+#           path: |
+#             pm*
+#         env:
+#           CC: clang
+#   windows-msvc:
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: seanmiddleditch/gha-setup-vsdevenv@master
+#       - name: build
+#         shell: cmd
+#         run: |
+#           cl nobuild.c && nobuild.exe
+#       - name: password-manager
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: pm-win-msvc
+#           path: |
+#             pm*
+#   upload_to_my_repo:
+#     needs: [ubuntu-gcc, ubuntu-aarch64-linux-android29-clang, windows-msvc]
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: webfactory/ssh-agent@v0.5.3
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+#       - name: download pm-linux-gcc
+#         uses: actions/download-artifact@v2
+#         with:
+#           name: pm-linux-gcc
+#       - name: download pm-win-msvc
+#         uses: actions/download-artifact@v2
+#         with:
+#           name: pm-win-msvc
+#       - name: download pm-linux-clang-unknown-aarch64
+#         uses: actions/download-artifact@v2
+#         with:
+#           name: pm-linux-clang-unknown-aarch64
+#       - name: upload artifacts to my repo
+#         run: |
+#           git clone git@github.com:Ciremun/pm-data.git data
+#           cd data
+#           git config --global user.name ${{ secrets.USER_NAME }}
+#           git config --global user.email ${{ secrets.USER_EMAIL }}
+#           cp ../pm* .
+#           git commit -am "auto_update_binary"
+#           git push
