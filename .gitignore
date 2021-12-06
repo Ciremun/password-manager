@@ -11,6 +11,7 @@ cov-int/
 *.pdb
 *.idb
 *.svg
+*.swp
 callgrind*
 
 .data
