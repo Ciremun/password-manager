@@ -36,7 +36,6 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
             while (b64_decoded_str[++label_len] != ' ')
                 if (label_len > b64_decoded_len)
                     goto skip_line;
-            // size_t old_data_length = line_len - label_len - 1;
             size_t label_and_data_length = label_len + 1 + s.length;
             uint8_t *label_and_data = (uint8_t *)calloc(1, label_and_data_length);
             memcpy(label_and_data, b64_decoded_str, label_len + 1);
@@ -47,6 +46,7 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
             if (b64_encoded_len == line_len)
             {
                 memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
+                UNMAP_AND_CLOSE_FILE(f);
             }
             else
             {
@@ -60,6 +60,7 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
                     memcpy(f.start + line_end + 1 + b64_len_diff, f.start + line_end + 1, initial_size - line_end - 1);
                     memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
                     f.start[line_start + b64_encoded_len] = '\n';
+                    UNMAP_AND_CLOSE_FILE(f);
                 }
                 if (b64_encoded_len < line_len)
                 {
@@ -67,7 +68,9 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
                     memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
                     f.start[line_start + b64_encoded_len] = '\n';
                     memcpy(f.start + line_start + b64_encoded_len + 1, f.start + line_end + 1, initial_size - line_end - 1);
+                    UNMAP_FILE(f);
                     TRUNCATE_FILE(&f, f.size - b64_len_diff);
+                    CLOSE_FILE(f.handle);
                 }
             }
             free(b64_decoded_str);
@@ -103,8 +106,8 @@ append:
         free(label_and_data);
         free(b64_encoded_str);
     }
-end:
     UNMAP_AND_CLOSE_FILE(f);
+end:
     upload_changes(sync_remote_url);
     // size_t idx = 0;
 
