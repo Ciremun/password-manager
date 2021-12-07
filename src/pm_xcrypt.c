@@ -47,25 +47,34 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
             if (b64_encoded_len == line_len)
             {
                 memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
-                goto end;
             }
-            if (b64_encoded_len > line_len)
+            else
             {
                 size_t initial_size = f.size;
-                size_t b64_len_diff = b64_encoded_len - line_len;
-                UNMAP_FILE(f);
-                TRUNCATE_FILE(&f, f.size + b64_len_diff);
-                MAP_FILE_(&f);
-                memcpy(f.start + line_end + 1 + b64_len_diff, f.start + line_end + 1, initial_size - line_end - 1);
-                memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
-                f.start[line_start + b64_encoded_len] = '\n';
-            }
-            if (b64_encoded_len < line_len)
-            {
-                size_t initial_size = f.size;
-                size_t b64_len_diff = b64_encoded_len - line_len;
-                memcpy
-                TRUNCATE_FILE(&f, f.size - b64_len_diff);
+                if (b64_encoded_len > line_len)
+                {
+                    size_t b64_len_diff = b64_encoded_len - line_len;
+                    printf("init size %zu\n", f.size);
+                    printf("diff %zu\n", b64_len_diff);
+                    printf("truncate to %zu\n", f.size + b64_len_diff);
+                    UNMAP_FILE(f);
+                    TRUNCATE_FILE(&f, f.size + b64_len_diff);
+                    MAP_FILE_(&f);
+                    memmove(f.start + line_end + 1 + b64_len_diff, f.start + line_end + 1, initial_size - line_start - b64_encoded_len - 1);
+                    memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
+                    f.start[line_start + b64_encoded_len] = '\n';
+                }
+                if (b64_encoded_len < line_len)
+                {
+                    size_t b64_len_diff = line_len - b64_encoded_len;
+                    memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
+                    f.start[line_start + b64_encoded_len] = '\n';
+                    memcpy(f.start + line_start + b64_encoded_len + 1, f.start + line_end + 1, initial_size - line_start - b64_encoded_len - 1);
+                    printf("init size %zu\n", f.size);
+                    printf("diff %zu\n", b64_len_diff);
+                    printf("truncate to %zu\n", f.size - b64_len_diff);
+                    TRUNCATE_FILE(&f, f.size - b64_len_diff);
+                }
             }
             free(b64_decoded_str);
             free(label_and_data);
