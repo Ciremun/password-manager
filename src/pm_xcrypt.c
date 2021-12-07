@@ -38,6 +38,8 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
             while (b64_decoded_str[++label_len] != ' ')
                 if (label_len > b64_decoded_len)
                     goto skip_line;
+            if (label_len != label.length)
+                goto skip_line;
             size_t label_and_data_length = label_len + 1 + s.length;
             uint8_t *label_and_data = (uint8_t *)calloc(1, label_and_data_length);
             memcpy(label_and_data, b64_decoded_str, label_len + 1);
