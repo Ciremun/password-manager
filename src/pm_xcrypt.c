@@ -233,6 +233,8 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     {
         error("file %s is empty", data_store);
         CLOSE_FILE(f.handle);
+        if (fl->output.exists)
+            fclose(o);
         return;
     }
     else
