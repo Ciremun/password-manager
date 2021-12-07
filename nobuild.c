@@ -117,16 +117,16 @@ int main(int argc, char **argv)
     }
     else
     {
+        if (debug)
+        {
+            printf("debug is not supported on Windows\n");
+            return 1;
+        }
         if (msvc)
         {
             pm_version[0] = '/';
             CMD("cl.exe", "/D_CRT_SECURE_NO_WARNINGS", "/DNDEBUG", pm_version, "/Fe" OUTPUT, "/O2", "src/pm_main.c", SOURCES,
                 MSVC_FLAGS);
-        }
-        if (debug)
-        {
-            printf("debug is not supported on Windows\n");
-            return 1;
         }
         else
         {
@@ -140,14 +140,15 @@ int main(int argc, char **argv)
     {
         cc = "gcc";
     }
+    if (debug)
+    {
+        CMD(cc, "-D_GNU_SOURCE", "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O0", "-ggdb");
+        return 0;
+    }
     if (test)
     {
         CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
         RUN("test");
-    }
-    if (debug)
-    {
-        CMD(cc, "-D_GNU_SOURCE", "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O0", "-ggdb");
     }
     else
     {
