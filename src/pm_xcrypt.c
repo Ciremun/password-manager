@@ -36,28 +36,39 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
             while (b64_decoded_str[++label_len] != ' ')
                 if (label_len > b64_decoded_len)
                     goto skip_line;
-            free(b64_decoded_str);
+            // size_t old_data_length = line_len - label_len - 1;
+            size_t label_and_data_length = label_len + 1 + s.length;
+            uint8_t *label_and_data = (uint8_t *)calloc(1, label_and_data_length);
+            memcpy(label_and_data, b64_decoded_str, label_len + 1);
+            memcpy(label_and_data + label_len + 1, s.data, s.length);
+            xcrypt_buffer(label_and_data, aes_key, label_and_data_length);
             size_t b64_encoded_len;
-            char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
-            size_t data_length = line_len - label_len - 1;
-            if (b64_encoded_len == data_length)
+            char *b64_encoded_str = b64_encode(label_and_data, label_and_data_length, &b64_encoded_len);
+            if (b64_encoded_len == line_len)
             {
-                memcpy(f.start + label_len + 1, b64_encoded_str, b64_encoded_len);
+                memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
                 goto end;
             }
-            if (b64_encoded_len > data_length)
+            if (b64_encoded_len > line_len)
             {
-                UNMAP_FILE(f);
                 size_t initial_size = f.size;
-                TRUNCATE_FILE(&f, f.size + b64_encoded_len - data_length + 1);
+                size_t b64_len_diff = b64_encoded_len - line_len;
+                UNMAP_FILE(f);
+                TRUNCATE_FILE(&f, f.size + b64_len_diff);
                 MAP_FILE_(&f);
-                memcpy(f.start + line_end + 1 + b64_encoded_len - data_length, f.start + line_end + 1, initial_size - line_end - 1 - b64_encoded_len + data_length);
-                memcpy(f.start + line_start + label_len + 1, b64_encoded_str, b64_encoded_len);
-                f.start[line_start + label_len + 1 + b64_encoded_len] = '\n';
+                memcpy(f.start + line_end + 1 + b64_len_diff, f.start + line_end + 1, initial_size - line_end - 1);
+                memcpy(f.start + line_start, b64_encoded_str, b64_encoded_len);
+                f.start[line_start + b64_encoded_len] = '\n';
             }
-            if (b64_encoded_len < data_length)
+            if (b64_encoded_len < line_len)
             {
+                size_t initial_size = f.size;
+                size_t b64_len_diff = b64_encoded_len - line_len;
+                memcpy
+                TRUNCATE_FILE(&f, f.size - b64_len_diff);
             }
+            free(b64_decoded_str);
+            free(label_and_data);
             free(b64_encoded_str);                
             goto end;
 skip_line:
@@ -224,7 +235,6 @@ void delete_label(Flags *fl, String label, uint8_t *aes_key)
     pull_changes(sync_remote_url);
 
     File f = open_file(data_store, PM_READ_WRITE);
-    input_key(aes_key, fl);
 
     if (f.size == 0)
     {
@@ -234,6 +244,8 @@ void delete_label(Flags *fl, String label, uint8_t *aes_key)
     }
     else
         MAP_FILE_(&f);
+
+    input_key(aes_key, fl);
 
     size_t line_start = 0;
     size_t line_end = 0;
@@ -304,7 +316,6 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     }
 
     File f = open_file(data_store, PM_READ_ONLY);
-    input_key(aes_key, fl);
 
     if (f.size == 0)
     {
@@ -314,6 +325,8 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     }
     else
         MAP_FILE_(&f);    
+
+    input_key(aes_key, fl);
 
     int found_label = 0;
     if (fl->binary.exists)
