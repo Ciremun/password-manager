@@ -78,7 +78,7 @@ struct Test
 };
 
 // extern Memory g_mem;
-struct AES_ctx ctx;
+extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 size_t failed_tests_count = 0;
 uint8_t aes_key[32] = {0};
