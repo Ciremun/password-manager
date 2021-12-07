@@ -8,6 +8,7 @@
 #define PM_B64_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 static const char b64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                                  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',

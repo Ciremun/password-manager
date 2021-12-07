@@ -2,10 +2,12 @@
 #include "pm_b64.h"
 #include "pm_io.h"
 #include "pm_sync.h"
+#include "pm_aes.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 extern String sync_remote_url;
+extern char *data_store;
 
 void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
 {

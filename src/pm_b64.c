@@ -3,6 +3,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 
 uint8_t *b64_decode(const uint8_t *src, size_t len, size_t *out_len)
 {
