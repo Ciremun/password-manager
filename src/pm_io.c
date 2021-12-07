@@ -67,7 +67,7 @@ File open_or_create_file(const char *path, flag_t access, int create)
     }
     if (dwCreationDisposition == OPEN_EXISTING && !get_file_size(&f))
     {
-        close_file(f.handle);
+        CLOSE_FILE(f.handle);
         f.handle = PM_BAD_FILE_HANDLE;
         return f;
     }
@@ -100,7 +100,7 @@ File open_or_create_file(const char *path, flag_t access, int create)
     }
     if (!(flags & O_CREAT) && !get_file_size(&f))
     {
-        close_file(f.handle);
+        CLOSE_FILE(f.handle);
         f.handle = PM_BAD_FILE_HANDLE;
         return f;
     }
