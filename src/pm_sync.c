@@ -157,8 +157,6 @@ Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs)
     return result;
 }
 
-Cstr cmd_show(Cmd cmd) { return cstr_array_join(" ", cmd.line); }
-
 int pid_wait(Pid pid)
 {
 #ifdef _WIN32
@@ -224,10 +222,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
                                   NULL, NULL, &siStartInfo, &piProcInfo);
 
     if (!bSuccess)
-    {
-        PANIC("Could not create child process %s: %lu\n", cmd_show(cmd),
-              GetLastError());
-    }
+        PANIC("CreateProcess failed: %ld\n", GetLastError());
 
     CloseHandle(piProcInfo.hThread);
 
@@ -235,10 +230,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
 #else
     pid_t cpid = fork();
     if (cpid < 0)
-    {
-        PANIC("Could not fork child process: %s: %s", cmd_show(cmd),
-              strerror(errno));
-    }
+        PANIC("fork failed: %s", strerror(errno));
 
     if (cpid == 0)
     {
@@ -263,10 +255,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
         }
 
         if (execvp(args.elems[0], (char *const *)args.elems) < 0)
-        {
-            PANIC("Could not exec child process: %s: %s", cmd_show(cmd),
-                  strerror(errno));
-        }
+            PANIC("execvp failed: %s", strerror(errno));
     }
 
     return cpid;

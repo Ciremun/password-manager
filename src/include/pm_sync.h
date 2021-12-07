@@ -56,7 +56,6 @@ int upload_changes(String remote);
 int pid_wait(Pid pid);
 int cmd_run_sync(Cmd cmd);
 Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
-Cstr cmd_show(Cmd cmd);
 Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs);
 Cstr_Array cstr_array_make(Cstr first, ...);
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr);
