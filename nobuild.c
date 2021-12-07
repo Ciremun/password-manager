@@ -54,8 +54,10 @@
 
 #if defined(_WIN32)
 #define OUTPUT "pm-" OS "-" CC "-" ARCH ".exe"
+#define RUN(e) CMD(e ".exe")
 #else
 #define OUTPUT "pm-" OS "-" CC "-" ARCH
+#define RUN(e) CMD("./" e)
 #endif // _WIN32
 
 #define PANIC_OVERWRITE_IF_FILE_EXISTS(PATH)                                   \
@@ -76,6 +78,7 @@ int main(int argc, char **argv)
 
     char *cc = getenv("cc");
     int test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
+    int debug = argc > 1 ? strcmp(argv[1], "debug") == 0 ? 1 : 0 : 0;
     if (test)
     {
         PANIC_OVERWRITE_IF_FILE_EXISTS(DEFAULT_DATA_STORE);
@@ -110,7 +113,7 @@ int main(int argc, char **argv)
             CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, "-lUser32", "-otest",
                 "-O0", "-ggdb");
         }
-        CMD(".\\test.exe");
+        RUN("test");
     }
     else
     {
@@ -119,6 +122,11 @@ int main(int argc, char **argv)
             pm_version[0] = '/';
             CMD("cl.exe", "/D_CRT_SECURE_NO_WARNINGS", "/DNDEBUG", pm_version, "/Fe" OUTPUT, "/O2", "src/pm_main.c", SOURCES,
                 MSVC_FLAGS);
+        }
+        if (debug)
+        {
+            printf("debug is not supported on Windows\n");
+            return 1;
         }
         else
         {
@@ -135,7 +143,11 @@ int main(int argc, char **argv)
     if (test)
     {
         CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
-        CMD("./test");
+        RUN("test");
+    }
+    if (debug)
+    {
+        CMD(cc, "-D_GNU_SOURCE", "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O0", "-ggdb");
     }
     else
     {
