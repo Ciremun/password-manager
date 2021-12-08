@@ -3,6 +3,7 @@
 build/
 password-manager/
 cov-int/
+reports/
 
 *.obj
 *.exe
@@ -22,3 +23,4 @@ pm.*
 test
 nobuild
 gprof2dot.py
+compile_commands.json

@@ -258,6 +258,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
             PANIC("execvp failed: %s", strerror(errno));
     }
 
+    free(args.elems);
     return cpid;
 #endif // _WIN32
 }
