@@ -16,6 +16,7 @@ int is_flag(char *arg, char *s, char *l)
 
 void parse_flags(Flags *f, int argc, char **argv)
 {
+    Flag *prev = NULL;
     for (int i = 1; i < argc; i++)
     {
         Flag *flag = NULL;
@@ -46,14 +47,18 @@ void parse_flags(Flags *f, int argc, char **argv)
         else if (!f->binary.exists && is_flag(argv[i], "-b", "--binary"))
             flag = &f->binary;
 
-        if (flag != NULL)
+        if (flag)
         {
+            prev = flag;
             flag->exists = 1;
             if ((i + 1) >= argc)
-            {
                 continue;
-            }
             flag->value = argv[i + 1];
+        }
+        else if (!prev || (prev->value && (strcmp(prev->value, argv[i]) != 0)))
+        {
+            error("unknown flag: \"%s\"", argv[i]);
+            exit(1);
         }
     }
 }
