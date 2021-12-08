@@ -119,8 +119,8 @@ int main(int argc, char **argv)
     {
         if (debug)
         {
-            printf("debug is not supported on Windows\n");
-            return 1;
+            CMD(cc, "-D_GNU_SOURCE", "src/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O0", "-ggdb");
+            return 0;
         }
         if (msvc)
         {
