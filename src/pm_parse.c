@@ -23,8 +23,6 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->data;
         else if (!f->label.exists && is_flag(argv[i], "-l", "--label"))
             flag = &f->label;
-        else if (!f->find_label.exists && is_flag(argv[i], "-fl", "--find-label"))
-            flag = &f->find_label;
         else if (!f->help.exists && is_flag(argv[i], "-h", "--help"))
             flag = &f->help;
         else if (!f->data_file.exists && is_flag(argv[i], "-df", "--data-file"))
@@ -212,15 +210,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         if (f.label.exists)
         {
-            error("%s", "label flag called without --data or --data-file or "
-                          "--generate-password");
-            return 1;
-        }
-        if (f.find_label.exists)
-        {
-            if (!f.find_label.value)
+            if (!f.label.value)
             {
-                error("%s", "find label flag called without name");
+                error("%s", "label flag called without value");
                 return 1;
             }
             decrypt_and_print(&f, aes_key);
@@ -239,13 +231,12 @@ int run(uint8_t *aes_key, int argc, char **argv)
                                         "\n"
                                         "-d  --data                    data to encrypt\n"
                                         "-df --data-file               data to encrypt from file\n"
-                                        "-l  --label                   add label for data\n"
-                                        "-fl --find-label              find data by label\n"
+                                        "-l  --label                   label data / find by label\n"
                                         "-dl --delete-label            delete label and its data\n"
 #ifdef _WIN32
-                                        "-c  --copy                    -fl, -gp helper, copy to clipboard\n"
+                                        "-c  --copy                    -l, -gp helper, copy to clipboard\n"
 #else
-                                        "-c  --copy                    -fl, -gp helper, pipe with clip tools\n"
+                                        "-c  --copy                    -l, -gp helper, pipe with clip tools\n"
 #endif
                                         "-gp --generate-password [N]   put random data\n"
                                         "-k  --key                     key\n"
@@ -260,7 +251,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             if (f.copy.exists)
             {
                 error("%s",
-                      "copy is only supported along with -fl, -gp flags");
+                      "copy is only supported along with -l, -gp flags");
                 return 1;
             }
             decrypt_and_print(&f, aes_key);

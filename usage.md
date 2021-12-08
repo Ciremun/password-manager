@@ -5,7 +5,7 @@
 
 ### copy saved password
 
-	./pm -kf key.txt -fl pass -c | xclip
+	./pm -kf key.txt -l pass -c | xclip
 
 ### encrypt binary
 

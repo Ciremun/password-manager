@@ -480,11 +480,6 @@ void test_delete_label_flag_exists(Test *t)
     remove(DEFAULT_DATA_STORE);
 }
 
-void test_find_label_flag_empty(Test *t)
-{
-    test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
-}
-
 void test_delete_label_flag_empty(Test *t)
 {
     test(run(t->a.key, t->a.argc, t->a.argv) == 1, t);
@@ -755,12 +750,6 @@ int main(void)
             .c = {.t = DELETE_LABEL, .n = DELETE_LABEL_CATEGORY_NAME},
             .d = "exists",
             .f = test_delete_label_flag_exists,
-        },
-        {
-            .a = ARGS("-fl"),
-            .c = {.t = FIND_LABEL, .n = FIND_LABEL_CATEGORY_NAME},
-            .d = "empty",
-            .f = test_find_label_flag_empty,
         },
         {
             .a = ARGS("-dl"),

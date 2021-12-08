@@ -12,11 +12,10 @@
 
     -d  --data                    data to encrypt
     -df --data-file               data to encrypt from file
-    -l  --label                   add label for data
-    -fl --find-label              find data by label
+    -l  --label                   label data / find by label
     -dl --delete-label            delete label and its data
     -gp --generate-password [N]   put random data
-    -c  --copy                    -fl, -gp helper, win32: copy to clipboard, posix: pipe with clip tools
+    -c  --copy                    -l, -gp helper, win32: copy to clipboard, posix: pipe with clip tools
     -k  --key                     key
     -kf --key-file                key file path
     -i  --input                   encrypted file path

@@ -261,8 +261,8 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     }
 
     size_t find_label_len = 0;
-    if (fl->find_label.exists)
-        find_label_len = strlen(fl->find_label.value);
+    if (fl->label.exists)
+        find_label_len = strlen(fl->label.value);
 
     size_t line_start = 0;
     size_t line_end = 0;
@@ -273,10 +273,10 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
             size_t b64_decoded_len;
             uint8_t *b64_decoded_str = b64_decode(f.start + line_start, line_end - line_start, &b64_decoded_len);
             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
-            if (fl->find_label.exists)
+            if (fl->label.exists)
             {
                 if ((find_label_len + 1 >= b64_decoded_len) ||
-                    (memcmp(b64_decoded_str, fl->find_label.value, find_label_len) != 0))
+                    (memcmp(b64_decoded_str, fl->label.value, find_label_len) != 0))
                     goto skip_write;
                 size_t label_len = 0;
                 while (b64_decoded_str[++label_len] != ' ')
@@ -302,7 +302,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     } while (line_end < f.size);
     fflush(o);
 end:
-    if (fl->find_label.exists && !found_label)
+    if (fl->label.exists && !found_label)
         info("%s", "no results");
     if (fl->output.exists)
         fclose(o);

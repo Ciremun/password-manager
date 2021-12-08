@@ -16,7 +16,6 @@ typedef struct
     Flag data;
     Flag data_file;
     Flag label;
-    Flag find_label;
     Flag delete_label;
     Flag copy;
     Flag generate_password;
