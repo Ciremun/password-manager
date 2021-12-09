@@ -70,7 +70,7 @@ jobs:
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - run: |
           cc -DPM_CROSSCOMPILING nobuild.c -onobuild && ./nobuild
-          $NDK/bin/armv7a-linux-androideabi29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm.c src/pm_main.c -opm-linux-clang-unknown-armv7a -O3
+          $NDK/bin/armv7a-linux-androideabi29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm_console.c src/core/pm_main.c -opm-linux-clang-unknown-armv7a -O3
         env:
           NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
       - name: password-manager
@@ -93,7 +93,7 @@ jobs:
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - run: |
           cc -DPM_CROSSCOMPILING nobuild.c -onobuild && ./nobuild
-          $NDK/bin/aarch64-linux-android29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm.c src/pm_main.c -opm-linux-clang-unknown-aarch64 -O3
+          $NDK/bin/aarch64-linux-android29-clang -Wall -Wextra -pedantic -std=c11 -DPM_VERSION=${{ steps.vars.outputs.sha_short }} -Isrc/include/ -I$NDK/sysroot/usr/include src/pm_console.c src/core/pm_main.c -opm-linux-clang-unknown-aarch64 -O3
         env:
           NDK: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64
       - name: password-manager
