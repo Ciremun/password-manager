@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -11,9 +11,9 @@
 #include <unistd.h>
 #endif
 
-#include "pm_io.h"
-#include "pm_b64.h"
 #include "pm_aes.h"
+#include "pm_b64.h"
+#include "pm_io.h"
 #include "pm_xcrypt.h"
 #undef exit
 
@@ -647,7 +647,8 @@ void test_input_flag_write_data(Test *t)
     remove(TEST_DATA_FILE);
 }
 
-void run_test(Test *t) {
+void run_test(Test *t)
+{
     t->f(t);
 }
 

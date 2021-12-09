@@ -3,8 +3,8 @@
 
 #include "pm_rand.h"
 
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
 
 int random_int()
 {
