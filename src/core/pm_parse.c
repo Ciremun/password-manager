@@ -3,9 +3,9 @@
 
 #include "pm_parse.h"
 #include "pm_io.h"
-#include "pm_xcrypt.h"
-#include "pm_util.h"
 #include "pm_rand.h"
+#include "pm_util.h"
+#include "pm_xcrypt.h"
 
 #include <string.h>
 
@@ -68,7 +68,7 @@ void parse_flags(Flags *f, int argc, char **argv)
 
 int run(uint8_t *aes_key, int argc, char **argv)
 {
-    sync_remote_url = (String) {
+    sync_remote_url = (String){
         .data = (uint8_t *)getenv("PM_SYNC_REMOTE_URL"),
     };
 
@@ -153,7 +153,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
             if (f.generate_password.exists)
             {
                 error("%s", "can't combine data-file and "
-                              "generate-password flags");
+                            "generate-password flags");
                 return 1;
             }
 

@@ -1,11 +1,11 @@
 #ifndef PM_UTIL_H_
 #define PM_UTIL_H_
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <errno.h>
 
 #ifdef TEST
 void exit_test_case(int exit_code);
@@ -17,7 +17,8 @@ void exit_test_case(int exit_code);
 #define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
 #endif // TEST
 
-#define PM_STR(s) (String){ .data = (uint8_t *)s, .length = strlen(s) }
+#define PM_STR(s) \
+    (String) { .data = (uint8_t *)s, .length = strlen(s) }
 
 typedef struct
 {

@@ -2,10 +2,10 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "pm_xcrypt.h"
+#include "pm_aes.h"
 #include "pm_b64.h"
 #include "pm_io.h"
 #include "pm_sync.h"
-#include "pm_aes.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
@@ -83,9 +83,9 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
             }
             free(b64_decoded_str);
             free(label_and_data);
-            free(b64_encoded_str);                
+            free(b64_encoded_str);
             goto end;
-skip_line:
+        skip_line:
             line_start = line_end + 1;
             free(b64_decoded_str);
         }
@@ -93,28 +93,28 @@ skip_line:
     } while (line_end < f.size);
 
 append:
-    {
-        size_t label_and_data_length = label.length + 1 + s.length;
-        uint8_t *label_and_data = (uint8_t *)calloc(1, label_and_data_length);
-        ASSERT_ALLOC(label_and_data);
+{
+    size_t label_and_data_length = label.length + 1 + s.length;
+    uint8_t *label_and_data = (uint8_t *)calloc(1, label_and_data_length);
+    ASSERT_ALLOC(label_and_data);
 
-        memcpy(label_and_data, label.data, label.length);        
-        label_and_data[label.length] = ' ';
-        memcpy(label_and_data + label.length + 1, s.data, s.length);
-        xcrypt_buffer(label_and_data, aes_key, label_and_data_length);
-        
-        size_t b64_encoded_len;
-        char *b64_encoded_str = b64_encode(label_and_data, label_and_data_length, &b64_encoded_len);
-        size_t initial_size = f.size;
-        
-        TRUNCATE_FILE(&f, f.size + b64_encoded_len + 1);
-        MAP_FILE_(&f);
-        memcpy(f.start + initial_size, b64_encoded_str, b64_encoded_len);
-        f.start[initial_size + b64_encoded_len] = '\n';
-        
-        free(label_and_data);
-        free(b64_encoded_str);
-    }
+    memcpy(label_and_data, label.data, label.length);
+    label_and_data[label.length] = ' ';
+    memcpy(label_and_data + label.length + 1, s.data, s.length);
+    xcrypt_buffer(label_and_data, aes_key, label_and_data_length);
+
+    size_t b64_encoded_len;
+    char *b64_encoded_str = b64_encode(label_and_data, label_and_data_length, &b64_encoded_len);
+    size_t initial_size = f.size;
+
+    TRUNCATE_FILE(&f, f.size + b64_encoded_len + 1);
+    MAP_FILE_(&f);
+    memcpy(f.start + initial_size, b64_encoded_str, b64_encoded_len);
+    f.start[initial_size + b64_encoded_len] = '\n';
+
+    free(label_and_data);
+    free(b64_encoded_str);
+}
     UNMAP_AND_CLOSE_FILE(f);
 end:
     upload_changes(sync_remote_url);
@@ -191,7 +191,7 @@ void delete_label(Flags *fl, String label, uint8_t *aes_key)
             TRUNCATE_FILE(&f, f.size - line_len - 1);
             CLOSE_FILE(f.handle);
             goto end;
-skip_line:
+        skip_line:
             line_start = line_end + 1;
             free(b64_decoded_str);
         }
@@ -247,7 +247,7 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
         return;
     }
     else
-        MAP_FILE_(&f);    
+        MAP_FILE_(&f);
 
     input_key(aes_key, fl);
 

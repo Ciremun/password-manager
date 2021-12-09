@@ -1036,13 +1036,15 @@ void path_mkdirs(Cstr_Array path)
 
 void path_rm(Cstr path)
 {
-    if (IS_DIR(path)) {
-        FOREACH_FILE_IN_DIR(file, path, {
-            if (strcmp(file, ".") != 0 && strcmp(file, "..") != 0)
-            {
-                path_rm(PATH(path, file));
-            }
-        });
+    if (IS_DIR(path))
+    {
+        FOREACH_FILE_IN_DIR(file, path,
+                            {
+                                if (strcmp(file, ".") != 0 && strcmp(file, "..") != 0)
+                                {
+                                    path_rm(PATH(path, file));
+                                }
+                            });
 
         if (rmdir(path) < 0) {
             if (errno == ENOENT) {

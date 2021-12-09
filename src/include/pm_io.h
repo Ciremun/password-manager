@@ -1,11 +1,11 @@
 #ifndef PM_IO_H_
 #define PM_IO_H_
 
+#include <errno.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <errno.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -50,7 +50,7 @@ typedef int handle_t;
             exit(1);           \
     } while (0)
 
-#define MAP_FILE_(file_ptr)       \
+#define MAP_FILE_(file_ptr)      \
     do                           \
     {                            \
         if (!map_file(file_ptr)) \
