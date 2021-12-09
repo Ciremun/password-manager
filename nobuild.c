@@ -77,8 +77,14 @@ int main(int argc, char **argv)
     GO_REBUILD_URSELF(argc, argv);
 
     char *cc = getenv("cc");
-    int test = argc > 1 ? strcmp(argv[1], "test") == 0 ? 1 : 0 : 0;
-    int debug = argc > 1 ? strcmp(argv[1], "debug") == 0 ? 1 : 0 : 0;
+    int test = 0, debug = 0;
+    for (int i = 0; i < argc; ++i)
+    {
+        if (!test && strcmp(argv[i], "test") == 0)
+            test = 1;
+        if (!debug && strcmp(argv[i], "debug") == 0)
+            debug = 1;
+    }
     if (test)
     {
         PANIC_OVERWRITE_IF_FILE_EXISTS(DEFAULT_DATA_STORE);
