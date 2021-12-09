@@ -45,6 +45,7 @@ void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
                 goto skip_line;
             size_t label_and_data_length = label_len + 1 + s.length;
             uint8_t *label_and_data = (uint8_t *)calloc(1, label_and_data_length);
+            ASSERT_ALLOC(label_and_data);
             memcpy(label_and_data, b64_decoded_str, label_len + 1);
             memcpy(label_and_data + label_len + 1, s.data, s.length);
             xcrypt_buffer(label_and_data, aes_key, label_and_data_length);
@@ -95,7 +96,8 @@ append:
     {
         size_t label_and_data_length = label.length + 1 + s.length;
         uint8_t *label_and_data = (uint8_t *)calloc(1, label_and_data_length);
-        
+        ASSERT_ALLOC(label_and_data);
+
         memcpy(label_and_data, label.data, label.length);        
         label_and_data[label.length] = ' ';
         memcpy(label_and_data + label.length + 1, s.data, s.length);
