@@ -24,3 +24,8 @@ test
 nobuild
 gprof2dot.py
 compile_commands.json
+main.wasm
+opt.js
+mid.js
+blob_b64
+

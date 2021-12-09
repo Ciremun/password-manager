@@ -33,7 +33,7 @@ opt.js : template.js main.wasm
 	rm mid.js blob_b64
 
 index.html : template.ht opt.js
-	./subst template.ht -s -f JAVASCRIPT_DATA opt.js -o $@
+	./subst template.ht -s -f JAVASCRIPT_DATA opt.js -o ../../$@
 
 subst : subst.c
 	cc -o $@ $^
