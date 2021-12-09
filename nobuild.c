@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SOURCES "src/pm_console.c"
+#define SOURCES "src/core/pm_console.c"
 #define FLAGS "-Wall", "-Wextra", "-pedantic", "-std=c99", "-Isrc/include/"
 #define MSVC_FLAGS "/W3", "/FC", "/nologo", "/Isrc/include/", "/link", "User32.lib"
 #define DEFAULT_DATA_STORE ".pm_data"

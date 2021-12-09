@@ -44,6 +44,7 @@ int EXPORT("main") main()
     CNFGBGColor = BLACK;
     setup_window();
 
+    char str[64] = {0};
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
     return 0;
 }
@@ -60,6 +61,9 @@ int EXPORT("loop") loop()
         if (!paused)
             OGUSleep(5000);
 #endif // __wasm__
+
+        CNFGColor(COLOR(0xffffffff));
+        CNFGTackRectangle(50, 50, w / 2 - 100, 100);
 
         CNFGSwapBuffers();
     }
