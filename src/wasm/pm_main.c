@@ -1,3 +1,8 @@
+#ifdef _MSC_VER
+#pragma comment(lib, "gdi32")
+#pragma comment(lib, "User32")
+#endif // _MSC_VER
+
 #ifndef __wasm__
 #include "os_generic.h"
 #endif // __wasm__
@@ -24,6 +29,7 @@
 
 short w, h;
 int offset = 0;
+int paused = 0;
 char str[64] = {0};
 
 void EXPORT("HandleKey") HandleKey(int keycode, int bDown)
@@ -31,6 +37,16 @@ void EXPORT("HandleKey") HandleKey(int keycode, int bDown)
     if (bDown)
         str[offset++] = keycode;
 }
+
+void EXPORT("HandleButton") HandleButton(int x, int y, int button, int bDown)
+{
+}
+
+void EXPORT("HandleMotion") HandleMotion(int x, int y, int mask)
+{
+}
+
+void HandleDestroy() {}
 
 void setup_window()
 {
@@ -46,6 +62,8 @@ void setup_window()
     CNFGSetup(WINDOW_NAME, w, h);
 #endif // __ANDROID__
 }
+
+#ifdef __wasm__
 
 extern unsigned char __heap_base;
 char *heap = (char *)&__heap_base;
@@ -74,6 +92,8 @@ void *memcpy(void *dst, void const *src, unsigned long size)
         *dest++ = *source++;
     return dst;
 }
+
+#endif // __wasm__
 
 int EXPORT("main") main()
 {
