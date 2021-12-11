@@ -1,0 +1,7 @@
+#include "source/core/pm_aes.c"
+#include "source/core/pm_b64.c"
+#include "source/core/pm_io.c"
+#include "source/core/pm_parse.c"
+#include "source/core/pm_rand.c"
+#include "source/core/pm_sync.c"
+#include "source/core/pm_xcrypt.c"

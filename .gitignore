@@ -13,6 +13,7 @@ reports/
 *.idb
 *.svg
 *.swp
+*.out
 callgrind*
 
 .data
