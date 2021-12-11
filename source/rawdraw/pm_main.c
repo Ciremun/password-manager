@@ -32,8 +32,8 @@ void setup_window()
     CNFGGetDimensions(&w, &h);
     CNFGSetup(WINDOW_NAME, w, h);
 #else
-    w = 1600;
-    h = 800;
+    w = 900;
+    h = 900;
     CNFGSetup(WINDOW_NAME, w, h);
 #endif // __ANDROID__
 }

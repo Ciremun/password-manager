@@ -1046,8 +1046,10 @@ void path_rm(Cstr path)
                                 }
                             });
 
-        if (rmdir(path) < 0) {
-            if (errno == ENOENT) {
+        if (rmdir(path) < 0)
+        {
+            if (errno == ENOENT)
+            {
                 errno = 0;
                 WARN("directory %s does not exist", path);
             } else {
