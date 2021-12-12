@@ -77,13 +77,35 @@ int main(int argc, char **argv)
     GO_REBUILD_URSELF(argc, argv);
 
     char *cc = getenv("cc");
-    int test = 0, debug = 0;
+    int test = 0, debug = 0, wasm = 0;
     for (int i = 0; i < argc; ++i)
     {
         if (!test && strcmp(argv[i], "test") == 0)
             test = 1;
         if (!debug && strcmp(argv[i], "debug") == 0)
             debug = 1;
+        if (!wasm && strcmp(argv[i], "wasm") == 0)
+            wasm = 1;
+    }
+    if (wasm)
+    {
+#ifdef _WIN32
+        printf("wasm build is not supported on Windows\n");
+        return 1;
+#else
+        chdir("source/rawdraw/wasm");
+        CMD("cc", "-o", "subst", "subst.c");
+        CMD("cc", "-o", "nn", "nn.c");
+        CMD("clang", "-DWASM", "-nostdlib", "--target=wasm32", "-I../../include/rawdraw", "-I../../include/rawdraw/vendor", "-flto", "-Oz", "-Wl,--lto-O3", "-Wl,--no-entry", "-Wl,--allow-undefined", "-Wl,--import-memory", "../pm_main.c", "../pm_event.c", "../pm_util.c", "-o", "main.wasm");
+        CMD("wasm-opt", "--asyncify", "--pass-arg=asyncify-imports@bynsyncify.*", "--pass-arg=asyncify-ignore-indirect", "-Oz", "main.wasm", "-o", "main.wasm");
+        CHAIN(CHAIN_CMD("cat", "main.wasm"), CHAIN_CMD("base64"), CHAIN_CMD("./nn"), OUT("blob_b64"));
+        CMD("./subst", "template.js", "-s", "-f", "BLOB", "blob_b64", "-o", "mid.js");
+        CMD("terser", "-ecma 2017", "-d", "RAWDRAW_USE_LOOP_FUNCTION=false", "-d", "RAWDRAW_NEED_BLITTER=true", "mid.js", "-o", "opt.js");
+        remove("mid.js");
+        remove("blob_b64");
+        CMD("./subst", "template.ht", "-s", "-f", "JAVASCRIPT_DATA", "opt.js", "-o", "../../../index.html");
+        return 0;
+#endif // _WIN32
     }
     if (test)
     {
