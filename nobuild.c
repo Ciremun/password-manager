@@ -6,8 +6,12 @@
 #include <string.h>
 
 #define SOURCES "pm_console.c"
-#define FLAGS "-Wall", "-Wextra", "-pedantic", "-std=c99", "-Isource/include/core"
+#define FLAGS "-Wall", "-Wextra", "-pedantic", "-std=c99"
 #define MSVC_FLAGS "/W3", "/FC", "/nologo", "/Isource/include/core", "/link", "User32.lib"
+#define CORE_INCLUDES "-Isource/include/core"
+#define RAWDRAW_INCLUDES "-Isource/include/rawdraw", "-Isource/include/rawdraw/vendor"
+#define DEBUG_FLAGS "-O0", "-ggdb"
+#define RELEASE_FLAGS "-O3", "-g0"
 #define DEFAULT_DATA_STORE ".pm_data"
 
 #define STR_HELPER(x) #x
@@ -77,7 +81,13 @@ int main(int argc, char **argv)
     GO_REBUILD_URSELF(argc, argv);
 
     char *cc = getenv("cc");
-    int test = 0, debug = 0, wasm = 0;
+#ifdef _WIN32
+    int msvc = cc == NULL || strcmp(cc, "cl") == 0 || strcmp(cc, "cl.exe") == 0;
+#else
+    if (cc == NULL)
+        cc = "cc";
+#endif // _WIN32
+    int test = 0, debug = 0, wasm = 0, rawdraw = 0, run = 0;
     for (int i = 0; i < argc; ++i)
     {
         if (!test && strcmp(argv[i], "test") == 0)
@@ -86,6 +96,10 @@ int main(int argc, char **argv)
             debug = 1;
         if (!wasm && strcmp(argv[i], "wasm") == 0)
             wasm = 1;
+        if (!rawdraw && strcmp(argv[i], "rawdraw") == 0)
+            rawdraw = 1;
+        if (!run && strcmp(argv[i], "run") == 0)
+            run = 1;
     }
     if (wasm)
     {
@@ -106,6 +120,28 @@ int main(int argc, char **argv)
         CMD("./subst", "template.ht", "-s", "-f", "JAVASCRIPT_DATA", "opt.js", "-o", "../../../index.html");
         return 0;
 #endif // _WIN32
+    }
+    if (rawdraw)
+    {
+#ifdef _WIN32
+        if (msvc)
+            CMD("cl", "/W3", "/FC", "/nologo", "/O2", "/DNDEBUG", "/Isource/include/rawdraw", "/Isource/include/rawdraw/vendor", "/Fe:pm-gui.exe", "source/rawdraw/*.c");
+        else
+        {
+            if (debug)
+                CMD(cc, FLAGS, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lUser32", "-lGdi32");
+            else
+                CMD(cc, FLAGS, "-DNDEBUG", RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lUser32", "-lGdi32");
+        }
+#else
+        if (debug)
+            CMD(cc, FLAGS, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lX11");
+        else
+            CMD(cc, FLAGS, "-DNDEBUG", RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lX11");
+#endif // _WIN32
+        if (run)
+            RUN("pm-gui");
+        return 0;
     }
     if (test)
     {
@@ -128,7 +164,6 @@ int main(int argc, char **argv)
 #if defined(PM_CROSSCOMPILING)
         // nothing
 #elif defined(_WIN32)
-    int msvc = cc == NULL || strcmp(cc, "cl") == 0 || strcmp(cc, "cl.exe") == 0;
     if (test)
     {
         if (msvc)
@@ -138,8 +173,8 @@ int main(int argc, char **argv)
         }
         else
         {
-            CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, "-lUser32", "-otest",
-                "-O0", "-ggdb");
+            CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, CORE_INCLUDES, "-lUser32", "-otest",
+                DEBUG_FLAGS);
         }
         RUN("test");
     }
@@ -147,7 +182,7 @@ int main(int argc, char **argv)
     {
         if (debug)
         {
-            CMD(cc, "-D_GNU_SOURCE", "source/core/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O0", "-ggdb");
+            CMD(cc, "-D_GNU_SOURCE", "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-o" OUTPUT, DEBUG_FLAGS);
             return 0;
         }
         if (msvc)
@@ -159,29 +194,25 @@ int main(int argc, char **argv)
         else
         {
             pm_version[0] = '-';
-            CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "source/core/pm_main.c", SOURCES, FLAGS, "-lUser32", "-o" OUTPUT,
-                "-O3");
+            CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-lUser32", "-o" OUTPUT,
+                RELEASE_FLAGS);
         }
     }
 #else
-    if (cc == NULL)
-    {
-        cc = "gcc";
-    }
     if (debug)
     {
-        CMD(cc, "-D_GNU_SOURCE", "source/core/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O0", "-ggdb");
+        CMD(cc, "-D_GNU_SOURCE", "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-o" OUTPUT, DEBUG_FLAGS);
         return 0;
     }
     if (test)
     {
-        CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, "-otest", "-O0", "-ggdb");
+        CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, CORE_INCLUDES, "-otest", DEBUG_FLAGS);
         RUN("test");
     }
     else
     {
         pm_version[0] = '-';
-        CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "source/core/pm_main.c", SOURCES, FLAGS, "-o" OUTPUT, "-O3");
+        CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-o" OUTPUT, RELEASE_FLAGS);
     }
 #endif
     return 0;
