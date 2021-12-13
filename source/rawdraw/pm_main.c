@@ -87,6 +87,7 @@ int EXPORT("main") main()
             },
             .color = BLACK,
             .font_size = 5,
+            .offset = 0,
         },
         .focused = 1,
         .oninput = oninput_i,
