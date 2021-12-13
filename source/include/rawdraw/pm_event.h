@@ -2,7 +2,9 @@
 #define PM_EVENT_H_
 
 #include "pm_util.h"
+#include "pm_ui.h"
 
+void oninput(InputField *i, int keycode);
 void EXPORT("HandleKey") HandleKey(int keycode, int bDown);
 void EXPORT("HandleButton") HandleButton(int x, int y, int button, int bDown);
 void EXPORT("HandleMotion") HandleMotion(int x, int y, int mask);

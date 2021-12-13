@@ -66,8 +66,6 @@ void prints(const char *str);
 #define prints
 #endif // __wasm__
 
-typedef struct InputField InputField;
-
 typedef struct
 {
     char *data;
@@ -76,39 +74,8 @@ typedef struct
 
 typedef struct
 {
-    String string;
-    uint32_t color;
-    int font_size;
-    int offset;
-} Text;
-
-typedef struct
-{
     int x;
     int y;
 } Point;
-
-typedef struct
-{
-    Point p1;
-    Point p2;
-    uint32_t color;
-} Rect;
-
-struct InputField
-{
-    Rect rect;
-    Text text;
-    int focused;
-    void (*oninput)(InputField *, int);
-};
-
-typedef struct
-{
-    InputField *arr;
-    size_t count;
-} InputFields;
-
-int inside_rect(Point p, Rect r);
 
 #endif // PM_UTIL_H__

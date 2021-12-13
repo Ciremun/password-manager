@@ -7,6 +7,19 @@
 volatile int suspended;
 extern InputFields input_fields;
 
+void oninput(InputField *i, int keycode)
+{
+    if (!i->focused)
+        return;
+    if (keycode == BACKSPACE_KEY)
+    {
+        if (i->text.offset)
+            i->text.string.data[--i->text.offset] = 0;
+    }
+    else
+        i->text.string.data[i->text.offset++] = keycode;
+}
+
 void HandleKey(int keycode, int bDown)
 {
     if (bDown)
