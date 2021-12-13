@@ -14,7 +14,7 @@
 
 #ifdef __wasm__
 #define EXPORT(s) __attribute__((export_name(s)))
-#define SWAPS(v) ((v>>24)&0xff) | ((v<<8)&0xff0000) | ((v>>8)&0xff00) | ((v<<24)&0xff000000)
+#define SWAPS(v) ((v >> 24) & 0xff) | ((v << 8) & 0xff0000) | ((v >> 8) & 0xff00) | ((v << 24) & 0xff000000)
 #define COLOR(c) SWAPS(c)
 #else
 #define COLOR(c) c
@@ -100,7 +100,7 @@ struct InputField
     Rect rect;
     Text text;
     int focused;
-    void (*oninput)(InputField*, int);
+    void (*oninput)(InputField *, int);
 };
 
 #endif // PM_UTIL_H__

@@ -267,11 +267,11 @@ if (RAWDRAW_NEED_BLITTER) {
             wasmExports = instance.exports;
 
             if (instance.exports.HandleResize) {
-                 window.addEventListener('resize', () => {
-                     canvas.width = window.innerWidth;
-                     canvas.height = window.innerHeight;
-                     instance.exports.HandleResize(window.innerWidth, window.innerHeight);
-                 });
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    instance.exports.HandleResize(window.innerWidth, window.innerHeight);
+                });
             }
             //Attach inputs.
             if (instance.exports.HandleMotion) {
