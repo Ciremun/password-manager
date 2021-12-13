@@ -5,14 +5,14 @@
 #include "pm_util.h"
 
 volatile int suspended;
-extern InputField inputs[1];
+extern InputFields input_fields;
 
 void HandleKey(int keycode, int bDown)
 {
     if (bDown)
     {
-        for (int i = 0; i < 2; ++i)
-            inputs[i].oninput(&inputs[i], keycode);
+        for (int i = 0; i < input_fields.count; ++i)
+            input_fields.arr[i].oninput(&input_fields.arr[i], keycode);
     }
 }
 
@@ -20,14 +20,15 @@ void HandleButton(int x, int y, int button, int bDown)
 {
     if (bDown)
     {
-        Point click = (Point){ .x = x, .y = y };
-        for (int i = 0; i < 2; ++i)
+        Point click = { .x = x, .y = y };
+        for (int i = 0; i < input_fields.count; ++i)
         {
-            inputs[i].focused = inside_rect(click, inputs[i].rect);;
-            if (inputs[i].focused)
+            input_fields.arr[i].focused = inside_rect(click, input_fields.arr[i].rect);;
+            if (input_fields.arr[i].focused)
             {
-                for (int j = i + 1; j < 2; ++j)
-                    inputs[j].focused = 0;
+                ++i;
+                for (; i < input_fields.count; ++i)
+                    input_fields.arr[i].focused = 0;
                 return;
             }
         }

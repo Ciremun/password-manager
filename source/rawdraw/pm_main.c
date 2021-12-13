@@ -19,7 +19,12 @@
 
 short w, h;
 int paused = 0;
-InputField inputs[2];
+InputFields input_fields;
+
+void add_input_field(InputField i)
+{
+    input_fields.arr[input_fields.count++] = i;
+}
 
 void oninput_i(InputField *i, int keycode)
 {
@@ -49,6 +54,12 @@ void DrawInputField(InputField i)
     CNFGDrawText(i.text.string.data, i.text.font_size);
 }
 
+void DrawInputFields()
+{
+    for (size_t i = 0; i < input_fields.count; ++i)
+        DrawInputField(input_fields.arr[i]);
+}
+
 void setup_window()
 {
 #ifdef __ANDROID__
@@ -71,6 +82,9 @@ int EXPORT("main") main()
 
     char str[64] = {0};
     char str2[64] = {0};
+    InputField fields[16] = {0};
+
+    input_fields.arr = fields;
 
     InputField i = {
         .rect = (Rect){
@@ -122,8 +136,8 @@ int EXPORT("main") main()
         .oninput = oninput_i,
     };
 
-    inputs[0] = i;
-    inputs[1] = i2;
+    add_input_field(i);
+    add_input_field(i2);
 
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
     return 0;
@@ -142,8 +156,7 @@ int EXPORT("loop") loop()
             OGUSleep(16000);
 #endif // __wasm__
 
-        for (int i = 0; i < 2; ++i)
-            DrawInputField(inputs[i]);
+        DrawInputFields();
 
         CNFGSwapBuffers();
     }

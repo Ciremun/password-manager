@@ -103,6 +103,12 @@ struct InputField
     void (*oninput)(InputField *, int);
 };
 
+typedef struct
+{
+    InputField *arr;
+    size_t count;
+} InputFields;
+
 int inside_rect(Point p, Rect r);
 
 #endif // PM_UTIL_H__
