@@ -4,21 +4,13 @@
 #include "pm_event.h"
 
 volatile int suspended;
-
-int offset = 0;
-char str[64] = {0};
+extern InputField inputs[1];
 
 void HandleKey(int keycode, int bDown)
 {
     if (bDown)
     {
-        if (keycode == BACKSPACE_KEY)
-        {
-            if (offset)
-                str[--offset] = 0;
-        }
-        else
-            str[offset++] = keycode;
+        inputs[0].oninput(&inputs[0], keycode);
     }
 }
 

@@ -13,49 +13,26 @@
 #define CNFG_IMPLEMENTATION
 #include "rawdraw_sf.h"
 
-#include <stddef.h>
-
 #include "pm_util.h"
 
 #define WINDOW_NAME "password-manager"
 
-typedef struct
-{
-    char *data;
-    size_t length;
-} String;
-
-typedef struct
-{
-    String string;
-    uint32_t color;
-    int font_size;
-} Text;
-
-typedef struct
-{
-    int x;
-    int y;
-} Point;
-
-typedef struct
-{
-    Point p1;
-    Point p2;
-    uint32_t color;
-} Rect;
-
-typedef struct
-{
-    Rect rect;
-    Text text;
-} InputField;
-
 short w, h;
 int paused = 0;
+InputField inputs[1];
 
-extern int offset;
-extern char str[64];
+void oninput_i(InputField *i, int keycode)
+{
+    if (!i->focused)
+        return;
+    if (keycode == BACKSPACE_KEY)
+    {
+        if (i->text.offset)
+            i->text.string.data[--i->text.offset] = 0;
+    }
+    else
+        i->text.string.data[i->text.offset++] = keycode;
+}
 
 void DrawInputField(InputField i)
 {
@@ -89,6 +66,8 @@ int EXPORT("main") main()
     CNFGBGColor = BLACK;
     setup_window();
 
+    char str[64] = {0};
+
     InputField i = {
         .rect = (Rect){
             .color = WHITE,
@@ -109,7 +88,11 @@ int EXPORT("main") main()
             .color = BLACK,
             .font_size = 5,
         },
+        .focused = 1,
+        .oninput = oninput_i,
     };
+
+    inputs[0] = i;
 
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
     return 0;

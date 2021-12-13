@@ -1,6 +1,9 @@
 #ifndef PM_UTIL_H__
 #define PM_UTIL_H__
 
+#include <stddef.h>
+#include <stdint.h>
+
 #ifndef min
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #endif // min
@@ -63,5 +66,41 @@ void prints(const char *str);
 #define prints
 #endif // __wasm__
 
+typedef struct InputField InputField;
+
+typedef struct
+{
+    char *data;
+    size_t length;
+} String;
+
+typedef struct
+{
+    String string;
+    uint32_t color;
+    int font_size;
+    int offset;
+} Text;
+
+typedef struct
+{
+    int x;
+    int y;
+} Point;
+
+typedef struct
+{
+    Point p1;
+    Point p2;
+    uint32_t color;
+} Rect;
+
+struct InputField
+{
+    Rect rect;
+    Text text;
+    int focused;
+    void (*oninput)(InputField*, int);
+};
 
 #endif // PM_UTIL_H__
