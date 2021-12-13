@@ -13,15 +13,61 @@
 #define CNFG_IMPLEMENTATION
 #include "rawdraw_sf.h"
 
+#include <stddef.h>
+
 #include "pm_util.h"
 
 #define WINDOW_NAME "password-manager"
+
+typedef struct
+{
+    char *data;
+    size_t length;
+} String;
+
+typedef struct
+{
+    String string;
+    uint32_t color;
+    int font_size;
+} Text;
+
+typedef struct
+{
+    int x;
+    int y;
+} Point;
+
+typedef struct
+{
+    Point p1;
+    Point p2;
+    uint32_t color;
+} Rect;
+
+typedef struct
+{
+    Rect rect;
+    Text text;
+} InputField;
 
 short w, h;
 int paused = 0;
 
 extern int offset;
 extern char str[64];
+
+void DrawInputField(InputField i)
+{
+    static const int text_height = 10;
+    int rect_height = i.rect.p2.y - i.rect.p1.y;
+    CNFGPenX = i.rect.p1.x + 10;
+    CNFGPenY = i.rect.p1.y + rect_height / 2 - text_height;
+    CNFGColor(i.rect.color);
+    CNFGTackRectangle(i.rect.p1.x, i.rect.p1.y, i.rect.p2.x, i.rect.p2.y);
+    CNFGColor(i.text.color);
+    CNFGDrawText(i.text.string.data, i.text.font_size);
+}
 
 void setup_window()
 {
@@ -43,6 +89,28 @@ int EXPORT("main") main()
     CNFGBGColor = BLACK;
     setup_window();
 
+    InputField i = {
+        .rect = (Rect){
+            .color = WHITE,
+            .p1 = (Point){
+                .x = 0,
+                .y = 0,
+            },
+            .p2 = (Point){
+                .x = w,
+                .y = 40,
+            },
+        },
+        .text = (Text){
+            .string = (String){
+                .data = str,
+                .length = 0,
+            },
+            .color = BLACK,
+            .font_size = 5,
+        },
+    };
+
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
     return 0;
 }
@@ -60,14 +128,8 @@ int EXPORT("loop") loop()
             OGUSleep(16000);
 #endif // __wasm__
 
-        CNFGColor(COLOR(0xffffffff));
-        CNFGTackRectangle(w / 10, h / 2 + 25, w - w / 10, h / 2 - 25);
+        DrawInputField(i);
 
-        CNFGPenX = w / 10 + 10;
-        CNFGPenY = h / 2 - 10;
-        CNFGColor(BLACK);
-        CNFGDrawText(str, 5);
-        
         CNFGSwapBuffers();
     }
 

@@ -11,7 +11,15 @@ char str[64] = {0};
 void HandleKey(int keycode, int bDown)
 {
     if (bDown)
-        str[offset++] = keycode;
+    {
+        if (keycode == BACKSPACE_KEY)
+        {
+            if (offset)
+                str[--offset] = 0;
+        }
+        else
+            str[offset++] = keycode;
+    }
 }
 
 void HandleButton(int x, int y, int button, int bDown)
