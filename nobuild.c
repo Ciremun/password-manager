@@ -125,19 +125,19 @@ int main(int argc, char **argv)
     {
 #ifdef _WIN32
         if (msvc)
-            CMD("cl", "/W3", "/FC", "/nologo", "/O2", "/DNDEBUG", "/Isource/include/rawdraw", "/Isource/include/rawdraw/vendor", "/Fe:pm-gui.exe", "source/rawdraw/*.c");
+            CMD("cl", "/W3", "/FC", "/nologo", "/O2", "/DNDEBUG", "/Isource/include/rawdraw", "/Isource/include/rawdraw/vendor", "/Isource/include/core", "/Fe:pm-gui.exe", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c");
         else
         {
             if (debug)
-                CMD(cc, FLAGS, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lUser32", "-lGdi32");
+                CMD(cc, FLAGS, CORE_INCLUDES, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lUser32", "-lGdi32");
             else
-                CMD(cc, FLAGS, "-DNDEBUG", RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lUser32", "-lGdi32");
+                CMD(cc, FLAGS, "-DNDEBUG", CORE_INCLUDES, RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lUser32", "-lGdi32");
         }
 #else
         if (debug)
-            CMD(cc, FLAGS, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lX11");
+            CMD(cc, FLAGS, CORE_INCLUDES, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lX11");
         else
-            CMD(cc, FLAGS, "-DNDEBUG", RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "-lX11");
+            CMD(cc, FLAGS, "-DNDEBUG", CORE_INCLUDES, RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lX11");
 #endif // _WIN32
         if (run)
             RUN("pm-gui");

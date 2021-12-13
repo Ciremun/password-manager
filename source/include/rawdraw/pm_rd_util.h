@@ -1,5 +1,5 @@
-#ifndef PM_UTIL_H__
-#define PM_UTIL_H__
+#ifndef PM_RD_UTIL_H_
+#define PM_RD_UTIL_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -56,9 +56,12 @@
 
 #ifdef __wasm__
 #define printf
+#define free
 unsigned long strlen(const char *s);
 void *memset(void *dest, int val, unsigned long len);
 void *memcpy(void *dst, void const *src, unsigned long size);
+void *malloc(size_t size);
+void *calloc(size_t num, size_t size);
 void print(double idebug);
 void prints(const char *str);
 #else
@@ -68,14 +71,8 @@ void prints(const char *str);
 
 typedef struct
 {
-    char *data;
-    size_t length;
-} String;
-
-typedef struct
-{
     int x;
     int y;
 } Point;
 
-#endif // PM_UTIL_H__
+#endif // PM_RD_UTIL_H_

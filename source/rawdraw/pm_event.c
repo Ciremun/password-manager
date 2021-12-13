@@ -1,6 +1,8 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include <stddef.h>
+
 #include "pm_event.h"
 #include "pm_util.h"
 
@@ -24,7 +26,7 @@ void HandleKey(int keycode, int bDown)
 {
     if (bDown)
     {
-        for (int i = 0; i < input_fields.count; ++i)
+        for (size_t i = 0; i < input_fields.count; ++i)
             input_fields.arr[i].oninput(&input_fields.arr[i], keycode);
     }
 }
@@ -34,7 +36,7 @@ void HandleButton(int x, int y, int button, int bDown)
     if (bDown)
     {
         Point click = { .x = x, .y = y };
-        for (int i = 0; i < input_fields.count; ++i)
+        for (size_t i = 0; i < input_fields.count; ++i)
         {
             input_fields.arr[i].focused = inside_rect(click, input_fields.arr[i].rect);;
             if (input_fields.arr[i].focused)
