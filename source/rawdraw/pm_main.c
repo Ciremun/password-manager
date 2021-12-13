@@ -19,7 +19,7 @@
 
 short w, h;
 int paused = 0;
-InputField inputs[1];
+InputField inputs[2];
 
 void oninput_i(InputField *i, int keycode)
 {
@@ -40,7 +40,10 @@ void DrawInputField(InputField i)
     int rect_height = i.rect.p2.y - i.rect.p1.y;
     CNFGPenX = i.rect.p1.x + 10;
     CNFGPenY = i.rect.p1.y + rect_height / 2 - text_height;
-    CNFGColor(i.rect.color);
+    if (i.focused)
+        CNFGColor(COLOR(0xFF0000FF));
+    else
+        CNFGColor(i.rect.color);
     CNFGTackRectangle(i.rect.p1.x, i.rect.p1.y, i.rect.p2.x, i.rect.p2.y);
     CNFGColor(i.text.color);
     CNFGDrawText(i.text.string.data, i.text.font_size);
@@ -67,6 +70,7 @@ int EXPORT("main") main()
     setup_window();
 
     char str[64] = {0};
+    char str2[64] = {0};
 
     InputField i = {
         .rect = (Rect){
@@ -93,7 +97,33 @@ int EXPORT("main") main()
         .oninput = oninput_i,
     };
 
+    InputField i2 = {
+        .rect = (Rect){
+            .color = WHITE,
+            .p1 = (Point){
+                .x = 0,
+                .y = 50,
+            },
+            .p2 = (Point){
+                .x = w,
+                .y = 90,
+            },
+        },
+        .text = (Text){
+            .string = (String){
+                .data = str2,
+                .length = 0,
+            },
+            .color = BLACK,
+            .font_size = 5,
+            .offset = 0,
+        },
+        .focused = 0,
+        .oninput = oninput_i,
+    };
+
     inputs[0] = i;
+    inputs[1] = i2;
 
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
     return 0;
@@ -112,7 +142,8 @@ int EXPORT("loop") loop()
             OGUSleep(16000);
 #endif // __wasm__
 
-        DrawInputField(i);
+        for (int i = 0; i < 2; ++i)
+            DrawInputField(inputs[i]);
 
         CNFGSwapBuffers();
     }

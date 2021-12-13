@@ -103,4 +103,6 @@ struct InputField
     void (*oninput)(InputField *, int);
 };
 
+int inside_rect(Point p, Rect r);
+
 #endif // PM_UTIL_H__

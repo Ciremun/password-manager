@@ -3,6 +3,11 @@
 
 #include "pm_util.h"
 
+int inside_rect(Point p, Rect r)
+{
+    return p.x >= r.p1.x && p.y >= r.p1.y && p.x <= r.p2.x && p.y <= r.p2.y;
+}
+
 #ifdef __wasm__
 
 extern unsigned char __heap_base;
