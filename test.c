@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+#pragma comment(lib, "User32")
+#endif // _MSC_VER
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
