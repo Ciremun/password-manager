@@ -11,7 +11,7 @@
 #define INCLUDES "-Isource/include"
 #endif // defined(_MSC_VER) && !defined(__clang__)
 
-#define CONSOLE_SOURCES "pm_console.c"
+#define CONSOLE_SOURCES "source/pm_console.c"
 #define WASM_SOURCES
 #define CORE_SOURCES "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_parse.c", "source/core/pm_rand.c", "source/core/pm_sync.c", "source/core/pm_xcrypt.c"
 #define RAWDRAW_SOURCES "source/rawdraw/rd_event.c", "source/rawdraw/rd_ui.c", "source/rawdraw/rd_util.c", "source/rawdraw/rd_xcrypt.c"
