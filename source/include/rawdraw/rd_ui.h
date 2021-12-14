@@ -4,10 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef __wasm__
 #include "core/pm_util.h"
-#endif // __wasm__
-
 #include "rawdraw/rd_util.h"
 
 typedef struct InputField InputField;

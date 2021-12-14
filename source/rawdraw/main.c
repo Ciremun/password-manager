@@ -7,7 +7,6 @@
 #endif // _MSC_VER
 
 #ifndef __wasm__
-#include "core/pm_util.h"
 #include "rawdraw/vendor/os_generic.h"
 #include <stdlib.h>
 #endif // __wasm__
@@ -15,6 +14,7 @@
 #define CNFG_IMPLEMENTATION
 #include "rawdraw/vendor/rawdraw_sf.h"
 
+#include "core/pm_util.h"
 #include "rawdraw/rd_event.h"
 #include "rawdraw/rd_ui.h"
 #include "rawdraw/rd_util.h"

@@ -1,10 +1,21 @@
 #ifndef PM_UTIL_H_
 #define PM_UTIL_H_
 
-#include <errno.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#ifdef __wasm__
+
+typedef struct
+{
+    uint8_t *data;
+    size_t length;
+} String;
+
+#else
+
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 #ifdef TEST
@@ -46,4 +57,5 @@ typedef struct
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
+#endif // __wasm__
 #endif // PM_UTIL_H_
