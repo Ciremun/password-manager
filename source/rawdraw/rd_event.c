@@ -3,8 +3,8 @@
 
 #include <stddef.h>
 
-#include "pm_event.h"
-#include "pm_util.h"
+#include "rawdraw/rd_event.h"
+#include "rawdraw/rd_util.h"
 
 volatile int suspended;
 extern InputFields input_fields;
@@ -35,10 +35,11 @@ void HandleButton(int x, int y, int button, int bDown)
 {
     if (bDown)
     {
-        Point click = { .x = x, .y = y };
+        Point click = {.x = x, .y = y};
         for (size_t i = 0; i < input_fields.count; ++i)
         {
-            input_fields.arr[i].focused = inside_rect(click, input_fields.arr[i].rect);;
+            input_fields.arr[i].focused = inside_rect(click, input_fields.arr[i].rect);
+            ;
             if (input_fields.arr[i].focused)
             {
                 ++i;

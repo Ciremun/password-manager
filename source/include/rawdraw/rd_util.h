@@ -75,4 +75,12 @@ typedef struct
     int y;
 } Point;
 
+#ifdef __wasm__
+typedef struct
+{
+    uint8_t *data;
+    size_t length;
+} String;
+#endif // __wasm__
+
 #endif // PM_RD_UTIL_H_

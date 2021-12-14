@@ -7,25 +7,28 @@
 #endif // _MSC_VER
 
 #ifndef __wasm__
-#include "os_generic.h"
+#include "core/pm_util.h"
+#include "rawdraw/vendor/os_generic.h"
+#include <stdlib.h>
 #endif // __wasm__
 
 #define CNFG_IMPLEMENTATION
-#include "rawdraw_sf.h"
+#include "rawdraw/vendor/rawdraw_sf.h"
 
-#include <stdlib.h>
-
-#include "pm_rd_util.h"
-#include "pm_ui.h"
-#include "pm_event.h"
+#include "rawdraw/rd_event.h"
+#include "rawdraw/rd_ui.h"
+#include "rawdraw/rd_util.h"
 
 #define WINDOW_NAME "password-manager"
 
 short w, h;
 int paused = 0;
-String sync_remote_url;
 
 extern InputFields input_fields;
+
+#ifndef __wasm__
+extern String sync_remote_url;
+#endif // __wasm__
 
 void setup_window()
 {
@@ -47,17 +50,17 @@ int EXPORT("main") main()
     CNFGBGColor = BLACK;
     setup_window();
 
+#ifndef __wasm__
     sync_remote_url = (String){
         .data = (uint8_t *)getenv("PM_SYNC_REMOTE_URL"),
     };
 
     if (sync_remote_url.data != 0)
         sync_remote_url.length = strlen((char *)sync_remote_url.data);
+#endif // __wasm__
 
-    char str[64] = {0};
-    char str2[64] = {0};
+    uint8_t str[64] = {0};
     InputField fields[16] = {0};
-
     input_fields.arr = fields;
 
     InputField i = {

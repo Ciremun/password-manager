@@ -1,8 +1,8 @@
 #ifndef PM_EVENT_H_
 #define PM_EVENT_H_
 
-#include "pm_util.h"
-#include "pm_ui.h"
+#include "rawdraw/rd_ui.h"
+#include "rawdraw/rd_util.h"
 
 void oninput(InputField *i, int keycode);
 void EXPORT("HandleKey") HandleKey(int keycode, int bDown);

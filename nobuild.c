@@ -5,13 +5,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SOURCES "pm_console.c"
-#define FLAGS "-Wall", "-Wextra", "-pedantic", "-std=c99"
-#define MSVC_FLAGS "/W3", "/FC", "/nologo", "/Isource/include/core", "/link", "User32.lib"
-#define CORE_INCLUDES "-Isource/include/core"
-#define RAWDRAW_INCLUDES "-Isource/include/rawdraw", "-Isource/include/rawdraw/vendor"
-#define DEBUG_FLAGS "-O0", "-ggdb"
-#define RELEASE_FLAGS "-O3", "-g0"
+#if defined(_MSC_VER) && !defined(__clang__)
+#define INCLUDES "/Isource/include"
+#else
+#define INCLUDES "-Isource/include"
+#endif // defined(_MSC_VER) && !defined(__clang__)
+
+#define CONSOLE_SOURCES "pm_console.c"
+#define WASM_SOURCES
+#define CORE_SOURCES "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_parse.c", "source/core/pm_rand.c", "source/core/pm_sync.c", "source/core/pm_xcrypt.c"
+#define RAWDRAW_SOURCES "source/rawdraw/rd_event.c", "source/rawdraw/rd_ui.c", "source/rawdraw/rd_util.c", "source/rawdraw/rd_xcrypt.c"
+#define CFLAGS "-Wall", "-Wextra", "-pedantic", "-std=c99", "-D_GNU_SOURCE"
+#define MSVC_CFLAGS "/W3", "/FC", "/nologo", "/D_CRT_SECURE_NO_WARNINGS"
+#define DEBUG_CFLAGS "-O0", "-ggdb"
+#define RELEASE_CFLAGS "-O3", "-g0"
 #define DEFAULT_DATA_STORE ".pm_data"
 
 #define STR_HELPER(x) #x
@@ -108,16 +115,16 @@ int main(int argc, char **argv)
         return 1;
 #else
         chdir("source/rawdraw/wasm");
-        CMD("cc", "-o", "subst", "subst.c");
-        CMD("cc", "-o", "nn", "nn.c");
-        CMD("clang", "-DWASM", "-nostdlib", "--target=wasm32", "-I../../include/rawdraw", "-I../../include/rawdraw/vendor", "-flto", "-Oz", "-Wl,--lto-O3", "-Wl,--no-entry", "-Wl,--allow-undefined", "-Wl,--import-memory", "../pm_main.c", "../pm_event.c", "../pm_util.c", "../pm_ui.c", "-o", "main.wasm");
+        CMD("cc", "-o", "subst", "source/tools/subst.c");
+        CMD("cc", "-o", "nn", "source/tools/nn.c");
+        CMD("clang", "-DWASM", "-nostdlib", "--target=wasm32", "-I../../include", "-Iinclude", "../rd_event.c", "../rd_ui.c", "../rd_util.c", "../main.c", "-flto", "-Oz", "-Wl,--lto-O3", "-Wl,--no-entry", "-Wl,--allow-undefined", "-Wl,--import-memory", "-o", "main.wasm");
         CMD("wasm-opt", "--asyncify", "--pass-arg=asyncify-imports@bynsyncify.*", "--pass-arg=asyncify-ignore-indirect", "-Oz", "main.wasm", "-o", "main.wasm");
         CHAIN(CHAIN_CMD("cat", "main.wasm"), CHAIN_CMD("base64"), CHAIN_CMD("./nn"), OUT("blob_b64"));
-        CMD("./subst", "template.js", "-s", "-f", "BLOB", "blob_b64", "-o", "mid.js");
+        CMD("./subst", "source/template.js", "-s", "-f", "BLOB", "blob_b64", "-o", "mid.js");
         CMD("terser", "-ecma 2017", "-d", "RAWDRAW_USE_LOOP_FUNCTION=false", "-d", "RAWDRAW_NEED_BLITTER=true", "mid.js", "-o", "opt.js");
         remove("mid.js");
         remove("blob_b64");
-        CMD("./subst", "template.ht", "-s", "-f", "JAVASCRIPT_DATA", "opt.js", "-o", "../../../index.html");
+        CMD("./subst", "source/template.ht", "-s", "-f", "JAVASCRIPT_DATA", "opt.js", "-o", "../../../index.html");
         return 0;
 #endif // _WIN32
     }
@@ -125,19 +132,19 @@ int main(int argc, char **argv)
     {
 #ifdef _WIN32
         if (msvc)
-            CMD("cl", "/W3", "/FC", "/nologo", "/O2", "/DNDEBUG", "/Isource/include/rawdraw", "/Isource/include/rawdraw/vendor", "/Isource/include/core", "/Fe:pm-gui.exe", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c");
+            CMD("cl", MSVC_CFLAGS, "/DRAWDRAW", "/O2", "/DNDEBUG", "/Isource/include", "/Fe:pm-gui.exe", "source/rawdraw/main.c", RAWDRAW_SOURCES, CORE_SOURCES);
         else
         {
             if (debug)
-                CMD(cc, FLAGS, CORE_INCLUDES, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lUser32", "-lGdi32");
+                CMD(cc, CFLAGS, INCLUDES, DEBUG_CFLAGS, "-o", "pm-gui", "source/rawdraw/main.c", RAWDRAW_SOURCES, CORE_SOURCES, "-lUser32", "-lGdi32");
             else
-                CMD(cc, FLAGS, "-DNDEBUG", CORE_INCLUDES, RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lUser32", "-lGdi32");
+                CMD(cc, CFLAGS, "-DNDEBUG", INCLUDES, RELEASE_CFLAGS, "-o", "pm-gui", "source/rawdraw/main.c", RAWDRAW_SOURCES, CORE_SOURCES, "-lUser32", "-lGdi32");
         }
 #else
         if (debug)
-            CMD(cc, FLAGS, CORE_INCLUDES, RAWDRAW_INCLUDES, DEBUG_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lX11");
+            CMD(cc, CFLAGS, INCLUDES, DEBUG_CFLAGS, "-o", "pm-gui", "source/rawdraw/main.c", RAWDRAW_SOURCES, CORE_SOURCES, "-lX11");
         else
-            CMD(cc, FLAGS, "-DNDEBUG", CORE_INCLUDES, RAWDRAW_INCLUDES, RELEASE_FLAGS, "-o", "pm-gui", "source/rawdraw/*.c", "source/core/pm_aes.c", "source/core/pm_b64.c", "source/core/pm_io.c", "source/core/pm_xcrypt.c", "source/core/pm_sync.c", "-lX11");
+            CMD(cc, CFLAGS, "-DNDEBUG", INCLUDES, RELEASE_CFLAGS, "-o", "pm-gui", "source/rawdraw/main.c", RAWDRAW_SOURCES, CORE_SOURCES, "-lX11");
 #endif // _WIN32
         if (run)
             RUN("pm-gui");
@@ -168,13 +175,13 @@ int main(int argc, char **argv)
     {
         if (msvc)
         {
-            CMD("cl.exe", "/DTEST", "/DEBUG", "/ZI", "/Fetest.exe", "/Od",
-                "test.c", SOURCES, MSVC_FLAGS);
+            CMD("cl.exe", MSVC_CFLAGS, INCLUDES, "/DTEST", "/DEBUG", "/ZI", "/Fetest.exe", "/Od",
+                "test.c", CONSOLE_SOURCES);
         }
         else
         {
-            CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, CORE_INCLUDES, "-lUser32", "-otest",
-                DEBUG_FLAGS);
+            CMD(cc, "-DTEST", "test.c", CONSOLE_SOURCES, CFLAGS, INCLUDES, "-lUser32", "-otest",
+                DEBUG_CFLAGS);
         }
         RUN("test");
     }
@@ -182,37 +189,41 @@ int main(int argc, char **argv)
     {
         if (debug)
         {
-            CMD(cc, "-D_GNU_SOURCE", "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-o" OUTPUT, DEBUG_FLAGS);
+            if (msvc)
+            {
+                printf("MSVC debug build is not supported\n");
+                return 1;
+            }
+            CMD(cc, "source/core/main.c", CONSOLE_SOURCES, CFLAGS, INCLUDES, "-o" OUTPUT, DEBUG_CFLAGS);
             return 0;
         }
         if (msvc)
         {
             pm_version[0] = '/';
-            CMD("cl.exe", "/D_CRT_SECURE_NO_WARNINGS", "/DNDEBUG", pm_version, "/Fe" OUTPUT, "/O2", "source/core/pm_main.c", SOURCES,
-                MSVC_FLAGS);
+            CMD("cl.exe", MSVC_CFLAGS, INCLUDES, "/DNDEBUG", pm_version, "/Fe" OUTPUT, "/O2", "source/core/main.c", CONSOLE_SOURCES);
         }
         else
         {
             pm_version[0] = '-';
-            CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-lUser32", "-o" OUTPUT,
-                RELEASE_FLAGS);
+            CMD(cc, "-DNDEBUG", pm_version, "source/core/main.c", CONSOLE_SOURCES, CFLAGS, INCLUDES, "-lUser32", "-o" OUTPUT,
+                RELEASE_CFLAGS);
         }
     }
 #else
     if (debug)
     {
-        CMD(cc, "-D_GNU_SOURCE", "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-o" OUTPUT, DEBUG_FLAGS);
+        CMD(cc, "source/core/main.c", CONSOLE_SOURCES, CFLAGS, INCLUDES, "-o" OUTPUT, DEBUG_CFLAGS);
         return 0;
     }
     if (test)
     {
-        CMD(cc, "-D_GNU_SOURCE", "-DTEST", "test.c", SOURCES, FLAGS, CORE_INCLUDES, "-otest", DEBUG_FLAGS);
+        CMD(cc, "-DTEST", "test.c", CONSOLE_SOURCES, CFLAGS, INCLUDES, "-otest", DEBUG_CFLAGS);
         RUN("test");
     }
     else
     {
         pm_version[0] = '-';
-        CMD(cc, "-DNDEBUG", "-D_GNU_SOURCE", pm_version, "source/core/pm_main.c", SOURCES, FLAGS, CORE_INCLUDES, "-o" OUTPUT, RELEASE_FLAGS);
+        CMD(cc, "-DNDEBUG", pm_version, "source/core/main.c", CONSOLE_SOURCES, CFLAGS, INCLUDES, "-o" OUTPUT, RELEASE_CFLAGS);
     }
 #endif
     return 0;

@@ -1,7 +1,7 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "pm_rd_util.h"
+#include "rawdraw/rd_util.h"
 
 #ifdef __wasm__
 
@@ -41,7 +41,7 @@ void *malloc(size_t size)
 
 void *calloc(size_t num, size_t size)
 {
-    return fisiks_malloc(num * size);
+    return malloc(num * size);
 }
 
 #endif // __wasm__

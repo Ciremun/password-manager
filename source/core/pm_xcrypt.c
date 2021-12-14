@@ -1,11 +1,11 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "pm_xcrypt.h"
-#include "pm_aes.h"
-#include "pm_b64.h"
-#include "pm_io.h"
-#include "pm_sync.h"
+#include "core/pm_xcrypt.h"
+#include "core/pm_aes.h"
+#include "core/pm_b64.h"
+#include "core/pm_io.h"
+#include "core/pm_sync.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];

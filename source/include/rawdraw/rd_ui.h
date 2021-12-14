@@ -4,8 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "pm_util.h"
-#include "pm_rd_util.h"
+#ifndef __wasm__
+#include "core/pm_util.h"
+#endif // __wasm__
+
+#include "rawdraw/rd_util.h"
 
 typedef struct InputField InputField;
 

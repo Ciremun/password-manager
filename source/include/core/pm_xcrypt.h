@@ -8,8 +8,8 @@
 #include <stdio.h>
 #endif // _WIN32
 
-#include "pm_parse.h"
-#include "pm_util.h"
+#include "core/pm_parse.h"
+#include "core/pm_util.h"
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
 void decrypt_and_print(Flags *fl, uint8_t *aes_key);

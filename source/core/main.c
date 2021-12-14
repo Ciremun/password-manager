@@ -1,12 +1,16 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#ifdef _MSC_VER
+#pragma comment(lib, "User32")
+#endif // _MSC_VER
+
 #include <stddef.h>
 #include <stdint.h>
 
-#include "pm_io.h"
-#include "pm_parse.h"
-#include "pm_sync.h"
+#include "core/pm_io.h"
+#include "core/pm_parse.h"
+#include "core/pm_sync.h"
 
 #include <stdio.h>
 

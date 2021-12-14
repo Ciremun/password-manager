@@ -11,10 +11,10 @@
 #include <unistd.h>
 #endif
 
-#include "pm_aes.h"
-#include "pm_b64.h"
-#include "pm_io.h"
-#include "pm_xcrypt.h"
+#include "core/pm_aes.h"
+#include "core/pm_b64.h"
+#include "core/pm_io.h"
+#include "core/pm_xcrypt.h"
 #undef exit
 
 #define ARGS(...) fill_args(__VA_ARGS__, NULL)

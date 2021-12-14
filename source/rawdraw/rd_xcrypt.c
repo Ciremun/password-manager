@@ -1,10 +1,11 @@
-#include "pm_io.h"
-#include "pm_sync.h"
-#include "pm_aes.h"
-#include "pm_util.h"
-#include "pm_xcrypt.h"
-#include "pm_rd_xcrypt.h"
-#include "pm_ui.h"
+#include "rawdraw/rd_xcrypt.h"
+#include "core/pm_aes.h"
+#include "core/pm_b64.h"
+#include "core/pm_io.h"
+#include "core/pm_sync.h"
+#include "core/pm_util.h"
+#include "core/pm_xcrypt.h"
+#include "rawdraw/rd_ui.h"
 
 extern String sync_remote_url;
 
@@ -63,7 +64,7 @@ void decrypt_and_draw(uint8_t *aes_key)
             //         goto end;
             //     }
             // }
-            
+
             // output to screen here
         skip_write:
             line_start = line_end + 1;

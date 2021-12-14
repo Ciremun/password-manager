@@ -1,9 +1,9 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "rawdraw_sf.h"
+#include "rawdraw/vendor/rawdraw_sf.h"
 
-#include "pm_ui.h"
+#include "rawdraw/rd_ui.h"
 
 InputFields input_fields;
 
@@ -29,7 +29,7 @@ void DrawInputField(InputField i)
         CNFGColor(i.rect.color);
     CNFGTackRectangle(i.rect.p1.x, i.rect.p1.y, i.rect.p2.x, i.rect.p2.y);
     CNFGColor(i.text.color);
-    CNFGDrawText(i.text.string.data, i.text.font_size);
+    CNFGDrawText((char *)i.text.string.data, i.text.font_size);
 }
 
 void DrawInputFields()
