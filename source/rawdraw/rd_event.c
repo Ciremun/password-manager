@@ -55,14 +55,14 @@ void HandleMotion(int x, int y, int mask)
     Point hover = {.x = x, .y = y};
     for (size_t i = 0; i < input_fields.count; ++i)
     {
-            input_fields.arr[i].rect.color = inside_rect(hover, input_fields.arr[i].rect) ? COLOR(0x00FF00FF) : WHITE;
-            if (input_fields.arr[i].rect.color == COLOR(0x00FF00FF))
-            {
-                ++i;
-                for (; i < input_fields.count; ++i)
-                    input_fields.arr[i].rect.color = WHITE;
-                return;
-            }
+        input_fields.arr[i].rect.color = inside_rect(hover, input_fields.arr[i].rect) ? COLOR(0x00FF00FF) : WHITE;
+        if (input_fields.arr[i].rect.color == COLOR(0x00FF00FF))
+        {
+            ++i;
+            for (; i < input_fields.count; ++i)
+                input_fields.arr[i].rect.color = WHITE;
+            return;
+        }
     }
 }
 
