@@ -3,6 +3,8 @@
 
 #include "rawdraw/rd_util.h"
 
+Keyboard keyboard = {0};
+
 #ifdef __wasm__
 
 extern unsigned char __heap_base;

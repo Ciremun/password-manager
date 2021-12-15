@@ -7,7 +7,9 @@
 #include "rawdraw/rd_util.h"
 
 volatile int suspended;
+
 extern InputFields input_fields;
+extern Keyboard keyboard;
 
 void oninput(InputField *i, int keycode)
 {
@@ -24,8 +26,15 @@ void oninput(InputField *i, int keycode)
 
 void HandleKey(int keycode, int bDown)
 {
+    if (keycode == SHIFT_KEY)
+    {
+        keyboard.shift = bDown;
+        return;
+    }
     if (bDown)
     {
+        if (keyboard.shift)
+            keycode -= 32;
         for (size_t i = 0; i < input_fields.count; ++i)
             input_fields.arr[i].oninput(&input_fields.arr[i], keycode);
     }

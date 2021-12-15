@@ -48,12 +48,14 @@
 #define PLUS_KEY 187
 #define RMB_KEY 2
 #define BACKSPACE_KEY 8
+#define SHIFT_KEY 16
 #else
 #define MINUS_KEY 45
 #define PLUS_KEY 43
 #define EQ_KEY 61
 #define RMB_KEY 3
 #define BACKSPACE_KEY 0xff08
+#define SHIFT_KEY 0xffe1
 #endif // defined(_WIN32) || defined(__wasm__)
 
 #ifdef __wasm__
@@ -79,5 +81,10 @@ typedef struct
     int x;
     int y;
 } Point;
+
+typedef struct
+{
+    int shift;
+} Keyboard;
 
 #endif // PM_RD_UTIL_H_
