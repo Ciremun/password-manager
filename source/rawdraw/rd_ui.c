@@ -59,7 +59,7 @@ void DrawInputField(InputField i)
     CNFGPenX = i.rect.p1.x + 10;
     CNFGPenY = i.rect.p1.y + rect_height / 2 - text_height;
     if (i.focused)
-        CNFGColor(COLOR(0xFF0000FF));
+        CNFGColor(GRAY);
     else
         CNFGColor(i.rect.color);
     CNFGTackRectangle(i.rect.p1.x, i.rect.p1.y, i.rect.p2.x, i.rect.p2.y);
