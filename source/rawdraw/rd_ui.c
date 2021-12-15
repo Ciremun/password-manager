@@ -11,6 +11,7 @@
 InputFields input_fields = {0};
 
 extern int w;
+extern RDWindow window;
 
 int inside_rect(Point p, Rect r)
 {
@@ -69,6 +70,6 @@ void DrawInputField(InputField i)
 
 void DrawInputFields(void)
 {
-    for (size_t i = 0; i < input_fields.count; ++i)
+    for (size_t i = window.scroll; i < input_fields.count; ++i)
         DrawInputField(input_fields.arr[i]);
 }

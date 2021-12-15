@@ -91,6 +91,11 @@ typedef struct
     int uppercase;
 } Keyboard;
 
+typedef struct
+{
+    size_t scroll;
+} RDWindow;
+
 int is_alpha(char c);
 
 #endif // PM_RD_UTIL_H_

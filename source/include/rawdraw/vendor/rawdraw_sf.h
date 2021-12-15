@@ -3584,6 +3584,9 @@ int CNFGHandleInput()
 		case WM_KEYUP:
 			HandleKey( tolower( (int) msg.wParam ), (msg.message==WM_KEYDOWN) );
 			break;
+        case WM_MOUSEWHEEL:
+            // HandleKey();
+            break;
 		default:
 			DispatchMessage(&msg);
 			break;

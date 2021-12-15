@@ -4,6 +4,7 @@
 #include "rawdraw/rd_util.h"
 
 Keyboard keyboard = {0};
+RDWindow window = {0};
 
 int is_alpha(char c)
 {
