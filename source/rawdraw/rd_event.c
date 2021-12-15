@@ -26,14 +26,19 @@ void oninput(InputField *i, int keycode)
 
 void HandleKey(int keycode, int bDown)
 {
+    if (bDown && keycode == CAPSLOCK_KEY)
+    {
+        keyboard.uppercase = !keyboard.uppercase;
+        return;
+    }
     if (keycode == SHIFT_KEY)
     {
-        keyboard.shift = bDown;
+        keyboard.uppercase = bDown;
         return;
     }
     if (bDown)
     {
-        if (keyboard.shift)
+        if (keyboard.uppercase && is_alpha(keycode))
             keycode -= 32;
         for (size_t i = 0; i < input_fields.count; ++i)
             input_fields.arr[i].oninput(&input_fields.arr[i], keycode);

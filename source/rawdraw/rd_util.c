@@ -5,6 +5,11 @@
 
 Keyboard keyboard = {0};
 
+int is_alpha(char c)
+{
+    return 'a' <= c && c <= 'z';
+}
+
 #ifdef __wasm__
 
 extern unsigned char __heap_base;

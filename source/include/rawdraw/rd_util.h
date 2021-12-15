@@ -49,6 +49,7 @@
 #define RMB_KEY 2
 #define BACKSPACE_KEY 8
 #define SHIFT_KEY 16
+#define CAPSLOCK_KEY 20
 #else
 #define MINUS_KEY 45
 #define PLUS_KEY 43
@@ -56,6 +57,7 @@
 #define RMB_KEY 3
 #define BACKSPACE_KEY 0xff08
 #define SHIFT_KEY 0xffe1
+#define CAPSLOCK_KEY 0xffe5
 #endif // defined(_WIN32) || defined(__wasm__)
 
 #ifdef __wasm__
@@ -84,7 +86,9 @@ typedef struct
 
 typedef struct
 {
-    int shift;
+    int uppercase;
 } Keyboard;
+
+int is_alpha(char c);
 
 #endif // PM_RD_UTIL_H_
