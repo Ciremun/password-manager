@@ -39,7 +39,6 @@ void HandleButton(int x, int y, int button, int bDown)
         for (size_t i = 0; i < input_fields.count; ++i)
         {
             input_fields.arr[i].focused = inside_rect(click, input_fields.arr[i].rect);
-            ;
             if (input_fields.arr[i].focused)
             {
                 ++i;

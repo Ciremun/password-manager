@@ -53,7 +53,7 @@
 #define PLUS_KEY 43
 #define EQ_KEY 61
 #define RMB_KEY 3
-#define BACKSPACE_KEY 8
+#define BACKSPACE_KEY 0xff08
 #endif // defined(_WIN32) || defined(__wasm__)
 
 #ifdef __wasm__
