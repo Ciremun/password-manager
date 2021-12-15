@@ -14,7 +14,6 @@ typedef struct
     String string;
     uint32_t color;
     int font_size;
-    int offset;
 } Text;
 
 typedef struct
@@ -34,13 +33,15 @@ struct InputField
 
 typedef struct
 {
-    InputField *arr;
+    int offset;
     size_t count;
+    InputField *arr;
 } InputFields;
 
-void add_input_field(InputField i);
+InputField create_input_field(String str);
+void append_input_field(InputField i);
 void DrawInputField(InputField i);
-void DrawInputFields();
+void DrawInputFields(void);
 int inside_rect(Point p, Rect r);
 
 #endif // PM_UI_H_

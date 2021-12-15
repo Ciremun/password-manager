@@ -66,9 +66,10 @@ void decrypt_and_draw(uint8_t *aes_key)
             // }
 
             // output to screen here
+
+            append_input_field(create_input_field(RD_STR(b64_decoded_str, b64_decoded_len)));
         skip_write:
             line_start = line_end + 1;
-            free(b64_decoded_str);
         }
         line_end++;
     } while (line_end < f.size);

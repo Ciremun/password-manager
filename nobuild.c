@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     {
 #ifdef _WIN32
         if (msvc)
-            CMD("cl", MSVC_CFLAGS, "/DRAWDRAW", "/O2", "/DNDEBUG", "/Isource/include", "/Fe:pm-gui.exe", "source/rawdraw/main.c", RAWDRAW_SOURCES, CORE_SOURCES);
+            CMD("cl", MSVC_CFLAGS, "/O2", "/DNDEBUG", "/Isource/include", "/Fe:pm-gui.exe", "source/rawdraw/main.c", RAWDRAW_SOURCES, CORE_SOURCES);
         else
         {
             if (debug)

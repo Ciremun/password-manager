@@ -15,11 +15,11 @@ void oninput(InputField *i, int keycode)
         return;
     if (keycode == BACKSPACE_KEY)
     {
-        if (i->text.offset)
-            i->text.string.data[--i->text.offset] = 0;
+        if (i->text.string.length)
+            i->text.string.data[--i->text.string.length] = 0;
     }
     else
-        i->text.string.data[i->text.offset++] = keycode;
+        i->text.string.data[i->text.string.length++] = keycode;
 }
 
 void HandleKey(int keycode, int bDown)

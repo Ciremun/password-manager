@@ -18,6 +18,7 @@
 #include "rawdraw/rd_event.h"
 #include "rawdraw/rd_ui.h"
 #include "rawdraw/rd_util.h"
+#include "rawdraw/rd_xcrypt.h"
 
 #define WINDOW_NAME "password-manager"
 
@@ -59,36 +60,12 @@ int EXPORT("main") main()
         sync_remote_url.length = strlen((char *)sync_remote_url.data);
 #endif // __wasm__
 
-    uint8_t str[64] = {0};
-    InputField fields[16] = {0};
+    InputField fields[32] = {0};
     input_fields.arr = fields;
 
-    InputField i = {
-        .rect = (Rect){
-            .color = WHITE,
-            .p1 = (Point){
-                .x = 0,
-                .y = 0,
-            },
-            .p2 = (Point){
-                .x = w,
-                .y = 40,
-            },
-        },
-        .text = (Text){
-            .string = (String){
-                .data = str,
-                .length = 0,
-            },
-            .color = BLACK,
-            .font_size = 5,
-            .offset = 0,
-        },
-        .focused = 1,
-        .oninput = oninput,
-    };
-
-    add_input_field(i);
+    uint8_t aes_key[32] = {0};
+    memcpy(aes_key, "secret_key", 10);
+    decrypt_and_draw(aes_key);
 
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
     return 0;

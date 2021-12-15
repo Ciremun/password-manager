@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "core/pm_util.h"
+
 #ifndef min
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #endif // min
@@ -68,6 +70,9 @@ void prints(const char *str);
 #define print
 #define prints
 #endif // __wasm__
+
+#define RD_STR(s, l) \
+    (String) { .data = (uint8_t *)s, .length = l }
 
 typedef struct
 {
