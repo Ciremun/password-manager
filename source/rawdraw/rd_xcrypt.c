@@ -10,15 +10,32 @@
 #include "rawdraw/rd_ui.h"
 
 extern String sync_remote_url;
+extern char *data_store;
+
+void rd_encrypt_and_write(String s, uint8_t *aes_key)
+{
+    File f = create_file(data_store, PM_READ_WRITE);
+    xcrypt_buffer(s.data, aes_key, s.length);
+    size_t b64_encoded_len;
+    char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
+    size_t initial_size = f.size;
+    TRUNCATE_FILE(&f, f.size + b64_encoded_len + 1);
+    MAP_FILE_(&f);
+    memcpy(f.start + initial_size, b64_encoded_str, b64_encoded_len);
+    free(b64_encoded_str);
+    f.start[initial_size + b64_encoded_len] = '\n';
+    UNMAP_AND_CLOSE_FILE(f);
+    upload_changes(sync_remote_url);
+}
 
 void decrypt_and_draw(uint8_t *aes_key)
 {
     pull_changes(sync_remote_url);
-    File f = open_file(DEFAULT_DATA_STORE, PM_READ_ONLY);
+    File f = open_file(data_store, PM_READ_ONLY);
 
     if (f.size == 0)
     {
-        error("file %s is empty", DEFAULT_DATA_STORE);
+        error("file %s is empty", data_store);
         CLOSE_FILE(f.handle);
         return;
     }

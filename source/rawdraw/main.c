@@ -15,6 +15,9 @@
 #include "rawdraw/vendor/rawdraw_sf.h"
 
 #include "core/pm_util.h"
+#include "core/pm_parse.h"
+#include "core/pm_xcrypt.h"
+#include "core/pm_io.h"
 #include "rawdraw/rd_event.h"
 #include "rawdraw/rd_ui.h"
 #include "rawdraw/rd_util.h"
@@ -29,6 +32,7 @@ extern InputFields input_fields;
 
 #ifndef __wasm__
 extern String sync_remote_url;
+extern char *data_store;
 #endif // __wasm__
 
 void setup_window()
@@ -55,6 +59,7 @@ int EXPORT("main") main()
     sync_remote_url = (String){
         .data = (uint8_t *)getenv("PM_SYNC_REMOTE_URL"),
     };
+    data_store = DEFAULT_DATA_STORE;
 
     if (sync_remote_url.data != 0)
         sync_remote_url.length = strlen((char *)sync_remote_url.data);
@@ -65,6 +70,12 @@ int EXPORT("main") main()
 
     uint8_t aes_key[32] = {0};
     memcpy(aes_key, "secret_key", 10);
+
+    Flags f = {0};
+    char hello[] = "tsodinSleep";
+    if (!AndroidHasPermissions("WRITE_EXTERNAL_STORAGE"))
+        AndroidRequestAppPermissions("WRITE_EXTERNAL_STORAGE");
+    rd_encrypt_and_write(PM_STR(hello), aes_key);
     decrypt_and_draw(aes_key);
 
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
