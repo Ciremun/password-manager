@@ -7,6 +7,9 @@
 #include "core/pm_util.h"
 #include "rawdraw/rd_util.h"
 
+#define RD_INPUT_FIELD_HEIGHT 40
+#define RD_INPUT_FIELD_MARGIN 5
+
 typedef struct InputField InputField;
 
 typedef struct

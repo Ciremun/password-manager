@@ -40,7 +40,7 @@ void setup_window()
     CNFGGetDimensions(&w, &h);
     CNFGSetup(WINDOW_NAME, w, h);
 #else
-    w = 900;
+    w = 1000;
     h = 900;
     CNFGSetup(WINDOW_NAME, w, h);
 #endif // __ANDROID__
@@ -60,7 +60,7 @@ int EXPORT("main") main()
         sync_remote_url.length = strlen((char *)sync_remote_url.data);
 #endif // __wasm__
 
-    InputField fields[32] = {0};
+    InputField fields[64] = {0};
     input_fields.arr = fields;
 
     uint8_t aes_key[32] = {0};

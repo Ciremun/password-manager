@@ -8,8 +8,10 @@
 
 volatile int suspended;
 
+extern short h;
 extern InputFields input_fields;
 extern Keyboard keyboard;
+extern RDWindow window;
 
 void oninput(InputField *i, int keycode)
 {
@@ -49,6 +51,36 @@ void HandleButton(int x, int y, int button, int bDown)
 {
     if (bDown)
     {
+        if (button == MOUSE_SCROLL_UP)
+        {
+            if (window.scroll)
+            {
+                int offset = RD_INPUT_FIELD_HEIGHT + RD_INPUT_FIELD_MARGIN;
+                window.scroll--;
+                for (size_t i = window.scroll; i < input_fields.count; ++i)
+                {
+                    input_fields.arr[i].rect.p1.y += offset;
+                    input_fields.arr[i].rect.p2.y += offset;
+                }
+                HandleMotion(x, y, 0);
+            }
+            return;
+        }
+        if (button == MOUSE_SCROLL_DOWN)
+        {
+            int offset = RD_INPUT_FIELD_HEIGHT + RD_INPUT_FIELD_MARGIN;
+            if (window.scroll + h / offset + 1 < input_fields.count)
+            {
+                for (size_t i = window.scroll; i < input_fields.count; ++i)
+                {
+                    input_fields.arr[i].rect.p1.y -= offset;
+                    input_fields.arr[i].rect.p2.y -= offset;
+                }
+                window.scroll++;
+                HandleMotion(x, y, 0);
+            }
+            return;
+        }
         Point click = {.x = x, .y = y};
         for (size_t i = 0; i < input_fields.count; ++i)
         {

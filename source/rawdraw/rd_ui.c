@@ -10,7 +10,8 @@
 
 InputFields input_fields = {0};
 
-extern int w;
+extern short w;
+extern short h;
 extern RDWindow window;
 
 int inside_rect(Point p, Rect r)
@@ -20,7 +21,7 @@ int inside_rect(Point p, Rect r)
 
 InputField create_input_field(String str)
 {
-    Point input_field_dim = { .x = w, .y = 40 };
+    Point input_field_dim = { .x = w, .y = RD_INPUT_FIELD_HEIGHT };
     return (InputField){
         .rect = (Rect){
             .color = WHITE,
@@ -45,9 +46,8 @@ InputField create_input_field(String str)
 
 void append_input_field(InputField i)
 {
-    static const int margin = 5;
     int y_offset = input_fields.count ? input_fields.arr[input_fields.count - 1].rect.p2.y : 0;
-    input_fields.offset = y_offset + margin;
+    input_fields.offset = y_offset + RD_INPUT_FIELD_MARGIN;
     i.rect.p1.y += input_fields.offset;
     i.rect.p2.y += input_fields.offset;
     input_fields.arr[input_fields.count++] = i;
@@ -71,5 +71,9 @@ void DrawInputField(InputField i)
 void DrawInputFields(void)
 {
     for (size_t i = window.scroll; i < input_fields.count; ++i)
+    {
+        if (input_fields.arr[i].rect.p2.y >= h)
+            break;
         DrawInputField(input_fields.arr[i]);
+    }
 }

@@ -52,6 +52,8 @@
 #define BACKSPACE_KEY 8
 #define SHIFT_KEY 16
 #define CAPSLOCK_KEY 20
+#define MOUSE_SCROLL_UP 0x0E
+#define MOUSE_SCROLL_DOWN 0x0F
 #else
 #define MINUS_KEY 45
 #define PLUS_KEY 43
@@ -60,6 +62,8 @@
 #define BACKSPACE_KEY 0xff08
 #define SHIFT_KEY 0xffe1
 #define CAPSLOCK_KEY 0xffe5
+#define MOUSE_SCROLL_UP 4
+#define MOUSE_SCROLL_DOWN 5
 #endif // defined(_WIN32) || defined(__wasm__)
 
 #ifdef __wasm__

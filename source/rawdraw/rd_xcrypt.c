@@ -1,3 +1,5 @@
+#include "rawdraw/vendor/os_generic.h"
+
 #include "rawdraw/rd_xcrypt.h"
 #include "core/pm_aes.h"
 #include "core/pm_b64.h"
@@ -64,8 +66,6 @@ void decrypt_and_draw(uint8_t *aes_key)
             //         goto end;
             //     }
             // }
-
-            // output to screen here
 
             append_input_field(create_input_field(RD_STR(b64_decoded_str, b64_decoded_len)));
         skip_write:
