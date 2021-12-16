@@ -69,7 +69,7 @@ void HandleButton(int x, int y, int button, int bDown)
         if (button == MOUSE_SCROLL_DOWN)
         {
             int offset = RD_INPUT_FIELD_HEIGHT + RD_INPUT_FIELD_MARGIN;
-            if (window.scroll + h / offset + 1 < input_fields.count)
+            if (window.scroll + 1 < input_fields.count)
             {
                 for (size_t i = window.scroll; i < input_fields.count; ++i)
                 {
