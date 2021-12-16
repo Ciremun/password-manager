@@ -4,6 +4,7 @@ build/
 password-manager/
 cov-int/
 reports/
+makecapk/
 
 *.obj
 *.exe
