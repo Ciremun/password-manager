@@ -312,6 +312,7 @@ void AndroidRequestAppPermissions(const char * perm);
 void AndroidDisplayKeyboard(int pShow);
 int AndroidGetUnicodeChar( int keyCode, int metaState );
 void AndroidSendToBack( int param );
+const char* AndroidGetExternalFilesDir();
 
 extern int android_sdk_version; //Derived at start from property ro.build.version.sdk
 extern int android_width, android_height;
@@ -4043,6 +4044,7 @@ void AndroidRequestAppPermissions(const char * perm);
 void AndroidDisplayKeyboard(int pShow);
 int AndroidGetUnicodeChar( int keyCode, int metaState );
 void AndroidSendToBack( int param );
+const char* AndroidGetExternalFilesDir();
 
 extern int android_sdk_version; //Derived at start from property ro.build.version.sdk
 extern int android_width, android_height;
@@ -4801,6 +4803,29 @@ void AndroidSendToBack( int param )
 	jmethodID MethodmoveTaskToBack = env->GetMethodID( envptr, ClassActivity, "moveTaskToBack", "(Z)Z" );
 	env->CallBooleanMethod( envptr, activity, MethodmoveTaskToBack, param );
 	jnii->DetachCurrentThread( jniiptr );
+}
+
+const char* AndroidGetExternalFilesDir()
+{
+	const struct JNINativeInterface * env = 0;
+	const struct JNINativeInterface ** envptr = &env;
+	const struct JNIInvokeInterface ** jniiptr = gapp->activity->vm;
+	const struct JNIInvokeInterface * jnii = *jniiptr;
+
+	jnii->AttachCurrentThread( jniiptr, &envptr, NULL);
+	env = (*envptr);
+	jclass activityClass = env->FindClass( envptr, "android/app/NativeActivity");
+	jobject lNativeActivity = gapp->activity->clazz;
+
+    	jmethodID mid_getExtStorage = env->GetMethodID(envptr,activityClass,"getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
+    	jobject obj_File = env->CallObjectMethod(envptr,lNativeActivity, mid_getExtStorage, NULL);
+    	jclass cls_File = env->FindClass(envptr,"java/io/File");
+    	jmethodID mid_getPath = env->GetMethodID(envptr,cls_File, "getPath", "()Ljava/lang/String;");
+    	jstring obj_Path = (jstring) env->CallObjectMethod(envptr,obj_File, mid_getPath);
+    	const char* path = env->GetStringUTFChars(envptr,obj_Path, NULL);
+    	env->ReleaseStringUTFChars(envptr,obj_Path, path);	
+	jnii->DetachCurrentThread( jniiptr );
+	return path;
 }
 
 #endif

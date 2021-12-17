@@ -9,6 +9,7 @@
 
 #define RD_INPUT_FIELD_HEIGHT 40
 #define RD_INPUT_FIELD_MARGIN 5
+#define RD_INPUT_FIELD_FONT_SIZE 4
 
 typedef struct InputField InputField;
 

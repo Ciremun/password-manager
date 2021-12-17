@@ -28,6 +28,7 @@ void oninput(InputField *i, int keycode)
 
 void HandleKey(int keycode, int bDown)
 {
+    printf("HandleKey: %d %d\n", keycode, bDown);
     if (bDown && keycode == CAPSLOCK_KEY)
     {
         keyboard.uppercase = !keyboard.uppercase;
@@ -49,6 +50,7 @@ void HandleKey(int keycode, int bDown)
 
 void HandleButton(int x, int y, int button, int bDown)
 {
+    printf("HandleButton: %d %d %d %d\n", x, y, button, bDown);
     if (bDown)
     {
         if (button == MOUSE_SCROLL_UP)
@@ -98,6 +100,7 @@ void HandleButton(int x, int y, int button, int bDown)
 
 void HandleMotion(int x, int y, int mask)
 {
+    printf("HandleMotion: %d %d %d\n", x, y, mask);
     Point hover = {.x = x, .y = y};
     for (size_t i = 0; i < input_fields.count; ++i)
     {

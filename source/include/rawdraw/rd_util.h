@@ -66,6 +66,11 @@
 #define MOUSE_SCROLL_DOWN 5
 #endif // defined(_WIN32) || defined(__wasm__)
 
+#if defined(__ANDROID__)
+#undef BACKSPACE_KEY
+#define BACKSPACE_KEY 67
+#endif // defined(__ANDROID__)
+
 #ifdef __wasm__
 #define printf
 #define free
@@ -80,6 +85,8 @@ void prints(const char *str);
 #define print
 #define prints
 #endif // __wasm__
+
+#define sprintf stbsp_sprintf 
 
 #define RD_STR(s, l) \
     (String) { .data = (uint8_t *)s, .length = l }

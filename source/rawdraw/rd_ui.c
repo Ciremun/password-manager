@@ -37,7 +37,7 @@ InputField create_input_field(String str)
                 .length = str.length,
             },
             .color = BLACK,
-            .font_size = 5,
+            .font_size = RD_INPUT_FIELD_FONT_SIZE,
         },
         .focused = 0,
         .oninput = oninput,

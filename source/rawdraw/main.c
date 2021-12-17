@@ -14,6 +14,9 @@
 #define CNFG_IMPLEMENTATION
 #include "rawdraw/vendor/rawdraw_sf.h"
 
+#define STB_SPRINTF_IMPLEMENTATION
+#include "rawdraw/vendor/stb_sprintf.h"
+
 #include "core/pm_util.h"
 #include "core/pm_parse.h"
 #include "core/pm_xcrypt.h"
@@ -59,7 +62,13 @@ int EXPORT("main") main()
     sync_remote_url = (String){
         .data = (uint8_t *)getenv("PM_SYNC_REMOTE_URL"),
     };
+#ifdef __ANDROID__
+    char path[1024] = {0};
+    sprintf(path, "%s/" DEFAULT_DATA_STORE, AndroidGetExternalFilesDir());
+    data_store = path;
+#else
     data_store = DEFAULT_DATA_STORE;
+#endif // __ANDROID__
 
     if (sync_remote_url.data != 0)
         sync_remote_url.length = strlen((char *)sync_remote_url.data);
@@ -73,8 +82,8 @@ int EXPORT("main") main()
 
     Flags f = {0};
     char hello[] = "tsodinSleep";
-    if (!AndroidHasPermissions("WRITE_EXTERNAL_STORAGE"))
-        AndroidRequestAppPermissions("WRITE_EXTERNAL_STORAGE");
+    // if (!AndroidHasPermissions("WRITE_EXTERNAL_STORAGE"))
+        // AndroidRequestAppPermissions("WRITE_EXTERNAL_STORAGE");
     rd_encrypt_and_write(PM_STR(hello), aes_key);
     decrypt_and_draw(aes_key);
 
