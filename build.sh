@@ -1,0 +1,1 @@
+([ -f ./nobuild ] || cc nobuild.c -onobuild) && ./nobuild $@
