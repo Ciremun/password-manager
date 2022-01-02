@@ -56,17 +56,17 @@ void append_input_field(InputField i)
 void DrawInputField(InputField i)
 {
     static const int text_height = 10;
-    int rect_height = i.rect.p2.y - i.rect.p1.y;
+    const int rect_height = i.rect.p2.y - i.rect.p1.y;
     CNFGPenX = i.rect.p1.x + 10;
     CNFGPenY = i.rect.p1.y + rect_height / 2 - text_height;
     if (i.focused)
         CNFGColor(GRAY);
     else
         CNFGColor(i.rect.color);
-    int32_t radius = 24;
-    int32_t centreX = i.rect.p1.x + radius;
-    int32_t centreY = i.rect.p1.y + radius - RD_INPUT_FIELD_MARGIN;
-    int32_t diameter = (radius * 2);
+    static const int32_t radius = 24;
+    const int32_t centreX = i.rect.p1.x + radius;
+    const int32_t centreY = i.rect.p1.y + radius - RD_INPUT_FIELD_MARGIN;
+    const int32_t diameter = (radius * 2);
     int32_t x = (radius - 1);
     int32_t y = 0;
     int32_t tx = 1;
