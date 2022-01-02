@@ -62,9 +62,9 @@ void DrawInputField(InputField i)
         CNFGColor(GRAY);
     else
         CNFGColor(i.rect.color);
-    static const int32_t radius = 24;
+    static const int32_t radius = 6;
     const int32_t centreX = i.rect.p1.x + radius;
-    const int32_t centreY = i.rect.p2.y - radius + (radius / 4);
+    const int32_t centreY = i.rect.p2.y - radius + 6;
     const int32_t diameter = (radius * 2);
     int32_t x = (radius - 1);
     int32_t y = 0;
