@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void decrypt_and_print(uint8_t *aes_key);
+void decrypt_and_draw(uint8_t *aes_key);
 
 #endif // PM_WASM_XCRYPT_H_

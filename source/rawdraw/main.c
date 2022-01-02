@@ -8,7 +8,13 @@
 
 #ifndef __wasm__
 #include "rawdraw/vendor/os_generic.h"
+#include "rawdraw/rd_xcrypt.h"
+#include "core/pm_parse.h"
+#include "core/pm_xcrypt.h"
+#include "core/pm_io.h"
 #include <stdlib.h>
+#else
+#include "rdw_xcrypt.h"
 #endif // __wasm__
 
 #define CNFG_IMPLEMENTATION
@@ -18,13 +24,9 @@
 #include "rawdraw/vendor/stb_sprintf.h"
 
 #include "core/pm_util.h"
-#include "core/pm_parse.h"
-#include "core/pm_xcrypt.h"
-#include "core/pm_io.h"
 #include "rawdraw/rd_event.h"
 #include "rawdraw/rd_ui.h"
 #include "rawdraw/rd_util.h"
-#include "rawdraw/rd_xcrypt.h"
 
 #define WINDOW_NAME "password-manager"
 
@@ -74,17 +76,15 @@ int EXPORT("main") main()
         sync_remote_url.length = strlen((char *)sync_remote_url.data);
 #endif // __wasm__
 
-    InputField fields[64] = {0};
-    input_fields.arr = fields;
+    input_fields.arr = (InputField *)calloc(64, sizeof(InputField));
 
     uint8_t aes_key[32] = {0};
     memcpy(aes_key, "secret_key", 10);
 
-    Flags f = {0};
     char hello[] = "tsodinSleep";
     // if (!AndroidHasPermissions("WRITE_EXTERNAL_STORAGE"))
         // AndroidRequestAppPermissions("WRITE_EXTERNAL_STORAGE");
-    rd_encrypt_and_write(PM_STR(hello), aes_key);
+    // rd_encrypt_and_write(PM_STR(hello), aes_key);
     decrypt_and_draw(aes_key);
 
 #ifdef RAWDRAW_USE_LOOP_FUNCTION

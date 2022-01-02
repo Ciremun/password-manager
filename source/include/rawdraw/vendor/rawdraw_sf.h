@@ -5810,7 +5810,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include "TextTool/FontData.h"
 #endif
 
+#ifndef __wasm__
 #include <malloc.h>
+#endif // __wasm__
 
 int CNFGPenX, CNFGPenY;
 uint32_t CNFGBGColor;

@@ -1,9 +1,10 @@
-#include "core/pm_b64.h"
-#include "core/pm_xcrypt.h"
+#include "rawdraw/rd_util.h"
 #include "rawdraw/rd_ui.h"
+#include "rdw_xcrypt.h"
 
-extern InputFields input_fields;
-
-void decrypt_and_print(uint8_t *aes_key)
+void decrypt_and_draw(uint8_t *aes_key)
 {
+    char *str = calloc(1, sizeof("tsodinSleep"));
+    memcpy(str, "tsodinSleep", sizeof("tsodinSleep") - 1);
+    append_input_field(create_input_field(RD_STR(str, sizeof("tsodinSleep") - 1)));
 }

@@ -1353,7 +1353,7 @@ int main(int argc, char **argv)
         chdir("source/rawdraw/wasm");
         CMD("cc", "-o", "subst", "source/tools/subst.c");
         CMD("cc", "-o", "nn", "source/tools/nn.c");
-        CMD("clang", "-DWASM", "-nostdlib", "--target=wasm32", "-I../../include", "-Iinclude", "../rd_event.c", "../rd_ui.c", "../rd_util.c", "../main.c", "-flto", "-Oz", "-Wl,--lto-O3", "-Wl,--no-entry", "-Wl,--allow-undefined", "-Wl,--import-memory", "-o", "main.wasm");
+        CMD("clang", "-DWASM", "-nostdlib", "--target=wasm32", "-I../../include", "-Iinclude", "../rd_event.c", "../rd_ui.c", "../rd_util.c", "../main.c", "source/rdw_xcrypt.c",  "-flto", "-Oz", "-Wl,--lto-O3", "-Wl,--no-entry", "-Wl,--allow-undefined", "-Wl,--import-memory", "-o", "main.wasm");
         CMD("wasm-opt", "--asyncify", "--pass-arg=asyncify-imports@bynsyncify.*", "--pass-arg=asyncify-ignore-indirect", "-Oz", "main.wasm", "-o", "main.wasm");
         CHAIN(CHAIN_CMD("cat", "main.wasm"), CHAIN_CMD("base64"), CHAIN_CMD("./nn"), OUT("blob_b64"));
         CMD("./subst", "source/template.js", "-s", "-f", "BLOB", "blob_b64", "-o", "mid.js");

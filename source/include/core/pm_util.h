@@ -4,15 +4,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifdef __wasm__
-
 typedef struct
 {
     uint8_t *data;
     size_t length;
 } String;
 
-#else
+#define PM_STR(s) \
+    (String) { .data = (uint8_t *)s, .length = strlen(s) }
+
+#ifndef __wasm__
 
 #include <errno.h>
 #include <stdarg.h>
@@ -27,15 +28,6 @@ void exit_test_case(int exit_code);
 #define error(fmt, ...) fprintf(stderr, "error: " fmt "\n", __VA_ARGS__)
 #define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
 #endif // TEST
-
-#define PM_STR(s) \
-    (String) { .data = (uint8_t *)s, .length = strlen(s) }
-
-typedef struct
-{
-    uint8_t *data;
-    size_t length;
-} String;
 
 #define PANIC(FMT, ...)          \
     do                           \

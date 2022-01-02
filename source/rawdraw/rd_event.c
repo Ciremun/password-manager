@@ -28,7 +28,7 @@ void oninput(InputField *i, int keycode)
 
 void HandleKey(int keycode, int bDown)
 {
-    printf("HandleKey: %d %d\n", keycode, bDown);
+    // printf("HandleKey: %d %d\n", keycode, bDown);
     if (bDown && keycode == CAPSLOCK_KEY)
     {
         keyboard.uppercase = !keyboard.uppercase;
@@ -50,7 +50,7 @@ void HandleKey(int keycode, int bDown)
 
 void HandleButton(int x, int y, int button, int bDown)
 {
-    printf("HandleButton: %d %d %d %d\n", x, y, button, bDown);
+    // printf("HandleButton: %d %d %d %d\n", x, y, button, bDown);
     if (bDown)
     {
         if (button == MOUSE_SCROLL_UP)
@@ -105,7 +105,7 @@ void HandleMotion(int x, int y, int mask)
     for (size_t i = 0; i < input_fields.count; ++i)
     {
         input_fields.arr[i].rect.color = inside_rect(hover, input_fields.arr[i].rect) ? SILVER : WHITE;
-        if (input_fields.arr[i].rect.color == SILVER)
+        if ((input_fields.arr[i].rect.color) == (SILVER))
         {
             ++i;
             for (; i < input_fields.count; ++i)
