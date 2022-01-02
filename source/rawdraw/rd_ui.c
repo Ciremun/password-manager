@@ -63,7 +63,32 @@ void DrawInputField(InputField i)
         CNFGColor(GRAY);
     else
         CNFGColor(i.rect.color);
-    CNFGTackRectangle(i.rect.p1.x, i.rect.p1.y, i.rect.p2.x, i.rect.p2.y);
+    int32_t radius = 24;
+    int32_t centreX = i.rect.p1.x + radius;
+    int32_t centreY = i.rect.p1.y + radius - RD_INPUT_FIELD_MARGIN;
+    int32_t diameter = (radius * 2);
+    int32_t x = (radius - 1);
+    int32_t y = 0;
+    int32_t tx = 1;
+    int32_t ty = 1;
+    int32_t error = (tx - diameter);
+    while (x >= y)
+    {
+        CNFGTackSegment(centreX - x, centreY + y, centreX + x + i.rect.p2.x - radius * 2, centreY + y);
+        CNFGTackSegment(centreX - x, centreY - y, centreX + x + i.rect.p2.x - radius * 2, centreY - y);
+        if (error <= 0)
+        {
+         ++y;
+         error += ty;
+         ty += 2;
+        }
+        else if (error > 0)
+        {
+         --x;
+         tx += 2;
+         error += (tx - diameter);
+        }
+    }
     CNFGColor(i.text.color);
     CNFGDrawText((char *)i.text.string.data, i.text.font_size);
 }

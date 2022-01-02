@@ -100,7 +100,7 @@ void HandleButton(int x, int y, int button, int bDown)
 
 void HandleMotion(int x, int y, int mask)
 {
-    printf("HandleMotion: %d %d %d\n", x, y, mask);
+    // printf("HandleMotion: %d %d %d\n", x, y, mask);
     Point hover = {.x = x, .y = y};
     for (size_t i = 0; i < input_fields.count; ++i)
     {
