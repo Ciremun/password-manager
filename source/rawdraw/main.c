@@ -84,7 +84,9 @@ int EXPORT("main") main()
     char hello[] = "tsodinSleep";
     // if (!AndroidHasPermissions("WRITE_EXTERNAL_STORAGE"))
         // AndroidRequestAppPermissions("WRITE_EXTERNAL_STORAGE");
-    // rd_encrypt_and_write(PM_STR(hello), aes_key);
+#ifndef __wasm__
+    rd_encrypt_and_write(PM_STR(hello), aes_key);
+#endif // __wasm__
     decrypt_and_draw(aes_key);
 
 #ifdef RAWDRAW_USE_LOOP_FUNCTION
