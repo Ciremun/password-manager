@@ -26,8 +26,7 @@
 
 ## Build
 
-    cc nobuild.c -o nobuild
-    ./nobuild
+    sh build.sh
 
 ## Examples
 
