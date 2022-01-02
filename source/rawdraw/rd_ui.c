@@ -21,7 +21,6 @@ int inside_rect(Point p, Rect r)
 
 InputField create_input_field(String str)
 {
-    Point input_field_dim = { .x = w, .y = RD_INPUT_FIELD_HEIGHT };
     return (InputField){
         .rect = (Rect){
             .color = WHITE,
@@ -29,13 +28,13 @@ InputField create_input_field(String str)
                 .x = 0,
                 .y = 0,
             },
-            .p2 = input_field_dim,
+            .p2 = (Point){
+                .x = w,
+                .y = RD_INPUT_FIELD_HEIGHT,
+            },
         },
         .text = (Text){
-            .string = (String){
-                .data = str.data,
-                .length = str.length,
-            },
+            .string = str,
             .color = BLACK,
             .font_size = RD_INPUT_FIELD_FONT_SIZE,
         },
@@ -65,7 +64,7 @@ void DrawInputField(InputField i)
         CNFGColor(i.rect.color);
     static const int32_t radius = 24;
     const int32_t centreX = i.rect.p1.x + radius;
-    const int32_t centreY = i.rect.p1.y + radius - RD_INPUT_FIELD_MARGIN;
+    const int32_t centreY = i.rect.p2.y - radius + (radius / 4);
     const int32_t diameter = (radius * 2);
     int32_t x = (radius - 1);
     int32_t y = 0;
