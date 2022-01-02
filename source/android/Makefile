@@ -3,7 +3,7 @@
 
 all : makecapk.apk
 
-SRC?=../rd_*.c ../../core/pm_*.c ../main.c
+SRC?=../core/pm_aes.c ../core/pm_b64.c ../core/pm_io.c ../core/pm_parse.c ../core/pm_rand.c ../core/pm_sync.c ../core/pm_xcrypt.c ../rawdraw/rd_event.c ../rawdraw/rd_ui.c ../rawdraw/rd_util.c ../rawdraw/rd_xcrypt.c
 
 .PHONY : push run
 
@@ -22,7 +22,7 @@ RAWDRAWANDROIDSRCS=$(RAWDRAWANDROID)/android_native_app_glue.c
 ANDROIDVERSION?=29
 ANDROIDTARGET?=$(ANDROIDVERSION)
 #Default is to be strip down, but your app can override it.
-CFLAGS?=-I../../include -ffunction-sections -Os -fdata-sections -Wall -fvisibility=hidden
+CFLAGS?=-I../include -ffunction-sections -Os -fdata-sections -Wall -fvisibility=hidden
 LDFLAGS?=-Wl,--gc-sections -s
 ANDROID_FULLSCREEN?=y
 ADB?=adb

@@ -1,6 +1,6 @@
 #include "rawdraw/rd_util.h"
 #include "rawdraw/rd_ui.h"
-#include "rdw_xcrypt.h"
+#include "wasm/wasm_xcrypt.h"
 
 void decrypt_and_draw(uint8_t *aes_key)
 {

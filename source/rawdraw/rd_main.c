@@ -14,7 +14,7 @@
 #include "core/pm_io.h"
 #include <stdlib.h>
 #else
-#include "rdw_xcrypt.h"
+#include "wasm/wasm_xcrypt.h"
 #endif // __wasm__
 
 #define CNFG_IMPLEMENTATION
