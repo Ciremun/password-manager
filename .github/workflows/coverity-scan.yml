@@ -33,8 +33,8 @@ jobs:
 
       - name: Submit the result to Coverity Scan
         id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
         run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
           tar czvf pm.tgz cov-int
           curl --form token=$TOKEN \
             --form email=ciremun@yandex.ru \
