@@ -39,8 +39,8 @@ jobs:
             --form token=$TOKEN \
             --form email=ciremun@yandex.ru \
             --form file=@pm.tgz \
-            --form version="`./pm* -v`" \
-            --form description="`./pm* -v`" \
+            --form version="`./pm-* -v`" \
+            --form description="`./pm-* -v`" \
             https://scan.coverity.com/builds?project=Ciremun%2Fpassword-manager
         env:
           TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
