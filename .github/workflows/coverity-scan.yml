@@ -32,15 +32,15 @@ jobs:
           cc source/nobuild.c -o nobuild && cov-build --dir cov-int ./nobuild
 
       - name: Submit the result to Coverity Scan
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
         run: |
           tar czvf pm.tgz cov-int
-          curl \
-            --form project=Ciremun%2Fpassword-manager \
-            --form token=$TOKEN \
+          curl --form token=$TOKEN \
             --form email=ciremun@yandex.ru \
             --form file=@pm.tgz \
-            --form version="`./pm-* -v`" \
-            --form description="`./pm-* -v`" \
+            --form version="${{ steps.vars.outputs.sha_short }}" \
+            --form description="${{ steps.vars.outputs.sha_short }}" \
             https://scan.coverity.com/builds?project=Ciremun%2Fpassword-manager
         env:
           TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
