@@ -1,4 +1,4 @@
-name: CI
+name: upload-to-my-repo
 on: [workflow_dispatch]
 
 jobs:
