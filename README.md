@@ -1,8 +1,12 @@
 # password-manager
 
-[![CI](https://github.com/Ciremun/password-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/Ciremun/password-manager/actions/workflows/ci.yml)
+.. image:: https://github.com/Ciremun/password-manager/actions/workflows/ci.yml/badge.svg
+   :alt: CI
+   :target: https://github.com/Ciremun/password-manager/actions
 
-<a href="https://scan.coverity.com/projects/ciremun-password-manager"><img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/23849/badge.svg"/></a>
+.. image:: https://scan.coverity.com/projects/23849/badge.svg
+   :alt: Coverity Scan Build Status
+   :target: https://scan.coverity.com/projects/ciremun-password-manager
 
 ## Usage
 
