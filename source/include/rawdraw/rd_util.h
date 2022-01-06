@@ -72,8 +72,9 @@
 #endif // defined(__ANDROID__)
 
 #ifdef __wasm__
-#define printf
-#define free
+#define printf(...)
+#define free(...)
+#define OGUSleep(...)
 unsigned long strlen(const char *s);
 void *memset(void *dest, int val, unsigned long len);
 void *memcpy(void *dst, void const *src, unsigned long size);
@@ -82,8 +83,8 @@ void *calloc(size_t num, size_t size);
 void print(double idebug);
 void prints(const char *str);
 #else
-#define print
-#define prints
+#define print(...)
+#define prints(...)
 #endif // __wasm__
 
 #define sprintf stbsp_sprintf 

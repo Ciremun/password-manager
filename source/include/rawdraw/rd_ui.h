@@ -7,7 +7,7 @@
 #include "core/pm_util.h"
 #include "rawdraw/rd_util.h"
 
-#define RD_INPUT_FIELD_HEIGHT 40
+#define RD_INPUT_FIELD_HEIGHT 30
 #define RD_INPUT_FIELD_MARGIN 1
 #define RD_INPUT_FIELD_FONT_SIZE 4
 

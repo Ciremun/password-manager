@@ -55,39 +55,14 @@ void append_input_field(InputField i)
 void DrawInputField(InputField i)
 {
     static const int text_height = 10;
-    const int rect_height = i.rect.p2.y - i.rect.p1.y;
+    int rect_height = i.rect.p2.y - i.rect.p1.y;
     CNFGPenX = i.rect.p1.x + 10;
     CNFGPenY = i.rect.p1.y + rect_height / 2 - text_height;
     if (i.focused)
         CNFGColor(GRAY);
     else
         CNFGColor(i.rect.color);
-    static const int32_t radius = 24;
-    const int32_t centreX = i.rect.p1.x + radius;
-    const int32_t centreY = i.rect.p2.y - radius + (radius / 4);
-    const int32_t diameter = (radius * 2);
-    int32_t x = (radius - 1);
-    int32_t y = 0;
-    int32_t tx = 1;
-    int32_t ty = 1;
-    int32_t error = (tx - diameter);
-    while (x >= y)
-    {
-        CNFGTackSegment(centreX - x, centreY + y, centreX + x + i.rect.p2.x - radius * 2, centreY + y);
-        CNFGTackSegment(centreX - x, centreY - y, centreX + x + i.rect.p2.x - radius * 2, centreY - y);
-        if (error <= 0)
-        {
-         ++y;
-         error += ty;
-         ty += 2;
-        }
-        else if (error > 0)
-        {
-         --x;
-         tx += 2;
-         error += (tx - diameter);
-        }
-    }
+    CNFGTackRectangle(i.rect.p1.x, i.rect.p1.y, i.rect.p2.x, i.rect.p2.y);
     CNFGColor(i.text.color);
     CNFGDrawText((char *)i.text.string.data, i.text.font_size);
 }

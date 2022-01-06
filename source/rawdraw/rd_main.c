@@ -31,7 +31,6 @@
 #define WINDOW_NAME "password-manager"
 
 short w, h;
-int paused = 0;
 
 extern InputFields input_fields;
 
@@ -101,13 +100,9 @@ int EXPORT("loop") loop()
         CNFGClearFrame();
         CNFGHandleInput();
 
-#ifndef __wasm__
-        if (!paused)
-            OGUSleep(16000);
-#endif // __wasm__
-
         DrawInputFields();
 
+        OGUSleep(1000);
         CNFGSwapBuffers();
     }
 
