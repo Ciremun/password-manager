@@ -92,6 +92,9 @@ void prints(const char *str);
 #define RD_STR(s, l) \
     (String) { .data = (uint8_t *)s, .length = l }
 
+#define PC_WIDTH(p) (w * p / 100)
+#define PC_HEIGHT(p) (h * p / 100)
+
 typedef struct
 {
     int x;
