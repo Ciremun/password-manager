@@ -16,8 +16,11 @@ typedef int Fd;
 #else
 #define WIN32_MEAN_AND_LEAN
 #include "windows.h"
+#include <direct.h>
 #include <process.h>
 #define PATH_SEP "\\"
+#define rmdir _rmdir
+#define mkdir(path, access) _mkdir(path)
 typedef HANDLE Pid;
 typedef HANDLE Fd;
 // minirent.h HEADER BEGIN ////////////////////////////////////////
@@ -168,13 +171,13 @@ typedef struct
 } Chain_Token;
 
 // TODO(#17): IN and OUT are already taken by WinAPI
-#define IN(path)                                                    \
+#define CHAIN_IN(path)                                                    \
     (Chain_Token)                                                   \
     {                                                               \
         .type = CHAIN_TOKEN_IN, .args = cstr_array_make(path, NULL) \
     }
 
-#define OUT(path)                                                    \
+#define CHAIN_OUT(path)                                                    \
     (Chain_Token)                                                    \
     {                                                                \
         .type = CHAIN_TOKEN_OUT, .args = cstr_array_make(path, NULL) \
@@ -363,7 +366,7 @@ LPSTR GetLastErrorAsString(void)
 
     LPSTR messageBuffer = NULL;
 
-    DWORD size = FormatMessage(
+    FormatMessage(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // DWORD   dwFlags,
         NULL,                                                                                        // LPCVOID lpSource,
         errorMessageId,                                                                              // DWORD   dwMessageId,
@@ -764,7 +767,7 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout)
         // TODO(#33): cmd_run_async on Windows does not render command line
         // properly It may require wrapping some arguments with double-quotes if
         // they contains spaces, etc.
-        cstr_array_join(" ", cmd.line), NULL, NULL, TRUE, 0, NULL, NULL,
+        (char *)cstr_array_join(" ", cmd.line), NULL, NULL, TRUE, 0, NULL, NULL,
         &siStartInfo, &piProcInfo);
 
     if (!bSuccess)
@@ -1354,7 +1357,7 @@ int main(int argc, char **argv)
         CMD("cc", "-o", "nn", "tools/nn.c");
         CMD("clang", "-DWASM", "-nostdlib", "--target=wasm32", "-I../include", "../rawdraw/rd_event.c", "../rawdraw/rd_ui.c", "../rawdraw/rd_util.c", "../rawdraw/rd_main.c", "wasm_xcrypt.c",  "-flto", "-Oz", "-Wl,--lto-O3", "-Wl,--no-entry", "-Wl,--allow-undefined", "-Wl,--import-memory", "-o", "main.wasm");
         CMD("wasm-opt", "--asyncify", "--pass-arg=asyncify-imports@bynsyncify.*", "--pass-arg=asyncify-ignore-indirect", "-Oz", "main.wasm", "-o", "main.wasm");
-        CHAIN(CHAIN_CMD("cat", "main.wasm"), CHAIN_CMD("base64"), CHAIN_CMD("./nn"), OUT("blob_b64"));
+        CHAIN(CHAIN_CMD("cat", "main.wasm"), CHAIN_CMD("base64"), CHAIN_CMD("./nn"), CHAIN_OUT("blob_b64"));
         CMD("./subst", "template.js", "-s", "-f", "BLOB", "blob_b64", "-o", "mid.js");
         CMD("terser", "-ecma 2017", "-d", "RAWDRAW_USE_LOOP_FUNCTION=false", "-d", "RAWDRAW_NEED_BLITTER=true", "mid.js", "-o", "opt.js");
         remove("mid.js");
