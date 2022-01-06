@@ -1,12 +1,6 @@
 # password-manager
 
-.. image:: https://github.com/Ciremun/password-manager/actions/workflows/ci.yml/badge.svg
-   :alt: CI
-   :target: https://github.com/Ciremun/password-manager/actions
-
-.. image:: https://scan.coverity.com/projects/23849/badge.svg
-   :alt: Coverity Scan Build Status
-   :target: https://scan.coverity.com/projects/ciremun-password-manager
+[![CI](https://github.com/Ciremun/password-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/Ciremun/password-manager/actions) [![Coverity Scan Build Status](https://scan.coverity.com/projects/23849/badge.svg)](https://scan.coverity.com/projects/ciremun-password-manager)
 
 ## Usage
 
