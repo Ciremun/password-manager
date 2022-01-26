@@ -15,10 +15,10 @@
 #include <unistd.h>
 #endif
 
-#include "core/pm_aes.h"
-#include "core/pm_b64.h"
-#include "core/pm_io.h"
-#include "core/pm_xcrypt.h"
+#include "core/aes.h"
+#include "core/b64.h"
+#include "core/io.h"
+#include "core/xcrypt.h"
 #undef exit
 
 #define ARGS(...) fill_args(__VA_ARGS__, NULL)
