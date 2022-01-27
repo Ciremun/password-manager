@@ -19,11 +19,11 @@ WEB_DIR = web
 EXE = $(WEB_DIR)/index.html
 IMGUI_DIR = ../imgui
 SOURCES = web_setup.cpp ui_update.cpp
-SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
+SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
-CPPFLAGS =-DIMGUI_USE_STB_SPRINTF
+CPPFLAGS =-DIMGUI_USE_STB_SPRINTF -DIMGUI_DEFINE_MATH_OPERATORS
 LDFLAGS =
 EMS =
 
