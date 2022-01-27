@@ -70,8 +70,9 @@ testsdk :
 	@echo "Build Tools:\t" $(BUILD_TOOLS)
 
 CFLAGS+=-Os -DANDROID -DAPPNAME=\"$(APPNAME)\"
+CFLAGS+= -DIMGUI_USE_STB_SPRINTF
 ifeq (ANDROID_FULLSCREEN,y)
-CFLAGS +=-DANDROID_FULLSCREEN
+CFLAGS += -DANDROID_FULLSCREEN
 endif
 CFLAGS+= -I../../include -I../imgui -I../imgui/backends -I$(NDK)/sysroot/usr/include -I$(NDK)/sysroot/usr/include/android -I$(NDK)/toolchains/llvm/prebuilt/$(OS_NAME)/sysroot/usr/include/android -I$(NDK)/sources/android/native_app_glue -fPIC -DANDROIDVERSION=$(ANDROIDVERSION)
 LDFLAGS += -lm -lGLESv3 -lEGL -landroid -llog -lstdc++
