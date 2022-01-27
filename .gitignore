@@ -14,7 +14,7 @@ source/ui/web/web/
 *.o
 *.ini
 *.keystore
-*.isdig
+*.idsig
 *.apk
 
 .pm_data
