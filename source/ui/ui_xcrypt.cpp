@@ -13,7 +13,7 @@
 extern String sync_remote_url;
 extern char *data_store;
 
-void rd_encrypt_and_write(String s, uint8_t *aes_key)
+void ui_encrypt_and_write(String s, uint8_t *aes_key)
 {
     File f = create_file(data_store, PM_READ_WRITE);
     xcrypt_buffer(s.data, aes_key, s.length);
@@ -29,7 +29,7 @@ void rd_encrypt_and_write(String s, uint8_t *aes_key)
     upload_changes(sync_remote_url);
 }
 
-void decrypt_and_draw(uint8_t *aes_key)
+void ui_decrypt_and_draw(uint8_t *aes_key)
 {
     pull_changes(sync_remote_url);
     File f = open_file(data_store, PM_READ_ONLY);
