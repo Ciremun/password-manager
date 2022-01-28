@@ -48,7 +48,7 @@ void ui_update()
         {
             const auto &password = passwords[i];
             ImGui::PushID(i);
-            ImGui::InputText("", (char *)password.data, password.length);
+            ImGui::InputText("", (char *)password.data, password.length + 1);
             ImGui::PopID();
         }
     ImGui::End();
