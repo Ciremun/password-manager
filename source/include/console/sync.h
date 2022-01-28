@@ -18,7 +18,7 @@ typedef int Fd;
 #include <stdlib.h>
 #include <string.h>
 
-#include "core/util.h"
+#include "console/util.h"
 
 typedef const char *Cstr;
 

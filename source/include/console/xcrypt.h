@@ -8,8 +8,8 @@
 #include <stdio.h>
 #endif // _WIN32
 
-#include "core/parse.h"
-#include "core/util.h"
+#include "console/parse.h"
+#include "console/util.h"
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
 void decrypt_and_print(Flags *fl, uint8_t *aes_key);

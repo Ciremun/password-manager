@@ -1,11 +1,11 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "core/parse.h"
-#include "core/io.h"
-#include "core/rand.h"
-#include "core/util.h"
-#include "core/xcrypt.h"
+#include "console/parse.h"
+#include "console/io.h"
+#include "console/rand.h"
+#include "console/util.h"
+#include "console/xcrypt.h"
 
 #include <string.h>
 

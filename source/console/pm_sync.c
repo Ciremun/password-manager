@@ -21,8 +21,8 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#include "core/sync.h"
-#include "core/io.h"
+#include "console/sync.h"
+#include "console/io.h"
 
 #ifndef _WIN32
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr)

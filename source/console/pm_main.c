@@ -8,9 +8,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "core/io.h"
-#include "core/parse.h"
-#include "core/sync.h"
+#include "console/io.h"
+#include "console/parse.h"
+#include "console/sync.h"
 
 #include <stdio.h>
 

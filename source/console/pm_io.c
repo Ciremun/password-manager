@@ -1,10 +1,10 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "core/io.h"
-#include "core/util.h"
+#include "console/io.h"
+#include "console/util.h"
 
-#include "assert.h"
+#include <assert.h>
 
 char *data_store = 0;
 

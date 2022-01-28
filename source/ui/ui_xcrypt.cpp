@@ -1,19 +1,18 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "core/aes.h"
-#include "core/b64.h"
-#include "core/io.h"
-#include "core/sync.h"
-#include "core/util.h"
-#include "core/xcrypt.h"
-#include "rawdraw/rd_xcrypt.h"
-#include "rawdraw/rd_ui.h"
+#include "console/aes.h"
+#include "console/b64.h"
+#include "console/io.h"
+#include "console/sync.h"
+#include "console/util.h"
+#include "console/xcrypt.h"
+#include "ui/xcrypt.hpp"
 
 extern String sync_remote_url;
 extern char *data_store;
 
-void ui_encrypt_and_write(String s, uint8_t *aes_key)
+void ui_encrypt_and_append(String s, uint8_t *aes_key)
 {
     File f = create_file(data_store, PM_READ_WRITE);
     xcrypt_buffer(s.data, aes_key, s.length);
@@ -29,9 +28,9 @@ void ui_encrypt_and_write(String s, uint8_t *aes_key)
     upload_changes(sync_remote_url);
 }
 
-void ui_decrypt_and_draw(uint8_t *aes_key)
+void ui_load_passwords(uint8_t *aes_key, ImVector<String> &passwords)
 {
-    pull_changes(sync_remote_url);
+    // pull_changes(sync_remote_url);
     File f = open_file(data_store, PM_READ_ONLY);
 
     if (f.size == 0)
@@ -85,7 +84,7 @@ void ui_decrypt_and_draw(uint8_t *aes_key)
             //     }
             // }
 
-            // append_input_field(create_input_field(RD_STR(b64_decoded_str, b64_decoded_len)));
+            passwords.push_back({ b64_decoded_str, b64_decoded_len });
         skip_write:
             line_start = line_end + 1;
         }

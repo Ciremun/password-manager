@@ -25,7 +25,7 @@ typedef int handle_t;
 #define PM_BAD_FILE_HANDLE -1
 #endif // _WIN32
 
-#include "core/parse.h"
+#include "console/parse.h"
 
 #define DEFAULT_DATA_STORE ".pm_data"
 

@@ -3,7 +3,7 @@
 
 all : makecapk.apk
 
-SRC?=android_setup.cpp ../ui_update.cpp ../imgui/*.cpp ../imgui/backends/imgui_impl_android.cpp ../imgui/backends/imgui_impl_opengl3.cpp
+SRC?=android_impl.cpp ../ui_update.cpp ../ui_xcrypt.cpp ../imgui/*.cpp ../imgui/backends/imgui_impl_android.cpp ../imgui/backends/imgui_impl_opengl3.cpp
 
 .PHONY : push run
 
