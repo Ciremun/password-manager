@@ -1,8 +1,0 @@
-#include "console/pm_aes.c"
-#include "console/pm_b64.c"
-#include "console/pm_io.c"
-#include "console/pm_main.c"
-#include "console/pm_parse.c"
-#include "console/pm_rand.c"
-#include "console/pm_sync.c"
-#include "console/pm_xcrypt.c"

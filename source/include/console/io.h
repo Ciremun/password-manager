@@ -27,6 +27,10 @@ typedef int handle_t;
 
 #include "console/parse.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #define DEFAULT_DATA_STORE ".pm_data"
 
 #define UNMAP_AND_CLOSE_FILE(file)       \
@@ -103,5 +107,9 @@ int unmap_and_close_file(File f);
 int getpasswd(uint8_t *pw);
 void input_key(uint8_t *aes_key, Flags *f);
 int copy_to_clipboard(uint8_t *password, size_t size);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // PM_IO_H_

@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct
 {
     char *value;
@@ -31,5 +35,9 @@ typedef struct
 int is_flag(char *arg, char *s, char *l);
 void parse_flags(Flags *f, int argc, char **argv);
 int run(uint8_t *aes_key, int argc, char **argv);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // PM_PARSE_H_

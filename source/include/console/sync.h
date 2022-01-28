@@ -20,6 +20,10 @@ typedef int Fd;
 
 #include "console/util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef const char *Cstr;
 
 typedef struct
@@ -59,5 +63,9 @@ Pid cmd_run_async(Cmd cmd, Fd *fdin, Fd *fdout);
 Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs);
 Cstr_Array cstr_array_make(Cstr first, ...);
 Cstr_Array cstr_array_append(Cstr_Array cstrs, Cstr cstr);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // PM_SYNC_H_

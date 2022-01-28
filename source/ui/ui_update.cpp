@@ -9,7 +9,7 @@
 
 static uint8_t aes_key[32] = {0};
 static bool password_entered = false;
-static ImVector<String> passwords;
+// static ImVector<String> passwords;
 
 void ui_update()
 {
@@ -33,21 +33,21 @@ void ui_update()
         ImGui::PopStyleVar();
         if (!password_entered)
             return;
-        passwords.reserve(256);
-        ui_load_passwords(aes_key, passwords);
+        // passwords.reserve(256);
+        // ui_load_passwords(aes_key, passwords);
     }
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Once);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::Begin("##io", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
     {
-        for (int i = 0; i < passwords.size(); ++i)
-        {
-            const auto &password = passwords[i];
-            ImGui::PushID(i);
-            ImGui::InputText("", (char *)password.data, password.length);
-            ImGui::PopID();
-        }
+        // for (int i = 0; i < passwords.size(); ++i)
+        // {
+        //     const auto &password = passwords[i];
+        //     ImGui::PushID(i);
+        //     ImGui::InputText("", (char *)password.data, password.length);
+        //     ImGui::PopID();
+        // }
     }
     ImGui::End();
     ImGui::PopStyleVar();
