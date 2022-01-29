@@ -3,7 +3,13 @@
 
 all : makecapk.apk
 
-SRC?=android_impl.cpp ../ui_update.cpp ../ui_xcrypt.cpp ../imgui/*.cpp ../imgui/backends/imgui_impl_android.cpp ../imgui/backends/imgui_impl_opengl3.cpp
+PM_CONSOLE_DIR = ../../console
+UI_DIR = ../
+SRC?=android_impl.cpp
+SRC+=$(UI_DIR)/ui_update.cpp $(UI_DIR)/ui_xcrypt.cpp
+SRC+=$(UI_DIR)/ui_update.cpp $(UI_DIR)/ui_xcrypt.cpp
+SRC+=$(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c
+SRC+=../imgui/*.cpp ../imgui/backends/imgui_impl_android.cpp ../imgui/backends/imgui_impl_opengl3.cpp
 
 .PHONY : push run
 
@@ -131,7 +137,7 @@ endif
 
 makecapk.apk : $(TARGETS) $(EXTRA_ASSETS_TRIGGER) AndroidManifest.xml
 	mkdir -p makecapk/assets
-	cp -r Sources/assets/* makecapk/assets
+	cp -r Sources/assets/ makecapk/
 	rm -rf temp.apk
 	$(AAPT) package -f -F temp.apk -I $(ANDROIDSDK)/platforms/android-$(ANDROIDVERSION)/android.jar -M AndroidManifest.xml -S Sources/res -A makecapk/assets -v --target-sdk-version $(ANDROIDTARGET)
 	unzip -o temp.apk -d makecapk

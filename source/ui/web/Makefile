@@ -18,7 +18,8 @@ CXX = em++
 WEB_DIR = web
 EXE = $(WEB_DIR)/index.html
 IMGUI_DIR = ../imgui
-SOURCES = web_impl.cpp ui_update.cpp ui_xcrypt.cpp
+PM_CONSOLE_DIR = ../../console
+SOURCES = web_impl.cpp ui_update.cpp ui_xcrypt.cpp $(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
@@ -65,6 +66,9 @@ LDFLAGS += --shell-file shell_minimal.html $(EMS)
 ##---------------------------------------------------------------------
 ## BUILD RULES
 ##---------------------------------------------------------------------
+
+%.o:$(PM_CONSOLE_DIR)/%.c
+	$(CC) $(CPPFLAGS) -c -o $@ $<
 
 %.o:%.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<

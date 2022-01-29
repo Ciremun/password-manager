@@ -3,6 +3,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 typedef struct
 {
@@ -13,17 +16,15 @@ typedef struct
 #define PM_STR(s) \
     (String) { .data = (uint8_t *)s, .length = strlen(s) }
 
-#ifndef __wasm__
-
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
-
 #ifdef TEST
 void exit_test_case(int exit_code);
 #define exit exit_test_case
 #define error(fmt, ...)
 #define info(fmt, ...)
+#elif defined(__ANDROID__)
+#include <android/log.h>
+#define error(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, "ImGuiExample", "error: " fmt "\n", __VA_ARGS__)
+#define info(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "ImGuiExample", "info: " fmt "\n", __VA_ARGS__)
 #else
 #define error(fmt, ...) fprintf(stderr, "error: " fmt "\n", __VA_ARGS__)
 #define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
@@ -49,5 +50,4 @@ void exit_test_case(int exit_code);
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#endif // __wasm__
 #endif // PM_UTIL_H_

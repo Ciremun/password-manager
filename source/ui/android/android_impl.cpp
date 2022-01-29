@@ -24,6 +24,7 @@ static char                 g_LogTag[] = "ImGuiExample";
 static int GetAssetData(const char* filename, void** out_data);
 static int AndroidGetUnicodeChar(int keyCode, int metaState);
 static void AndroidToggleKeyboard();
+const char* AndroidGetExternalFilesDir();
 
 void init(struct android_app* app)
 {
@@ -305,4 +306,23 @@ static int AndroidGetUnicodeChar( int keyCode, int metaState )
     g_App->activity->vm->DetachCurrentThread();
 
     return unicodeKey;
+}
+
+const char* AndroidGetExternalFilesDir()
+{
+    JNIEnv *env;
+    g_App->activity->vm->AttachCurrentThread(&env, NULL);
+
+    jclass cls_Env = env->FindClass("android/app/NativeActivity");
+    jmethodID mid = env->GetMethodID(cls_Env, "getExternalFilesDir",
+            "(Ljava/lang/String;)Ljava/io/File;");
+    jobject obj_File = env->CallObjectMethod(g_App->activity->clazz, mid, NULL);
+    jclass cls_File = env->FindClass("java/io/File");
+    jmethodID mid_getPath = env->GetMethodID(cls_File, "getPath", "()Ljava/lang/String;");
+    jstring obj_Path = (jstring) env->CallObjectMethod(obj_File, mid_getPath);
+    const char* path = env->GetStringUTFChars(obj_Path, NULL);
+    env->ReleaseStringUTFChars(obj_Path, path);
+
+    g_App->activity->vm->DetachCurrentThread();
+    return path;
 }

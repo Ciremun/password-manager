@@ -11,10 +11,13 @@
 static uint8_t aes_key[32] = {0};
 static bool password_entered = false;
 static ImVector<String> passwords;
+static char android_storage_path[1024] = {0};
 
 String sync_remote_url;
 
 extern const char* data_store;
+
+const char* AndroidGetExternalFilesDir();
 
 void ui_update()
 {
@@ -36,7 +39,14 @@ void ui_update()
         ImGui::PopStyleVar();
         if (!password_entered)
             return;
+#ifdef __ANDROID__
+        stbsp_snprintf(android_storage_path, 1024, "%s/" DEFAULT_DATA_STORE, AndroidGetExternalFilesDir());
+        data_store = android_storage_path;
+#else
         data_store = DEFAULT_DATA_STORE;
+#endif // __ANDROID__
+        char test_str[14] = "test password";
+        ui_encrypt_and_append((String) { .data = (uint8_t *)test_str, .length = 13 }, aes_key);
         passwords.reserve(256);
         ui_load_passwords(aes_key, passwords);
     }
