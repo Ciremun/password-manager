@@ -23,7 +23,7 @@ PACKAGENAME?=org.ciremun.$(APPNAME)
 #We've tested it with android version 22, 24, 28, 29 and 30.
 #You can target something like Android 28, but if you set ANDROIDVERSION to say 22, then
 #Your app should (though not necessarily) support all the way back to Android 22. 
-ANDROIDVERSION?=24
+ANDROIDVERSION?=29
 ANDROIDTARGET?=$(ANDROIDVERSION)
 #Default is to be strip down, but your app can override it.
 CFLAGS?=-ffunction-sections -Os -fdata-sections -Wall -fvisibility=hidden
@@ -80,7 +80,7 @@ CFLAGS+= -DIMGUI_USE_STB_SPRINTF -DIMGUI_DEFINE_MATH_OPERATORS
 ifeq (ANDROID_FULLSCREEN,y)
 CFLAGS += -DANDROID_FULLSCREEN
 endif
-CFLAGS+= -I../../include -I../imgui -I../imgui/backends -I$(NDK)/sysroot/usr/include -I$(NDK)/sysroot/usr/include/android -I$(NDK)/toolchains/llvm/prebuilt/$(OS_NAME)/sysroot/usr/include/android -I$(NDK)/sources/android/native_app_glue -fPIC -DANDROIDVERSION=$(ANDROIDVERSION)
+CFLAGS+= -I../../../include -I../imgui -I../imgui/backends -I$(NDK)/sysroot/usr/include -I$(NDK)/sysroot/usr/include/android -I$(NDK)/toolchains/llvm/prebuilt/$(OS_NAME)/sysroot/usr/include/android -I$(NDK)/sources/android/native_app_glue -fPIC -DANDROIDVERSION=$(ANDROIDVERSION)
 LDFLAGS += -lm -lGLESv3 -lEGL -landroid -llog -lstdc++
 LDFLAGS += -shared -uANativeActivity_onCreate
 
