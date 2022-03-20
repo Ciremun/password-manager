@@ -24,7 +24,7 @@ OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
-CXXFLAGS = -I../include -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
+CXXFLAGS = -I../../include -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
 CXXFLAGS += -DIMGUI_USE_STB_SPRINTF -DIMGUI_DEFINE_MATH_OPERATORS
 CXXFLAGS += -g -Wall -Wformat
 LIBS =

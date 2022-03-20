@@ -15,7 +15,7 @@
 
 CC = emcc
 CXX = em++
-WEB_DIR = web
+WEB_DIR = ../../../docs
 EXE = $(WEB_DIR)/index.html
 IMGUI_DIR = ../imgui
 PM_CONSOLE_DIR = ../../console
@@ -58,7 +58,7 @@ endif
 ## FINAL BUILD FLAGS
 ##---------------------------------------------------------------------
 
-CPPFLAGS += -I../../include -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
+CPPFLAGS += -I../../../include -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
 #CPPFLAGS += -g
 CPPFLAGS += -Wall -Wformat -Os $(EMS)
 LDFLAGS += --shell-file shell_minimal.html $(EMS)
