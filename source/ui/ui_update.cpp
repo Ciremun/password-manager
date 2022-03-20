@@ -11,7 +11,6 @@
 static uint8_t aes_key[32] = {0};
 static bool password_entered = false;
 static ImVector<String> passwords;
-static char android_storage_path[1024] = {0};
 
 String sync_remote_url;
 
@@ -40,6 +39,7 @@ void ui_update()
         if (!password_entered)
             return;
 #ifdef __ANDROID__
+        static char android_storage_path[1024] = {0};
         stbsp_snprintf(android_storage_path, 1024, "%s/" DEFAULT_DATA_STORE, AndroidGetExternalFilesDir());
         data_store = android_storage_path;
 #else
