@@ -1,1 +1,1 @@
-([ -f ./nobuild ] || cc source/nobuild.c -onobuild) && ./nobuild $@
+cc -DNDEBUG -O3 -g0 source/console/*.c -Isource/include -opm
