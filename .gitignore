@@ -9,3 +9,4 @@ emsdk/
 *idsig
 makecapk/
 *.keystore
+test_console
