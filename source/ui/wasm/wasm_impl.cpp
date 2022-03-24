@@ -17,6 +17,25 @@
 
 #include "ui/update.hpp"
 
+// https://github.com/pthom/imgui_manual/blob/master/src/JsClipboardTricks.cpp
+EM_JS(void, sapp_js_write_clipboard, (const char* c_str), {
+    var str = UTF8ToString(c_str);
+    var ta = document.createElement('textarea');
+    ta.setAttribute('autocomplete', 'off');
+    ta.setAttribute('autocorrect', 'off');
+    ta.setAttribute('autocapitalize', 'off');
+    ta.setAttribute('spellcheck', 'false');
+    ta.style.left = -100 + 'px';
+    ta.style.top = -100 + 'px';
+    ta.style.height = 1;
+    ta.style.width = 1;
+    ta.value = str;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+});
+
 // Emscripten requires to have full control over the main loop. We're going to store our SDL book-keeping variables globally.
 // Having a single function that acts as a loop prevents us to store state in the stack of said function. So we need some location for this.
 SDL_Window*     g_Window = NULL;
@@ -118,10 +137,30 @@ static void main_loop(void* arg)
     // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
     // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
     // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+
+    static int lctrl = 0;
+    static int should_set_clipboard_data = 0;
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
+        switch (event.type)
+        {
+            case SDL_KEYDOWN:
+            {
+                if (event.key.keysym.sym == SDLK_LCTRL)
+                    lctrl = 1;
+                if (event.key.keysym.sym == SDLK_c && lctrl)
+                    should_set_clipboard_data = 1;
+            } break;
+            case SDL_KEYUP:
+            {
+                if (event.key.keysym.sym == SDLK_LCTRL)
+                    lctrl = 0;
+            } break;
+            default:
+                break;
+        }
         // Capture events here, based on io.WantCaptureMouse and io.WantCaptureKeyboard
     }
 
@@ -131,6 +170,12 @@ static void main_loop(void* arg)
     ImGui::NewFrame();
 
     ui_update();
+
+    if (should_set_clipboard_data)
+    {
+        sapp_js_write_clipboard(ImGui::GetClipboardText());
+        should_set_clipboard_data = 0;
+    }
 
     // Rendering
     ImGui::Render();
