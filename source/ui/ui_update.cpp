@@ -8,9 +8,9 @@
 #include "ui/update.hpp"
 #include "ui/xcrypt.hpp"
 
-static uint8_t aes_key[32] = {0};
-static bool password_entered = false;
-static ImVector<String> passwords;
+uint8_t aes_key[32] = {0};
+bool password_entered = false;
+ImVector<String> passwords;
 
 String sync_remote_url;
 
