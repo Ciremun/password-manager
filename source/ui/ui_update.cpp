@@ -1,16 +1,21 @@
+#include <string>
+
 #include <stdint.h>
 
 #include "stb_sprintf.h"
 #include "imgui_internal.h"
+#include "imgui_stdlib.h"
 
 #include "console/util.h"
 #include "console/io.h"
+#include "console/b64.h"
+#include "console/xcrypt.h"
 #include "ui/update.hpp"
 #include "ui/xcrypt.hpp"
 
 uint8_t aes_key[32] = {0};
 bool password_entered = false;
-ImVector<String> passwords;
+ImVector<std::string *> passwords;
 
 String sync_remote_url;
 
@@ -45,8 +50,8 @@ void ui_update()
 #else
         data_store = DEFAULT_DATA_STORE;
 #endif // __ANDROID__
-        char test_str[14] = "test password";
-        ui_encrypt_and_append((String) { .data = (uint8_t *)test_str, .length = 13 }, aes_key);
+        char test_str[] = "Sadge";
+        ui_encrypt_and_append((String) { .data = (uint8_t *)test_str, .length = sizeof(test_str) - 1 }, aes_key);
         passwords.reserve(256);
         ui_load_passwords(aes_key, passwords);
     }
@@ -56,9 +61,29 @@ void ui_update()
     ImGui::Begin("##io", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         for (int i = 0; i < passwords.size(); ++i)
         {
-            const auto &password = passwords[i];
+            std::string *password = passwords[i];
             ImGui::PushID(i);
-            ImGui::InputText("", (char *)password.data, password.length + 1);
+            if (ImGui::InputText("", password, ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                if (password->empty())
+                {
+                    passwords.find_erase(password);
+                    free(password);
+                }
+                std::string encrypted_passwords;
+                for (auto &pw : passwords)
+                {
+                    uint8_t *c_str = (uint8_t *)pw->c_str();
+                    size_t pw_len = pw->length();
+                    xcrypt_buffer(c_str, aes_key, pw_len);
+                    char *enc_pw = b64_encode(c_str, pw_len, 0);
+                    encrypted_passwords += enc_pw;
+                    encrypted_passwords += '\n';
+                    free(enc_pw);
+                    xcrypt_buffer(c_str, aes_key, pw_len);
+                }
+                ui_write_encrypted_passwords(encrypted_passwords);
+            }
             ImGui::PopID();
         }
     ImGui::End();

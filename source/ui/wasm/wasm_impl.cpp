@@ -17,8 +17,13 @@
 
 #include "ui/update.hpp"
 
+EM_JS(void, setup_localstorage, (void), {
+    if (localStorage.passwords === undefined)
+        localStorage.passwords = '';
+});
+
 // https://github.com/pthom/imgui_manual/blob/master/src/JsClipboardTricks.cpp
-EM_JS(void, sapp_js_write_clipboard, (const char* c_str), {
+EM_JS(void, js_write_clipboard, (const char* c_str), {
     var str = UTF8ToString(c_str);
     var ta = document.createElement('textarea');
     ta.setAttribute('autocomplete', 'off');
@@ -35,6 +40,11 @@ EM_JS(void, sapp_js_write_clipboard, (const char* c_str), {
     document.execCommand('copy');
     document.body.removeChild(ta);
 });
+
+void write_clipboard(const char* c_str)
+{
+    js_write_clipboard(c_str);
+}
 
 // Emscripten requires to have full control over the main loop. We're going to store our SDL book-keeping variables globally.
 // Having a single function that acts as a loop prevents us to store state in the stack of said function. So we need some location for this.
@@ -70,7 +80,7 @@ int main(int, char**)
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    g_Window = SDL_CreateWindow("Dear ImGui Emscripten example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    g_Window = SDL_CreateWindow("password-manager", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     g_GLContext = SDL_GL_CreateContext(g_Window);
     if (!g_GLContext)
     {
@@ -119,6 +129,8 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("fonts/ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 #endif
+
+    setup_localstorage();
 
     // This function call won't return, and will engage in an infinite loop, processing events from the browser, and dispatching them.
     emscripten_set_main_loop_arg(main_loop, NULL, 0, true);
@@ -173,7 +185,7 @@ static void main_loop(void* arg)
 
     if (should_set_clipboard_data)
     {
-        sapp_js_write_clipboard(ImGui::GetClipboardText());
+        write_clipboard(ImGui::GetClipboardText());
         should_set_clipboard_data = 0;
     }
 

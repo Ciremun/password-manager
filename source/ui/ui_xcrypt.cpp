@@ -12,6 +12,15 @@
 extern String sync_remote_url;
 extern char *data_store;
 
+void ui_write_encrypted_passwords(std::string const &str)
+{
+    File f = create_file(data_store, PM_READ_WRITE);
+    TRUNCATE_FILE(&f, str.length());
+    MAP_FILE_(&f);
+    memcpy(f.start, str.c_str(), str.length());
+    UNMAP_AND_CLOSE_FILE(f);
+}
+
 void ui_encrypt_and_append(String s, uint8_t *aes_key)
 {
     File f = create_file(data_store, PM_READ_WRITE);
@@ -28,9 +37,8 @@ void ui_encrypt_and_append(String s, uint8_t *aes_key)
     upload_changes(sync_remote_url);
 }
 
-void ui_load_passwords(uint8_t *aes_key, ImVector<String> &passwords)
+void ui_load_passwords(uint8_t *aes_key, ImVector<std::string *> &passwords)
 {
-    // pull_changes(sync_remote_url);
     File f = open_file(data_store, PM_READ_ONLY);
 
     if (f.size == 0)
@@ -42,20 +50,7 @@ void ui_load_passwords(uint8_t *aes_key, ImVector<String> &passwords)
     else
         MAP_FILE_(&f);
 
-    // input_key(aes_key);
-
     int found_label = 0;
-    // if (fl->binary.exists)
-    // {
-    //     uint8_t *file_copy = calloc(1, f.size);
-    //     ASSERT_ALLOC(file_copy);
-    //     memcpy(file_copy, f.start, f.size);
-    //     xcrypt_buffer(file_copy, aes_key, f.size);
-    //     // output to screen here
-    //     free(file_copy);
-    //     goto end;
-    // }
-
     size_t line_start = 0;
     size_t line_end = 0;
     do
@@ -64,34 +59,15 @@ void ui_load_passwords(uint8_t *aes_key, ImVector<String> &passwords)
         {
             size_t b64_decoded_len;
             uint8_t *b64_decoded_str = b64_decode(f.start + line_start, line_end - line_start, &b64_decoded_len);
-            xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
-            // if (fl->label.exists)
-            // {
-            //     if ((find_label_len + 1 >= b64_decoded_len) ||
-            //         (memcmp(b64_decoded_str, fl->label.value, find_label_len) != 0))
-            //         goto skip_write;
-            //     size_t label_len = 0;
-            //     while (b64_decoded_str[++label_len] != ' ')
-            //         if (label_len > b64_decoded_len)
-            //             goto skip_write;
-            //     found_label = 1;
-            //     if (fl->copy.exists)
-            //     {
-            //         if (!copy_to_clipboard(b64_decoded_str + label_len + 1, b64_decoded_len - label_len))
-            //             error("%s", "couldn't copy to clipboard");
-            //         free(b64_decoded_str);
-            //         goto end;
-            //     }
-            // }
-
-            passwords.push_back({ b64_decoded_str, b64_decoded_len });
+            xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);    
+            std::string *decoded_password = new std::string((const char *)b64_decoded_str);
+            passwords.push_back(decoded_password);
+            free(b64_decoded_str);
         skip_write:
             line_start = line_end + 1;
         }
         line_end++;
     } while (line_end < f.size);
 end:
-    // if (fl->label.exists && !found_label)
-    //     info("%s", "no results");
     UNMAP_AND_CLOSE_FILE(f);
 }
