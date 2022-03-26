@@ -73,14 +73,14 @@ void ui_update()
                 std::string encrypted_passwords;
                 for (auto &pw : passwords)
                 {
-                    uint8_t *c_str = (uint8_t *)pw->c_str();
-                    size_t pw_len = pw->length();
-                    xcrypt_buffer(c_str, aes_key, pw_len);
-                    char *enc_pw = b64_encode(c_str, pw_len, 0);
+                    uint8_t *pw_copy = (uint8_t *)malloc(pw->length());
+                    memcpy(pw_copy, pw->c_str(), pw->length());
+                    xcrypt_buffer(pw_copy, aes_key, pw->length());
+                    char *enc_pw = b64_encode(pw_copy, pw->length(), 0);
                     encrypted_passwords += enc_pw;
                     encrypted_passwords += '\n';
                     free(enc_pw);
-                    xcrypt_buffer(c_str, aes_key, pw_len);
+                    free(pw_copy);
                 }
                 ui_write_encrypted_passwords(encrypted_passwords);
             }
