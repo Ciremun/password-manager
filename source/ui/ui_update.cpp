@@ -36,10 +36,9 @@ void write_clipboard(const char* c_str)
 void ui_update()
 {
     static double last_input_time = 0.0;
-
+    ImGuiIO& io = ImGui::GetIO();
     if (!password_entered)
     {
-        ImGuiIO& io = ImGui::GetIO();
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 #ifdef __ANDROID__
         ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, 240.0f), ImGuiCond_Always);
@@ -85,12 +84,34 @@ void ui_update()
                 passwords.push_back(new std::string());
             ImGui::SameLine();
             if (ImGui::Button("Clear"))
+                ImGui::OpenPopup("Clear?");
+            if (ImGui::BeginPopupModal("Clear?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
             {
-                for (auto &pw : passwords)
-                    free(pw);
-                passwords.clear();
-                last_input_time = ImGui::GetTime();
-                last_active_item = -1;
+                ImGui::PushTextWrapPos(io.DisplaySize.x);
+                ImGui::TextWrapped("All passwords will be deleted.\nThis operation cannot be undone!\n\n");
+                ImGui::PopTextWrapPos();
+#ifdef __ANDROID__
+                if (ImGui::Button("OK"))
+#else
+                if (ImGui::Button("OK", ImVec2(120.0f, 0.0f)))
+#endif // __ANDROID__
+                {
+                    for (auto &pw : passwords)
+                        free(pw);
+                    passwords.clear();
+                    last_input_time = ImGui::GetTime();
+                    last_active_item = -1;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+#ifdef __ANDROID__
+                if (ImGui::Button("Cancel"))
+#else
+                if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f)))
+#endif // __ANDROID__
+                    ImGui::CloseCurrentPopup();
+                ImGui::EndPopup();
             }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             static std::string search_bar_str;
