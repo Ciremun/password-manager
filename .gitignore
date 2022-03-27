@@ -1,0 +1,12 @@
+*.o
+.pm_data
+pm
+*.exe
+emsdk/
+.vscode/
+*.xml
+*.apk
+*idsig
+makecapk/
+*.keystore
+test_console
