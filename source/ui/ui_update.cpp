@@ -13,6 +13,10 @@
 #include "ui/update.hpp"
 #include "ui/xcrypt.hpp"
 
+#ifdef __ANDROID__
+const char* AndroidGetExternalFilesDir();
+#endif // __ANDROID__
+
 uint8_t aes_key[32] = {0};
 bool password_entered = false;
 ImVector<std::string *> passwords;
@@ -21,10 +25,10 @@ String sync_remote_url;
 
 extern const char* data_store;
 
-const char* AndroidGetExternalFilesDir();
-
 void ui_update()
 {
+    static double last_input_time = 0.0;
+
     if (!password_entered)
     {
         ImGuiIO& io = ImGui::GetIO();
@@ -59,33 +63,59 @@ void ui_update()
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::Begin("##io", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        for (int i = 0; i < passwords.size(); ++i)
+    if (ImGui::BeginTabBar("##tab_bar", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton))
+    {
+        if (ImGui::BeginTabItem("passwords"))
         {
-            std::string *password = passwords[i];
-            ImGui::PushID(i);
-            if (ImGui::InputText("", password, ImGuiInputTextFlags_EnterReturnsTrue))
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            static std::string search_bar_str;
+            ImGui::InputTextWithHint("##search", "Search", &search_bar_str);
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            for (int i = 0; i < passwords.size(); ++i)
             {
-                if (password->empty())
+                std::string *password = passwords[i];
+                if (!search_bar_str.empty() && !(password->rfind(search_bar_str, 0) == 0))
+                    continue;
+                ImGui::PushID(i);
+                if (ImGui::InputText("", password))
+                    last_input_time = ImGui::GetTime();
+                if (ImGui::IsItemFocused() && (ImGui::IsKeyPressedMap(ImGuiKey_Enter) || ImGui::IsKeyPressedMap(ImGuiKey_KeyPadEnter)))
                 {
-                    passwords.find_erase(password);
-                    free(password);
+                    if (password->empty())
+                    {
+                        passwords.find_erase(password);
+                        free(password);
+                        last_input_time = ImGui::GetTime();
+                    }
                 }
-                std::string encrypted_passwords;
-                for (auto &pw : passwords)
-                {
-                    uint8_t *pw_copy = (uint8_t *)malloc(pw->length());
-                    memcpy(pw_copy, pw->c_str(), pw->length());
-                    xcrypt_buffer(pw_copy, aes_key, pw->length());
-                    char *enc_pw = b64_encode(pw_copy, pw->length(), 0);
-                    encrypted_passwords += enc_pw;
-                    encrypted_passwords += '\n';
-                    free(enc_pw);
-                    free(pw_copy);
-                }
-                ui_write_encrypted_passwords(encrypted_passwords);
+                ImGui::PopID();
             }
-            ImGui::PopID();
+            ImGui::EndTabItem();
         }
+        ImGui::EndTabBar();
+    }
     ImGui::End();
     ImGui::PopStyleVar();
+
+    if (last_input_time)
+    {
+        double sec_since_input_end = ImGui::GetTime() - last_input_time;
+        if (sec_since_input_end > 0.5)
+        {
+            std::string encrypted_passwords;
+            for (auto &pw : passwords)
+            {
+                uint8_t *pw_copy = (uint8_t *)malloc(pw->length());
+                memcpy(pw_copy, pw->c_str(), pw->length());
+                xcrypt_buffer(pw_copy, aes_key, pw->length());
+                char *enc_pw = b64_encode(pw_copy, pw->length(), 0);
+                encrypted_passwords += enc_pw;
+                encrypted_passwords += '\n';
+                free(enc_pw);
+                free(pw_copy);
+            }
+            ui_write_encrypted_passwords(encrypted_passwords);
+            last_input_time = 0.0;
+        }
+    }
 }
