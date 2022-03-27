@@ -29,6 +29,7 @@ jobs:
         run: |
           ls -la
           export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+          chmod +x *.sh
           cov-build --dir cov-int ./build_console.sh
 
       - name: Submit the result to Coverity Scan
