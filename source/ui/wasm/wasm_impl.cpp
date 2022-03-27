@@ -17,6 +17,30 @@
 
 #include "ui/update.hpp"
 
+// static bool mobile = false;
+
+// EM_JS(void, hide_keyboard, (void), {
+//     const fake_input = document.getElementById('fake_input');
+//     if (fake_input) fake_input.remove();
+// });
+
+// EM_JS(void, show_keyboard, (void), {
+//     const input = document.createElement('input');
+//     input.type = 'text';
+//     input.id = 'fake_input';
+//     document.body.appendChild(input);
+//     input.focus();
+//     input.style.position = 'absolute';
+//     input.style.top = 0;
+//     input.style.left = 0;
+//     input.style.opacity = 0;
+//     input.addEventListener('input', function(e){ ccall('SDL_SendKeyboardKey', 'void', ['string'], [pasted_str]); });
+// });
+
+// EM_JS(bool, is_mobile, (void), {
+//     return navigator.userAgentData.mobile;
+// });
+
 EM_JS(void, setup_localstorage, (void), {
     if (localStorage.passwords === undefined)
         localStorage.passwords = '';
@@ -130,6 +154,7 @@ int main(int, char**)
     //IM_ASSERT(font != NULL);
 #endif
 
+    // mobile = is_mobile();
     setup_localstorage();
 
     // This function call won't return, and will engage in an infinite loop, processing events from the browser, and dispatching them.
@@ -180,6 +205,16 @@ static void main_loop(void* arg)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
+
+    // if (mobile)
+    // {
+    //     static bool prev_want_capture_keyboard = false;
+    //     if (io.WantCaptureKeyboard  && !prev_want_capture_keyboard)
+    //         show_keyboard();
+    //     if (!io.WantCaptureKeyboard && prev_want_capture_keyboard)
+    //         hide_keyboard();
+    //     prev_want_capture_keyboard = io.WantCaptureKeyboard;
+    // }
 
     ui_update();
 

@@ -16,6 +16,11 @@ void ui_write_encrypted_passwords(std::string const &str)
 {
     File f = create_file(data_store, PM_READ_WRITE);
     TRUNCATE_FILE(&f, str.length());
+    if (str.empty())
+    {
+        CLOSE_FILE(f.handle);
+        return;
+    }
     MAP_FILE_(&f);
     memcpy(f.start, str.c_str(), str.length());
     UNMAP_AND_CLOSE_FILE(f);

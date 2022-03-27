@@ -97,7 +97,7 @@ void init(struct android_app* app)
     // FIXME: Put some effort into DPI awareness.
     // Important: when calling AddFontFromMemoryTTF(), ownership of font_data is transfered by Dear ImGui by default (deleted is handled by Dear ImGui), unless we set FontDataOwnedByAtlas=false in ImFontConfig
     ImFontConfig font_cfg;
-    font_cfg.SizePixels = 22.0f;
+    font_cfg.SizePixels = 65.0f;
     io.Fonts->AddFontDefault(&font_cfg);
     //void* font_data;
     //int font_data_size;
@@ -120,7 +120,7 @@ void init(struct android_app* app)
 
     // Arbitrary scale-up
     // FIXME: Put some effort into DPI awareness
-    ImGui::GetStyle().ScaleAllSizes(4.0f);
+    ImGui::GetStyle().ScaleAllSizes(5.0f);
 
     g_Initialized = true;
 }
