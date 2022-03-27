@@ -21,7 +21,7 @@ void exit_test_case(int exit_code);
 #define exit exit_test_case
 #define error(fmt, ...)
 #define info(fmt, ...)
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) and defined(PM_UI)
 #include <android/log.h>
 #define error(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, "ImGuiExample", "error: " fmt "\n", __VA_ARGS__)
 #define info(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "ImGuiExample", "info: " fmt "\n", __VA_ARGS__)
