@@ -82,37 +82,6 @@ void ui_update()
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             if (ImGui::Button("New Password"))
                 passwords.push_back(new std::string());
-            ImGui::SameLine();
-            if (ImGui::Button("Clear"))
-                ImGui::OpenPopup("Clear?");
-            if (ImGui::BeginPopupModal("Clear?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-            {
-                ImGui::PushTextWrapPos(io.DisplaySize.x);
-                ImGui::TextWrapped("All passwords will be deleted.\nThis operation cannot be undone!\n\n");
-                ImGui::PopTextWrapPos();
-#ifdef __ANDROID__
-                if (ImGui::Button("OK", ImVec2(240.0f, 0.0f)))
-#else
-                if (ImGui::Button("OK", ImVec2(120.0f, 0.0f)))
-#endif // __ANDROID__
-                {
-                    for (auto &pw : passwords)
-                        free(pw);
-                    passwords.clear();
-                    last_input_time = ImGui::GetTime();
-                    // last_active_item = -1;
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::SetItemDefaultFocus();
-                ImGui::SameLine();
-#ifdef __ANDROID__
-                if (ImGui::Button("Cancel", ImVec2(240.0f, 0.0f)))
-#else
-                if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f)))
-#endif // __ANDROID__
-                    ImGui::CloseCurrentPopup();
-                ImGui::EndPopup();
-            }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             static std::string search_bar_str;
             ImGui::InputTextWithHint("##search", "Search", &search_bar_str);
@@ -147,6 +116,38 @@ void ui_update()
                 ImGui::PopID();
             }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("settings"))
+        {
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            if (ImGui::Button("Clear Passwords"))
+                ImGui::OpenPopup("Clear?");
+            if (ImGui::BeginPopupModal("Clear?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::PushTextWrapPos(io.DisplaySize.x);
+                ImGui::TextWrapped("All passwords will be deleted.\nThis operation cannot be undone!\n\n");
+                ImGui::PopTextWrapPos();
+            #ifdef __ANDROID__
+                #define MODAL_BUTTON_SIZE ImVec2(240.0f, 0.0f)
+            #else
+                #define MODAL_BUTTON_SIZE ImVec2(120.0f, 0.0f)
+            #endif // __ANDROID__
+                if (ImGui::Button("OK", MODAL_BUTTON_SIZE))
+                {
+                    for (auto &pw : passwords)
+                        free(pw);
+                    passwords.clear();
+                    last_input_time = ImGui::GetTime();
+                    // last_active_item = -1;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", MODAL_BUTTON_SIZE))
+                    ImGui::CloseCurrentPopup();
+                ImGui::EndPopup();
+            }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
