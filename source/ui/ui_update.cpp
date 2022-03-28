@@ -91,7 +91,7 @@ void ui_update()
                 ImGui::TextWrapped("All passwords will be deleted.\nThis operation cannot be undone!\n\n");
                 ImGui::PopTextWrapPos();
 #ifdef __ANDROID__
-                if (ImGui::Button("OK"))
+                if (ImGui::Button("OK", ImVec2(240.0f, 0.0f)))
 #else
                 if (ImGui::Button("OK", ImVec2(120.0f, 0.0f)))
 #endif // __ANDROID__
@@ -106,7 +106,7 @@ void ui_update()
                 ImGui::SetItemDefaultFocus();
                 ImGui::SameLine();
 #ifdef __ANDROID__
-                if (ImGui::Button("Cancel"))
+                if (ImGui::Button("Cancel", ImVec2(240.0f, 0.0f)))
 #else
                 if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f)))
 #endif // __ANDROID__
