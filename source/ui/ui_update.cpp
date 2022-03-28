@@ -76,7 +76,7 @@ void ui_update()
     ImGui::Begin("##io", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
     if (ImGui::BeginTabBar("##tab_bar", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton))
     {
-        static int last_active_item = -1;
+        // static int last_active_item = -1;
         if (ImGui::BeginTabItem("passwords"))
         {
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
@@ -100,7 +100,7 @@ void ui_update()
                         free(pw);
                     passwords.clear();
                     last_input_time = ImGui::GetTime();
-                    last_active_item = -1;
+                    // last_active_item = -1;
                     ImGui::CloseCurrentPopup();
                 }
                 ImGui::SetItemDefaultFocus();
@@ -134,13 +134,16 @@ void ui_update()
                         last_input_time = ImGui::GetTime();
                     }
                 }
-                if (ImGui::IsItemActive() || last_active_item == i)
-                {
-                    last_active_item = i;
-                    ImGui::SameLine();
-                    if (ImGui::Button("Copy"))
-                        write_clipboard(password->c_str());
-                }
+                //
+                // Mobile-only copy button
+                //
+                // if (ImGui::IsItemActive() || last_active_item == i)
+                // {
+                //     last_active_item = i;
+                //     ImGui::SameLine();
+                //     if (ImGui::Button("Copy"))
+                //         write_clipboard(password->c_str());
+                // }
                 ImGui::PopID();
             }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
