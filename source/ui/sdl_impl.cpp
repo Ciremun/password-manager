@@ -15,6 +15,7 @@
 #endif
 
 #include "ui/update.hpp"
+#include "ui/font.hpp"
 
 // Main code
 int main(int, char**)
@@ -78,9 +79,7 @@ int main(int, char**)
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImFontConfig font_cfg;
-    font_cfg.SizePixels = 22.0f;
-    io.Fonts->AddFontDefault(&font_cfg);
+    io.Fonts->AddFontFromMemoryCompressedBase85TTF(basis33xProggyClean_compressed_data_base85, 22.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
