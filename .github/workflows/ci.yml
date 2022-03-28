@@ -135,4 +135,4 @@ jobs:
         with:
           name: pm-win-msvc
           path: |
-            pm*
+            pm.exe
