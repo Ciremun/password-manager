@@ -33,7 +33,7 @@
 // Android data
 static double                                   g_Time = 0.0;
 static ANativeWindow*                           g_Window;
-static char                                     g_LogTag[] = "ImGuiExample";
+static char                                     g_LogTag[] = "password-manager";
 static std::map<int32_t, std::queue<int32_t>>   g_KeyEventQueues; // FIXME: Remove dependency on map and queue once we use upcoming input queue.
 
 int32_t ImGui_ImplAndroid_HandleInputEvent(AInputEvent* input_event)

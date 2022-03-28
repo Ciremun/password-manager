@@ -4,10 +4,8 @@
 all : makecapk.apk
 
 PM_CONSOLE_DIR = ../../console
-UI_DIR = ../
 SRC?=android_impl.cpp
-SRC+=$(UI_DIR)/ui_update.cpp $(UI_DIR)/ui_xcrypt.cpp
-SRC+=$(UI_DIR)/ui_update.cpp $(UI_DIR)/ui_xcrypt.cpp
+SRC+=../ui_update.cpp ../ui_xcrypt.cpp
 SRC+=$(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c
 SRC+=../imgui/*.cpp ../imgui/backends/imgui_impl_android.cpp ../imgui/backends/imgui_impl_opengl3.cpp
 
@@ -15,7 +13,7 @@ SRC+=../imgui/*.cpp ../imgui/backends/imgui_impl_android.cpp ../imgui/backends/i
 
 # WARNING WARNING WARNING!  YOU ABSOLUTELY MUST OVERRIDE THE PROJECT NAME
 # you should also override these parameters, get your own signatre file and make your own manifest.
-APPNAME?=ImGuiAndroid
+APPNAME?=pm
 LABEL?=$(APPNAME)
 APKFILE ?= $(APPNAME).apk
 PACKAGENAME?=org.ciremun.$(APPNAME)

@@ -23,8 +23,8 @@ void exit_test_case(int exit_code);
 #define info(fmt, ...)
 #elif defined(__ANDROID__) && defined(PM_UI)
 #include <android/log.h>
-#define error(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, "ImGuiExample", "error: " fmt "\n", __VA_ARGS__)
-#define info(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "ImGuiExample", "info: " fmt "\n", __VA_ARGS__)
+#define error(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, "password-manager", "error: " fmt "\n", __VA_ARGS__)
+#define info(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "password-manager", "info: " fmt "\n", __VA_ARGS__)
 #else
 #define error(fmt, ...) fprintf(stderr, "error: " fmt "\n", __VA_ARGS__)
 #define info(fmt, ...) fprintf(stdout, "info: " fmt "\n", __VA_ARGS__)
