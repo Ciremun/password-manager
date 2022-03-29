@@ -20,6 +20,7 @@
 #include "ui/font.hpp"
 
 static bool mobile = false;
+static bool mobile_skip_keyup_event = false;
 
 extern "C" {
     void EMSCRIPTEN_KEEPALIVE soft_kb_input_callback(int keycode)
@@ -29,6 +30,12 @@ extern "C" {
         keydown_event.key.keysym.sym = keycode;
         keydown_event.key.keysym.scancode = SDL_GetScancodeFromKey(keycode);
         SDL_PushEvent(&keydown_event);
+
+        if (keydown_event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+        {
+            mobile_skip_keyup_event = true;
+            return;
+        }
 
         SDL_Event text_input_event;
         text_input_event.type = SDL_TEXTINPUT;
@@ -57,7 +64,8 @@ EM_JS(void, show_keyboard, (void), {
     input.style.top = 0;
     input.style.left = 0;
     input.style.opacity = 0;
-    input.addEventListener('input', (e) => { e.preventDefault(); ccall('soft_kb_input_callback', 'void', ['int'], [e.data.charCodeAt(0)]); e.target.value = ''; });
+    input.addEventListener('input', (e) => { ccall('soft_kb_input_callback', 'void', ['int'], [e.data.charCodeAt(0)]); e.target.value = ''; });
+    input.addEventListener('keypress', (e) => { ccall('soft_kb_input_callback', 'void', ['int'], [e.keyCode]); e.target.value = ''; });
 });
 
 EM_JS(bool, is_mobile, (void), {
@@ -198,9 +206,12 @@ static void main_loop(void* arg)
 
     static int lctrl = 0;
     static int should_set_clipboard_data = 0;
+    static bool delay_keyup_till_next_frame = false;
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
+        if (mobile && event.type == SDL_KEYUP && event.key.keysym.scancode == SDL_SCANCODE_RETURN && mobile_skip_keyup_event)
+            continue;
         ImGui_ImplSDL2_ProcessEvent(&event);
         switch (event.type)
         {
@@ -220,6 +231,17 @@ static void main_loop(void* arg)
                 break;
         }
         // Capture events here, based on io.WantCaptureMouse and io.WantCaptureKeyboard
+    }
+
+    // SDL_KEYUP event comes out of nowhere once we emit keydown, pass it to ImGui first
+    if (mobile && mobile_skip_keyup_event)
+    {
+        SDL_Event keyup_event;
+        keyup_event.type = SDL_KEYUP;
+        keyup_event.key.keysym.sym = 13;
+        keyup_event.key.keysym.scancode = (SDL_Scancode)40;
+        SDL_PushEvent(&keyup_event);
+        mobile_skip_keyup_event = false;
     }
 
     // Start the Dear ImGui frame

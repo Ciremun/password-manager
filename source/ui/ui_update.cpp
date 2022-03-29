@@ -28,7 +28,6 @@ extern const char* data_store;
 #ifndef __EMSCRIPTEN__
 void write_clipboard(const char* c_str)
 {
-    printf("set clipboard text!\n");
     ImGui::SetClipboardText(c_str);
 }
 #endif // __EMSCRIPTEN__
