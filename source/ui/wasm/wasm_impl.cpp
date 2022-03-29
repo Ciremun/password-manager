@@ -21,26 +21,47 @@
 
 static bool mobile = false;
 
+extern "C" {
+    void EMSCRIPTEN_KEEPALIVE soft_kb_input_callback(int keycode)
+    {
+        SDL_Event keydown_event;
+        keydown_event.type = SDL_KEYDOWN;
+        keydown_event.key.keysym.sym = keycode;
+        keydown_event.key.keysym.scancode = SDL_GetScancodeFromKey(keycode);
+        SDL_PushEvent(&keydown_event);
+
+        SDL_Event text_input_event;
+        text_input_event.type = SDL_TEXTINPUT;
+        text_input_event.text.text[0] = keycode;
+        SDL_PushEvent(&text_input_event);
+
+        SDL_Event keyup_event;
+        keyup_event.type = SDL_KEYUP;
+        keyup_event.key.keysym.sym = keycode;
+        keyup_event.key.keysym.scancode = SDL_GetScancodeFromKey(keycode);
+        SDL_PushEvent(&keyup_event);
+    }
+}
+
 EM_JS(void, hide_keyboard, (void), {
     const soft_kb_input = document.getElementById('soft_kb_input');
     if (soft_kb_input) soft_kb_input.remove();
 });
 
 EM_JS(void, show_keyboard, (void), {
-    const input = document.createElement('input');
-    input.type = 'text';
+    const input = document.createElement('textarea');
     input.id = 'soft_kb_input';
     document.body.appendChild(input);
     input.focus();
     input.style.position = 'absolute';
     input.style.top = 0;
     input.style.left = 0;
-    // input.style.opacity = 0;
+    input.style.opacity = 0;
+    input.addEventListener('input', (e) => { e.preventDefault(); ccall('soft_kb_input_callback', 'void', ['int'], [e.data.charCodeAt(0)]); e.target.value = ''; });
 });
 
 EM_JS(bool, is_mobile, (void), {
-    // return navigator.userAgentData.mobile;
-    return 1;
+    return navigator.userAgentData ? navigator.userAgentData.mobile : false;
 });
 
 EM_JS(void, setup_localstorage, (void), {
@@ -66,52 +87,6 @@ EM_JS(void, js_write_clipboard, (const char* c_str), {
     document.execCommand('copy');
     document.body.removeChild(ta);
 });
-
-EM_BOOL soft_kb_input_callback(int eventType, const EmscriptenKeyboardEvent *keyEvent, void *userData)
-{
-    printf("keycode: %lu\n", keyEvent->keyCode);
-    printf("scancode: %u\n", SDL_GetScancodeFromKey(keyEvent->keyCode));
-    printf("which: %lu\n", keyEvent->which);
-    // sdlevent.key.timestamp = keyEvent->timestamp;
-//     typedef struct EmscriptenKeyboardEvent {
-//   double timestamp;
-//   unsigned long location;
-//   EM_BOOL ctrlKey;
-//   EM_BOOL shiftKey;
-//   EM_BOOL altKey;
-//   EM_BOOL metaKey;
-//   EM_BOOL repeat;
-//   unsigned long charCode;
-//   unsigned long keyCode;
-//   unsigned long which;
-//   EM_UTF8 key[EM_HTML5_SHORT_STRING_LEN_BYTES];
-//   EM_UTF8 code[EM_HTML5_SHORT_STRING_LEN_BYTES];
-//   EM_UTF8 charValue[EM_HTML5_SHORT_STRING_LEN_BYTES];
-//   EM_UTF8 locale[EM_HTML5_SHORT_STRING_LEN_BYTES];
-// } EmscriptenKeyboardEvent;
-
-    // SDL_Event sdlevent;
-    // sdlevent.type = SDL_KEYDOWN;
-    // sdlevent.key.keysym.sym = SDLK_1;
-
-    ImGuiIO& io = ImGui::GetIO();
-    int key = SDL_GetScancodeFromKey(keyEvent->keyCode);
-    IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
-    io.KeysDown[key] = 1;
-    io.KeyShift = keyEvent->shiftKey;
-    io.KeyCtrl = keyEvent->ctrlKey;
-    io.KeyAlt = keyEvent->altKey;
-
-            // int key = event->key.keysym.scancode;
-            // IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
-            // io.KeysDown[key] = (event->type == SDL_KEYDOWN);
-            // io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
-            // io.KeyCtrl = ((SDL_GetModState() & KMOD_CTRL) != 0);
-            // io.KeyAlt = ((SDL_GetModState() & KMOD_ALT) != 0);
-
-    // SDL_PushEvent(&sdlevent);
-    return true;
-}
 
 void write_clipboard(const char* c_str)
 {
@@ -201,8 +176,6 @@ int main(int, char**)
 #endif
 
     mobile = is_mobile();
-    if (mobile)
-        emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, true, soft_kb_input_callback);
     setup_localstorage();
 
     // This function call won't return, and will engage in an infinite loop, processing events from the browser, and dispatching them.
@@ -233,8 +206,6 @@ static void main_loop(void* arg)
         {
             case SDL_KEYDOWN:
             {
-                printf("keycode inside loop %d\n", event.key.keysym.sym);
-                printf("scancode inside loop %d\n", event.key.keysym.scancode);
                 if (event.key.keysym.sym == SDLK_LCTRL)
                     lctrl = 1;
                 if (event.key.keysym.sym == SDLK_c && lctrl)
