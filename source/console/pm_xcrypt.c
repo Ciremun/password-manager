@@ -6,6 +6,7 @@
 #include "console/b64.h"
 #include "console/io.h"
 #include "console/sync.h"
+#include "console/thread.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
@@ -120,6 +121,14 @@ end:
     upload_changes(sync_remote_url);
 }
 
+static void xcrypt_and_write_load(thread_load_info *info)
+{
+    printf("offset: %zu\n", info->offset);
+    xcrypt_buffer(info->s.data + info->offset, info->aes_key, info->load);
+    memcpy(info->f.start + info->offset, info->s.data + info->offset, info->load);
+    printf("done writing\n");
+}
+
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 {
     if (!fl->binary.exists)
@@ -127,17 +136,43 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 
     File f = create_file(data_store, PM_READ_WRITE);
     input_key(aes_key, fl);
-    xcrypt_buffer(s.data, aes_key, s.length);
 
     if (fl->binary.exists)
     {
         TRUNCATE_FILE(&f, s.length);
         MAP_FILE_(&f);
-        memcpy(f.start, s.data, s.length);
+        thread_load_info info = calc_thread_count_and_load(s.length);
+        info.s = s;
+        info.f = f;
+        info.aes_key = aes_key;
+        if (info.remainder)
+            info.thread_count -= 1;
+        og_thread_t threads[1024];
+        int i = 0;
+        printf("string length: %zu\n", s.length);
+        for (; i < info.thread_count; ++i)
+        {
+            printf("offset in loop: %zu\n", info.offset);
+            threads[i] = OGCreateThread(xcrypt_and_write_load, &info);
+            if (!threads[i])
+                printf("error sadeg\n");
+            info.offset += info.load;
+        }
+        if (info.remainder)
+        {
+            info.load += info.remainder;
+            threads[i] = OGCreateThread(xcrypt_and_write_load, &info);
+            if (!threads[i])
+                printf("error sadeg\n");
+            info.thread_count += 1;
+        }
+        for (int i = 0; i < info.thread_count; ++i)
+            OGJoinThread(threads[i]);
         UNMAP_AND_CLOSE_FILE(f);
     }
     else
     {
+        xcrypt_buffer(s.data, aes_key, s.length);
         size_t b64_encoded_len;
         char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
         size_t initial_size = f.size;
