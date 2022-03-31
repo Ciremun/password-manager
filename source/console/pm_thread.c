@@ -9,7 +9,6 @@ thread_load_info calc_thread_count_and_load(size_t size)
     size_t load = size / thread_count;
     size_t remainder = size % thread_count;
     thread_load_info info;
-    memset(&info, 0, sizeof(thread_load_info));
     info.load = load;
     info.remainder = remainder;
     info.thread_count = thread_count;
@@ -17,10 +16,11 @@ thread_load_info calc_thread_count_and_load(size_t size)
 }
 
 #ifdef _WIN32
-og_thread_t OGCreateThread(void (routine)(thread_load_info *), void *parameter)
+og_thread_t OGCreateThread(void *(routine)(void *), void *parameter)
 {
     return (og_thread_t)CreateThread(0, 0, (LPTHREAD_START_ROUTINE)routine, parameter, 0, 0);
 }
+
 void *OGJoinThread(og_thread_t ot)
 {
     WaitForSingleObject(ot, INFINITE);

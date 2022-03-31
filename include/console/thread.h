@@ -36,17 +36,13 @@ typedef struct
 {
     size_t load;
     size_t remainder;
-    size_t offset;
-    uint8_t *aes_key;
-    String s;
-    File f;
     int thread_count;
 } thread_load_info;
 
 typedef void *og_thread_t;
 
 thread_load_info calc_thread_count_and_load(size_t size);
-og_thread_t OGCreateThread(void(routine)(thread_load_info *), void *parameter);
+og_thread_t OGCreateThread(void *(routine)(void *), void *parameter);
 void *OGJoinThread(og_thread_t ot);
 
 #endif // PM_THREAD_H_

@@ -8,12 +8,25 @@
 #include <stdio.h>
 #endif // _WIN32
 
+#include <stdint.h>
+
 #include "console/parse.h"
 #include "console/util.h"
+#include "console/thread.h"
+#include "console/io.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
+
+typedef struct
+{
+    thread_load_info tl;
+    String str;
+    File file;
+    size_t offset;
+    uint8_t *aes_key;
+} xcrypt_load_info;
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
 void decrypt_and_print(Flags *fl, uint8_t *aes_key);
