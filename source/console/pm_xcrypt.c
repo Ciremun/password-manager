@@ -6,6 +6,7 @@
 #include "console/b64.h"
 #include "console/io.h"
 #include "console/sync.h"
+#include "console/thread.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
@@ -120,6 +121,19 @@ end:
     upload_changes(sync_remote_url);
 }
 
+#if PM_THREAD_COUNT > 1
+static void* xcrypt_and_write_load(void* parameter)
+{
+    xcrypt_load_info *xl = (xcrypt_load_info *)parameter;
+    struct AES_ctx ctx;
+    AES_init_ctx_iv(&ctx, xl->aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, xl->str.data + xl->offset, xl->tl.load);
+    memcpy(xl->file.start + xl->offset, xl->str.data + xl->offset, xl->tl.load);
+    free(xl);
+    return 0;
+}
+#endif // PM_THREAD_COUNT
+
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 {
     if (!fl->binary.exists)
@@ -127,17 +141,43 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 
     File f = create_file(data_store, PM_READ_WRITE);
     input_key(aes_key, fl);
-    xcrypt_buffer(s.data, aes_key, s.length);
 
     if (fl->binary.exists)
     {
         TRUNCATE_FILE(&f, s.length);
         MAP_FILE_(&f);
+#if PM_THREAD_COUNT == 1
+        xcrypt_buffer(s.data, aes_key, s.length);
         memcpy(f.start, s.data, s.length);
+#else
+        xcrypt_load_info xl = { .tl = calc_thread_load(PM_THREAD_COUNT, s.length), .str = s, .file = f, .aes_key = aes_key, .offset = 0 };
+        og_thread_t threads[PM_THREAD_COUNT];
+        int i = 0;
+        if (xl.tl.remainder)
+            xl.tl.thread_count -= 1;
+        for (; i < xl.tl.thread_count; ++i)
+        {
+            xcrypt_load_info *xl_copy = (xcrypt_load_info *)malloc(sizeof(xcrypt_load_info));
+            memcpy(xl_copy, &xl, sizeof(xcrypt_load_info));
+            threads[i] = OGCreateThread(xcrypt_and_write_load, xl_copy);
+            xl.offset += xl.tl.load;
+        }
+        if (xl.tl.remainder)
+        {
+            xl.tl.load += xl.tl.remainder;
+            xcrypt_load_info *xl_copy = (xcrypt_load_info *)malloc(sizeof(xcrypt_load_info));
+            memcpy(xl_copy, &xl, sizeof(xcrypt_load_info));
+            threads[i] = OGCreateThread(xcrypt_and_write_load, xl_copy);
+            xl.tl.thread_count += 1;
+        }
+        for (int i = 0; i < xl.tl.thread_count; ++i)
+            OGJoinThread(threads[i]);
+#endif // PM_THREAD_COUNT
         UNMAP_AND_CLOSE_FILE(f);
     }
     else
     {
+        xcrypt_buffer(s.data, aes_key, s.length);
         size_t b64_encoded_len;
         char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
         size_t initial_size = f.size;

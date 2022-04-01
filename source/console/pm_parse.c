@@ -6,6 +6,7 @@
 #include "console/rand.h"
 #include "console/util.h"
 #include "console/xcrypt.h"
+#include "console/thread.h"
 
 #include <string.h>
 
@@ -86,6 +87,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
 #else
                 "unknown"
 #endif // PM_VERSION
+                "\nPM_THREAD_COUNT=" STR(PM_THREAD_COUNT)
         );
         return 0;
     }
@@ -164,10 +166,18 @@ int run(uint8_t *aes_key, int argc, char **argv)
             }
 
             File file = open_and_map_file(f.data_file.value, PM_READ_ONLY);
+
+            if (file.size == 0)
+            {
+                UNMAP_AND_CLOSE_FILE(file);
+                return 1;
+            }
+
             String s = {
                 .data = calloc(1, file.size + 1),
                 .length = file.size,
             };
+
             ASSERT_ALLOC(s.data);
             memcpy(s.data, file.start, file.size);
 
