@@ -26,7 +26,7 @@
 
 ## Build
 
-    sh build.sh
+    sh build_console.sh
 
 ## Examples
 
@@ -45,7 +45,7 @@
 
 ### decrypt binary
 
-	./pm -kf key.txt -i binary.enc -o binary.dec -b
+	./pm -kf key.txt -i binary.dec -df binary.enc -b
 
 ### print all passwords
 
