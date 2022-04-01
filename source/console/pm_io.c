@@ -145,7 +145,9 @@ int file_exists(const char *path)
 int truncate_file(File *f, size_t new_size)
 {
 #ifdef _WIN32
-    if (SetFilePointer(f->handle, (LONG)new_size, 0, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
+    LARGE_INTEGER li;
+    li.QuadPart = new_size;
+    if (SetFilePointer(f->handle, li.LowPart, &li.HighPart, FILE_BEGIN) == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR)
     {
         error("SetFilePointer failed (%ld)", GetLastError());
         return 0;
