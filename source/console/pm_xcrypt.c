@@ -292,19 +292,6 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     input_key(aes_key, fl);
 
     int found_label = 0;
-    if (fl->binary.exists)
-    {
-        uint8_t *file_copy = calloc(1, f.size);
-        ASSERT_ALLOC(file_copy);
-        memcpy(file_copy, f.start, f.size);
-        xcrypt_buffer(file_copy, aes_key, f.size);
-        setvbuf(o, NULL, _IONBF, 0);
-        if (fwrite(file_copy, 1, f.size, o) != f.size)
-            error("%s", "fwrite failed");
-        free(file_copy);
-        goto end;
-    }
-
     size_t find_label_len = 0;
     if (fl->label.exists)
         find_label_len = strlen(fl->label.value);
