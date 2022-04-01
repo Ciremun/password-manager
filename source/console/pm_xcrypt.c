@@ -121,13 +121,18 @@ end:
     upload_changes(sync_remote_url);
 }
 
+#if PM_THREAD_COUNT > 1
 static void* xcrypt_and_write_load(void* parameter)
 {
     xcrypt_load_info *xl = (xcrypt_load_info *)parameter;
-    printf("offset: %zu\n", xl->offset);
+    struct AES_ctx ctx;
+    AES_init_ctx_iv(&ctx, xl->aes_key, aes_iv);
+    AES_CTR_xcrypt_buffer(&ctx, xl->str.data + xl->offset, xl->tl.load);
     memcpy(xl->file.start + xl->offset, xl->str.data + xl->offset, xl->tl.load);
+    free(xl);
     return 0;
 }
+#endif // PM_THREAD_COUNT
 
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 {
@@ -136,28 +141,23 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
 
     File f = create_file(data_store, PM_READ_WRITE);
     input_key(aes_key, fl);
-    xcrypt_buffer(s.data, aes_key, s.length);
 
     if (fl->binary.exists)
     {
         TRUNCATE_FILE(&f, s.length);
         MAP_FILE_(&f);
-        thread_load_info tl = calc_thread_count_and_load(s.length);
-        xcrypt_load_info xl;
-        memset(&xl, 0, sizeof(xcrypt_load_info));
-        xl.tl = tl;
-        xl.str = s;
-        xl.file = f;
-        xl.aes_key = aes_key;
+#if PM_THREAD_COUNT == 1
+        xcrypt_buffer(s.data, aes_key, s.length);
+        memcpy(f.start, s.data, s.length);
+#else
+        xcrypt_load_info xl = { .tl = calc_thread_load(PM_THREAD_COUNT, s.length), .str = s, .file = f, .aes_key = aes_key, .offset = 0 };
+        og_thread_t threads[PM_THREAD_COUNT];
+        int i = 0;
         if (xl.tl.remainder)
             xl.tl.thread_count -= 1;
-        og_thread_t threads[1024];
-        int i = 0;
-        printf("string length: %zu\n", s.length);
         for (; i < xl.tl.thread_count; ++i)
         {
-            printf("offset in loop: %zu\n", xl.offset);
-            xcrypt_load_info *xl_copy = (xcrypt_load_info *)calloc(1, sizeof(xcrypt_load_info));
+            xcrypt_load_info *xl_copy = (xcrypt_load_info *)malloc(sizeof(xcrypt_load_info));
             memcpy(xl_copy, &xl, sizeof(xcrypt_load_info));
             threads[i] = OGCreateThread(xcrypt_and_write_load, xl_copy);
             xl.offset += xl.tl.load;
@@ -165,14 +165,14 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
         if (xl.tl.remainder)
         {
             xl.tl.load += xl.tl.remainder;
-            xcrypt_load_info *xl_copy = (xcrypt_load_info *)calloc(1, sizeof(xcrypt_load_info));
+            xcrypt_load_info *xl_copy = (xcrypt_load_info *)malloc(sizeof(xcrypt_load_info));
             memcpy(xl_copy, &xl, sizeof(xcrypt_load_info));
-            printf("offset in copy: %zu\n", xl.offset);
             threads[i] = OGCreateThread(xcrypt_and_write_load, xl_copy);
             xl.tl.thread_count += 1;
         }
         for (int i = 0; i < xl.tl.thread_count; ++i)
             OGJoinThread(threads[i]);
+#endif // PM_THREAD_COUNT
         UNMAP_AND_CLOSE_FILE(f);
     }
     else

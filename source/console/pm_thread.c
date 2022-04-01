@@ -3,9 +3,8 @@
 
 #include "console/thread.h"
 
-thread_load_info calc_thread_count_and_load(size_t size)
+thread_load_info calc_thread_load(int thread_count, size_t size)
 {
-    int thread_count = 4;
     size_t load = size / thread_count;
     size_t remainder = size % thread_count;
     thread_load_info info;

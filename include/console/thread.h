@@ -32,6 +32,14 @@
 #include "console/io.h"
 #include "console/util.h"
 
+#ifndef PM_THREAD_COUNT
+#define PM_THREAD_COUNT 32
+#endif // PM_THREAD_COUNT
+
+#if PM_THREAD_COUNT < 1
+#error "PM_THREAD_COUNT < 1"
+#endif // PM_THREAD_COUNT
+
 typedef struct
 {
     size_t load;
@@ -41,7 +49,7 @@ typedef struct
 
 typedef void *og_thread_t;
 
-thread_load_info calc_thread_count_and_load(size_t size);
+thread_load_info calc_thread_load(int thread_count, size_t size);
 og_thread_t OGCreateThread(void *(routine)(void *), void *parameter);
 void *OGJoinThread(og_thread_t ot);
 
