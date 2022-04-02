@@ -41,11 +41,11 @@
 
 ### encrypt binary
 
-	./pm -kf key.txt -i binary.enc -df binary -b
+	./pm -kf key.txt -i binary -o binary.enc -b
 
 ### decrypt binary
 
-	./pm -kf key.txt -i binary.dec -df binary.enc -b
+	./pm -kf key.txt -i binary.enc -o binary.dec -b
 
 ### print all passwords
 
