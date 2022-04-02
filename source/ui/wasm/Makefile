@@ -24,7 +24,7 @@ SOURCES += $(IMGUI_DIR)/imgui_stdlib.cpp $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/img
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
-CPPFLAGS =-DIMGUI_USE_STB_SPRINTF -DIMGUI_DEFINE_MATH_OPERATORS
+CPPFLAGS =-DIMGUI_USE_STB_SPRINTF -DIMGUI_DEFINE_MATH_OPERATORS -DPM_THREAD_COUNT=1
 LDFLAGS =
 EMS =
 

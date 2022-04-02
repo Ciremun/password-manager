@@ -26,36 +26,18 @@ void ui_write_encrypted_passwords(std::string const &str)
     UNMAP_AND_CLOSE_FILE(f);
 }
 
-void ui_encrypt_and_append(String s, uint8_t *aes_key)
-{
-    File f = create_file(data_store, PM_READ_WRITE);
-    xcrypt_buffer(s.data, aes_key, s.length);
-    size_t b64_encoded_len;
-    char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
-    size_t initial_size = f.size;
-    TRUNCATE_FILE(&f, f.size + b64_encoded_len + 1);
-    MAP_FILE_(&f);
-    memcpy(f.start + initial_size, b64_encoded_str, b64_encoded_len);
-    free(b64_encoded_str);
-    f.start[initial_size + b64_encoded_len] = '\n';
-    UNMAP_AND_CLOSE_FILE(f);
-    upload_changes(sync_remote_url);
-}
-
 void ui_load_passwords(uint8_t *aes_key, ImVector<std::string *> &passwords)
 {
-    File f = open_file(data_store, PM_READ_ONLY);
+    File f = create_file(data_store, PM_READ_ONLY);
 
     if (f.size == 0)
     {
-        error("file %s is empty", data_store);
         CLOSE_FILE(f.handle);
         return;
     }
     else
         MAP_FILE_(&f);
 
-    int found_label = 0;
     size_t line_start = 0;
     size_t line_end = 0;
     do
@@ -68,11 +50,9 @@ void ui_load_passwords(uint8_t *aes_key, ImVector<std::string *> &passwords)
             std::string *decoded_password = new std::string((const char *)b64_decoded_str);
             passwords.push_back(decoded_password);
             free(b64_decoded_str);
-        skip_write:
             line_start = line_end + 1;
         }
         line_end++;
     } while (line_end < f.size);
-end:
     UNMAP_AND_CLOSE_FILE(f);
 }

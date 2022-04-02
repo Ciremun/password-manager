@@ -38,30 +38,10 @@ void ui_write_encrypted_passwords(std::string const &str)
     js_write_encrypted_passwords((uint8_t *)str.c_str());
 }
 
-void ui_encrypt_and_append(String s, uint8_t *aes_key)
-{
-    uint8_t *encrypted_passwords = get_encrypted_passwords();
-    size_t encrypted_passwords_length = strlen((char *)encrypted_passwords);
-    xcrypt_buffer(s.data, aes_key, s.length);
-    size_t b64_encoded_len;
-    char *b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
-    uint8_t *new_str = (uint8_t *)malloc(encrypted_passwords_length + b64_encoded_len + 1);
-    memcpy(new_str, encrypted_passwords, encrypted_passwords_length);
-    memcpy(new_str + encrypted_passwords_length, b64_encoded_str, b64_encoded_len);
-    new_str[encrypted_passwords_length + b64_encoded_len] = '\n';
-    new_str[encrypted_passwords_length + b64_encoded_len + 1] = 0;
-    write_encrypted_passwords(new_str);
-    free(b64_encoded_str);
-    free(encrypted_passwords);
-    free(new_str);
-}
-
 void ui_load_passwords(uint8_t *aes_key, ImVector<std::string *> &passwords)
 {
     uint8_t *encrypted_passwords = get_encrypted_passwords();
     size_t encrypted_passwords_size = strlen((char *)encrypted_passwords) + 1;
-
-    int found_label = 0;
 
     size_t line_start = 0;
     size_t line_end = 0;
@@ -75,11 +55,9 @@ void ui_load_passwords(uint8_t *aes_key, ImVector<std::string *> &passwords)
             std::string *decoded_password = new std::string((const char *)b64_decoded_str);
             passwords.push_back(decoded_password);
             free(b64_decoded_str);
-        skip_write:
             line_start = line_end + 1;
         }
         line_end++;
     } while (line_end < encrypted_passwords_size);
-end:
     free(encrypted_passwords);
 }

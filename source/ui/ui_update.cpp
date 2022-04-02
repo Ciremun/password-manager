@@ -64,8 +64,6 @@ void ui_update()
 #else
         data_store = DEFAULT_DATA_STORE;
 #endif // __ANDROID__
-        char test_str[] = "Привет";
-        ui_encrypt_and_append((String) { .data = (uint8_t *)test_str, .length = sizeof(test_str) - 1 }, aes_key);
         passwords.reserve(256);
         ui_load_passwords(aes_key, passwords);
     }
