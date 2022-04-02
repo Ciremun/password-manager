@@ -81,9 +81,6 @@ struct Test
     void (*f)(Test *t);
 };
 
-// extern Memory g_mem;
-extern struct AES_ctx ctx;
-extern uint8_t aes_iv[];
 size_t failed_tests_count = 0;
 uint8_t aes_key[32] = {0};
 
@@ -280,7 +277,6 @@ void free_argv(Args *a)
 
 void exit_test_case(int exit_code)
 {
-    // mem_free(&g_mem);
 #ifdef _WIN32
     ExitThread(exit_code);
 #else
@@ -328,8 +324,7 @@ void test_data_flag_valid(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(lines[0], strlen(lines[0]), &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp("data", (char *)decoded_data) == 0, t);
 
@@ -368,8 +363,7 @@ void test_data_file_flag_empty_file(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp("\n", (char *)decoded_data) == 0, t);
 
@@ -393,8 +387,7 @@ void test_data_file_flag_valid(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp("test data file", (char *)decoded_data) == 0, t);
 
@@ -422,8 +415,7 @@ void test_label_flag_valid(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_DATA,
                 (char *)decoded_data) == 0,
@@ -440,8 +432,7 @@ void test_label_flag_replace(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_REPLACE_DATA,
                 (char *)decoded_data) == 0,
@@ -458,8 +449,7 @@ void test_delete_label_flag_doesnt_exist(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp(TEST_LABEL_FLAG_LABEL " " TEST_LABEL_FLAG_REPLACE_DATA,
                 (char *)decoded_data) == 0,
@@ -476,8 +466,7 @@ void test_delete_label_flag_exists(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp("", (char *)decoded_data) == 0, t);
 
@@ -514,8 +503,7 @@ void test_generate_password_flag_128_chars(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strlen((char *)decoded_data) == 128, t);
 
@@ -537,8 +525,7 @@ void test_key_flag_valid(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) == 0, t);
 
@@ -555,8 +542,7 @@ void test_key_flag_invalid(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp((char *)decoded_data, TEST_KEY_FLAG_DATA) != 0, t);
 
@@ -589,8 +575,7 @@ void test_key_file_flag_valid(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) == 0, t);
 
@@ -614,8 +599,7 @@ void test_key_file_flag_invalid(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp((char *)decoded_data, TEST_KEY_FILE_FLAG_DATA) != 0, t);
 
@@ -643,8 +627,7 @@ void test_input_flag_write_data(Test *t)
     size_t decsize = 0;
     unsigned char *decoded_data = b64_decode(data, nch, &decsize);
 
-    AES_init_ctx_iv(&ctx, t->a.key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, decoded_data, decsize);
+    xcrypt_buffer(decoded_data, t->a.key, decsize);
 
     test(strcmp((char *)decoded_data, TEST_INPUT_FLAG_DATA) == 0, t);
 
