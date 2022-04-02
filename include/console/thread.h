@@ -44,6 +44,8 @@ typedef struct
 {
     size_t load;
     size_t remainder;
+    size_t offset;
+    void *user_ctx;
     int thread_count;
 } thread_load_info;
 

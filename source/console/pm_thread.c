@@ -5,11 +5,11 @@
 
 thread_load_info calc_thread_load(int thread_count, size_t size)
 {
-    size_t load = size / thread_count;
-    size_t remainder = size % thread_count;
     thread_load_info info;
-    info.load = load;
-    info.remainder = remainder;
+    info.load = size / thread_count;
+    info.remainder = size % thread_count;
+    info.offset = 0;
+    info.user_ctx = 0;
     info.thread_count = thread_count;
     return info;
 }

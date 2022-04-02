@@ -21,12 +21,16 @@ extern "C" {
 
 typedef struct
 {
-    thread_load_info tl;
-    String str;
     File file;
-    size_t offset;
+    String str;
     uint8_t *aes_key;
-} xcrypt_load_info;
+} xcrypt_and_write_load_ctx;
+
+typedef struct
+{
+    uint8_t *str;
+    uint8_t *aes_key;
+} xcrypt_load_ctx;
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
 void decrypt_and_print(Flags *fl, uint8_t *aes_key);

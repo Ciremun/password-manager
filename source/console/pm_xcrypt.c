@@ -1,12 +1,12 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "console/xcrypt.h"
 #include "console/aes.h"
 #include "console/b64.h"
 #include "console/io.h"
 #include "console/sync.h"
 #include "console/thread.h"
+#include "console/xcrypt.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
@@ -122,14 +122,51 @@ end:
 }
 
 #if PM_THREAD_COUNT > 1
-static void* xcrypt_and_write_load(void* parameter)
+static void xcrypt_in_parallel(void *(routine)(void *), void *user_ctx, size_t size)
 {
-    xcrypt_load_info *xl = (xcrypt_load_info *)parameter;
-    struct AES_ctx ctx;
-    AES_init_ctx_iv(&ctx, xl->aes_key, aes_iv);
-    AES_CTR_xcrypt_buffer(&ctx, xl->str.data + xl->offset, xl->tl.load);
-    memcpy(xl->file.start + xl->offset, xl->str.data + xl->offset, xl->tl.load);
-    free(xl);
+    thread_load_info tl = calc_thread_load(PM_THREAD_COUNT, size);
+    tl.user_ctx = user_ctx;
+    og_thread_t threads[PM_THREAD_COUNT];
+    int i = 0;
+    if (tl.remainder)
+        tl.thread_count -= 1;
+    for (; i < tl.thread_count; ++i)
+    {
+        thread_load_info *tl_copy = (thread_load_info *)malloc(sizeof(thread_load_info));
+        memcpy(tl_copy, &tl, sizeof(thread_load_info));
+        threads[i] = OGCreateThread(routine, tl_copy);
+        tl.offset += tl.load;
+    }
+    if (tl.remainder)
+    {
+        tl.load += tl.remainder;
+        thread_load_info *tl_copy = (thread_load_info *)malloc(sizeof(thread_load_info));
+        memcpy(tl_copy, &tl, sizeof(thread_load_info));
+        threads[i] = OGCreateThread(routine, tl_copy);
+        tl.thread_count += 1;
+    }
+    for (int i = 0; i < tl.thread_count; ++i)
+        OGJoinThread(threads[i]);
+}
+
+static void *xcrypt_and_write_load(void *parameter)
+{
+    thread_load_info *tl = (thread_load_info *)parameter;
+    xcrypt_and_write_load_ctx *ctx = (xcrypt_and_write_load_ctx *)tl->user_ctx;
+    uint8_t *data_start = ctx->str.data + tl->offset;
+    xcrypt_buffer(data_start, ctx->aes_key, tl->load);
+    memcpy(ctx->file.start + tl->offset, data_start, tl->load);
+    free(tl);
+    return 0;
+}
+
+static void *xcrypt_load(void *parameter)
+{
+    thread_load_info *tl = (thread_load_info *)parameter;
+    xcrypt_load_ctx *ctx = (xcrypt_load_ctx *)tl->user_ctx;
+    uint8_t *data_start = ctx->str + tl->offset;
+    xcrypt_buffer(data_start, ctx->aes_key, tl->load);
+    free(tl);
     return 0;
 }
 #endif // PM_THREAD_COUNT
@@ -150,28 +187,8 @@ void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key)
         xcrypt_buffer(s.data, aes_key, s.length);
         memcpy(f.start, s.data, s.length);
 #else
-        xcrypt_load_info xl = { .tl = calc_thread_load(PM_THREAD_COUNT, s.length), .str = s, .file = f, .aes_key = aes_key, .offset = 0 };
-        og_thread_t threads[PM_THREAD_COUNT];
-        int i = 0;
-        if (xl.tl.remainder)
-            xl.tl.thread_count -= 1;
-        for (; i < xl.tl.thread_count; ++i)
-        {
-            xcrypt_load_info *xl_copy = (xcrypt_load_info *)malloc(sizeof(xcrypt_load_info));
-            memcpy(xl_copy, &xl, sizeof(xcrypt_load_info));
-            threads[i] = OGCreateThread(xcrypt_and_write_load, xl_copy);
-            xl.offset += xl.tl.load;
-        }
-        if (xl.tl.remainder)
-        {
-            xl.tl.load += xl.tl.remainder;
-            xcrypt_load_info *xl_copy = (xcrypt_load_info *)malloc(sizeof(xcrypt_load_info));
-            memcpy(xl_copy, &xl, sizeof(xcrypt_load_info));
-            threads[i] = OGCreateThread(xcrypt_and_write_load, xl_copy);
-            xl.tl.thread_count += 1;
-        }
-        for (int i = 0; i < xl.tl.thread_count; ++i)
-            OGJoinThread(threads[i]);
+        xcrypt_and_write_load_ctx ctx = { .file = f, .str = s, .aes_key = aes_key };
+        xcrypt_in_parallel(xcrypt_and_write_load, &ctx, s.length);
 #endif // PM_THREAD_COUNT
         UNMAP_AND_CLOSE_FILE(f);
     }
@@ -246,6 +263,7 @@ end:
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length)
 {
+    struct AES_ctx ctx;
     AES_init_ctx_iv(&ctx, aes_key, aes_iv);
     AES_CTR_xcrypt_buffer(&ctx, line, length);
 }
@@ -292,6 +310,24 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
     input_key(aes_key, fl);
 
     int found_label = 0;
+    if (fl->binary.exists)
+    {
+        uint8_t *file_copy = calloc(1, f.size);
+        ASSERT_ALLOC(file_copy);
+        memcpy(file_copy, f.start, f.size);
+#if PM_THREAD_COUNT == 1
+        xcrypt_buffer(file_copy, aes_key, f.size);
+#else
+        xcrypt_load_ctx ctx = { .str = file_copy, .aes_key = aes_key };
+        xcrypt_in_parallel(xcrypt_load, &ctx, f.size);
+#endif // PM_THREAD_COUNT
+        setvbuf(o, NULL, _IONBF, 0);
+        if (fwrite(file_copy, 1, f.size, o) != f.size)
+            error("%s", "fwrite failed");
+        free(file_copy);
+        goto end;
+    }
+
     size_t find_label_len = 0;
     if (fl->label.exists)
         find_label_len = strlen(fl->label.value);
