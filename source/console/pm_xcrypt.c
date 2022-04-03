@@ -13,6 +13,27 @@ extern uint8_t aes_iv[];
 extern String sync_remote_url;
 extern char *data_store;
 
+void b64_encrypt(Flags *fl, String s, uint8_t *aes_key)
+{
+    if (fl->key.exists || fl->key_file.exists)
+        xcrypt_buffer(s.data, aes_key, s.length);
+    size_t b64_encoded_len;
+    char* b64_encoded_str = b64_encode(s.data, s.length, &b64_encoded_len);
+    if (fwrite(b64_encoded_str, 1, b64_encoded_len, stdout) != b64_encoded_len)
+        error("%s", "fwrite failed");
+    free(b64_encoded_str);
+}
+void b64_decrypt(Flags *fl, String s, uint8_t *aes_key)
+{
+    size_t b64_decoded_len;
+    uint8_t* b64_decoded_str = b64_decode(s.data, s.length, &b64_decoded_len);
+    if (fl->key.exists || fl->key_file.exists)
+        xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
+    if (fwrite(b64_decoded_str, 1, b64_decoded_len, stdout) != b64_decoded_len)
+        error("%s", "fwrite failed");
+    free(b64_decoded_str);
+}
+
 void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key)
 {
     pull_changes(sync_remote_url);

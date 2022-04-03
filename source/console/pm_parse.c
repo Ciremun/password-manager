@@ -7,6 +7,7 @@
 #include "console/util.h"
 #include "console/xcrypt.h"
 #include "console/thread.h"
+#include "console/b64.h"
 
 #include <string.h>
 
@@ -50,6 +51,10 @@ void parse_flags(Flags *f, int argc, char **argv)
             flag = &f->output;
         else if (!f->binary.exists && is_flag(argv[i], "-b", "--binary"))
             flag = &f->binary;
+        else if (!f->b64enc.exists && is_flag(argv[i], "-b64enc", "--base64-encode"))
+            flag = &f->b64enc;
+        else if (!f->b64dec.exists && is_flag(argv[i], "-b64dec", "--base64-decode"))
+            flag = &f->b64dec;
 
         if (flag)
         {
@@ -169,6 +174,7 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
             if (file.size == 0)
             {
+                error("file %s is empty", f.data_file.value);
                 UNMAP_AND_CLOSE_FILE(file);
                 return 1;
             }
@@ -180,6 +186,18 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
             ASSERT_ALLOC(s.data);
             memcpy(s.data, file.start, file.size);
+
+            if (f.b64enc.exists)
+            {
+                b64_encrypt(&f, s, aes_key);
+                return 0;
+            }
+
+            if (f.b64dec.exists)
+            {
+                b64_decrypt(&f, s, aes_key);
+                return 0;
+            }
 
             if (f.label.exists)
                 encrypt_and_replace(&f, s, PM_STR(f.label.value), aes_key);
@@ -247,23 +265,25 @@ int run(uint8_t *aes_key, int argc, char **argv)
                                         "\n"
                                         "flags:\n"
                                         "\n"
-                                        "-d  --data                    data to encrypt\n"
-                                        "-df --data-file               data to encrypt from file\n"
-                                        "-l  --label                   label data / find by label\n"
-                                        "-dl --delete-label            delete label and its data\n"
+                                        "-d       --data                   data to encrypt\n"
+                                        "-df      --data-file              data to encrypt from file\n"
+                                        "-l       --label                  label data / find by label\n"
+                                        "-dl      --delete-label           delete label and its data\n"
 #ifdef _WIN32
-                                        "-c  --copy                    -l, -gp helper, copy to clipboard\n"
+                                        "-c       --copy                   -l, -gp helper, copy to clipboard\n"
 #else
-                                        "-c  --copy                    -l, -gp helper, pipe with clip tools\n"
+                                        "-c       --copy                   -l, -gp helper, pipe with clip tools\n"
 #endif
-                                        "-gp --generate-password [N]   put random data\n"
-                                        "-k  --key                     key\n"
-                                        "-kf --key-file                key file path\n"
-                                        "-i  --input                   encrypted file path\n"
-                                        "-o  --output                  decrypted file path\n"
-                                        "-b  --binary                  binary mode\n"
-                                        "-v  --version                 display version\n"
-                                        "-h  --help                    display help\n\n");
+                                        "-gp      --generate-password [N]  put random data\n"
+                                        "-k       --key                    key\n"
+                                        "-kf      --key-file               key file path\n"
+                                        "-i       --input                  encrypted file path\n"
+                                        "-o       --output                 decrypted file path\n"
+                                        "-b       --binary                 binary mode\n"
+                                        "-b64enc  --base64-encode          base64 encode string to stdout, optional key\n"
+                                        "-b64dec  --base64-decode          base64 decode string to stdout, optional key\n"
+                                        "-v       --version                display version\n"
+                                        "-h       --help                   display help\n\n");
                 return 0;
             }
             if (f.copy.exists)
@@ -293,6 +313,20 @@ int run(uint8_t *aes_key, int argc, char **argv)
     {
         error("%s", "can't combine data and generate-password flags");
         return 1;
+    }
+
+    if (f.b64enc.exists)
+    {
+        String str = PM_STR(f.data.value);
+        b64_encrypt(&f, str, aes_key);
+        return 0;
+    }
+
+    if (f.b64dec.exists)
+    {
+        String str = PM_STR(f.data.value);
+        b64_decrypt(&f, str, aes_key);
+        return 0;
     }
 
     if (f.label.exists)

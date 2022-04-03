@@ -28,6 +28,8 @@ typedef struct
     Flag input;
     Flag output;
     Flag binary;
+    Flag b64enc;
+    Flag b64dec;
     Flag version;
     Flag help;
 } Flags;

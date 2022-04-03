@@ -33,6 +33,8 @@ typedef struct
 } xcrypt_load_ctx;
 
 void xcrypt_buffer(uint8_t *line, uint8_t *aes_key, size_t length);
+void b64_encrypt(Flags *fl, String s, uint8_t *aes_key);
+void b64_decrypt(Flags *fl, String s, uint8_t *aes_key);
 void decrypt_and_print(Flags *fl, uint8_t *aes_key);
 void encrypt_and_write(Flags *fl, String s, uint8_t *aes_key);
 void encrypt_and_replace(Flags *fl, String s, String label, uint8_t *aes_key);

@@ -10,19 +10,21 @@
 
     flags:
 
-    -d  --data                    data to encrypt
-    -df --data-file               data to encrypt from file
-    -l  --label                   label data / find by label
-    -dl --delete-label            delete label and its data
-    -gp --generate-password [N]   put random data
-    -c  --copy                    -l, -gp helper, win32: copy to clipboard, posix: pipe with clip tools
-    -k  --key                     key
-    -kf --key-file                key file path
-    -i  --input                   encrypted file path
-    -o  --output                  decrypted file path
-    -b  --binary                  binary mode
-    -v  --version                 display version
-    -h  --help                    display help
+    -d       --data                   data to encrypt
+    -df      --data-file              data to encrypt from file
+    -l       --label                  label data / find by label
+    -dl      --delete-label           delete label and its data
+    -gp      --generate-password [N]  put random data
+    -c       --copy                   -l, -gp helper, win32: copy to clipboard, posix: pipe with clip tools
+    -k       --key                    key
+    -kf      --key-file               key file path
+    -i       --input                  encrypted file path
+    -o       --output                 decrypted file path
+    -b       --binary                 binary mode
+    -b64enc  --base64-encode          base64 encode string to stdout, optional key
+    -b64dec  --base64-decode          base64 decode string to stdout, optional key
+    -v       --version                display version
+    -h       --help                   display help
 
 ## Build
 
@@ -50,6 +52,10 @@
 ### print all passwords
 
     ./pm -kf key.txt
+
+### base64 encode string to stdout, optional key
+
+    ./pm -b64enc -d "string" [-kf key.txt]
 
 ## Thank
 
