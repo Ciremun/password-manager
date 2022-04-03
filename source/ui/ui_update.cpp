@@ -115,6 +115,36 @@ void ui_update()
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("base64"))
+        {
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            static std::string base64_encode_bar_str;
+            static std::string base64_encode_result;
+            ImGui::Text("base64 encode");
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            if (ImGui::InputTextWithHint("##base64_encode", "string to encode...", &base64_encode_bar_str))
+            {
+                char *encoeded_str = b64_encode((uint8_t *)base64_encode_bar_str.c_str(), base64_encode_bar_str.length(), 0);
+                base64_encode_result = encoeded_str;
+                free(encoeded_str);
+            }
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            ImGui::InputTextWithHint("##base64_encode_result", 0, &base64_encode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
+            ImGui::Dummy(ImVec2(0.0f, 12.0f));
+            static std::string base64_decode_bar_str;
+            static std::string base64_decode_result;
+            ImGui::Text("base64 decode");
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            if (ImGui::InputTextWithHint("##base64_decode", "string to decode...", &base64_decode_bar_str))
+            {
+                uint8_t *decoded_str = b64_decode((uint8_t *)base64_decode_bar_str.c_str(), base64_decode_bar_str.length(), 0);
+                base64_decode_result = (char *)decoded_str;
+                free(decoded_str);
+            }
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            ImGui::InputTextWithHint("##base64_decode_result", 0, &base64_decode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("settings"))
         {
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
