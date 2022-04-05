@@ -10,3 +10,4 @@ emsdk/
 makecapk/
 *.keystore
 test_console
+*.obj
