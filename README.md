@@ -4,9 +4,9 @@
 
 ## Usage
 
-    ./pm [flags]                  read or write data
+    ./pm [flags]                      read or write data
 
-    sync:                         set PM_SYNC_REMOTE_URL env var
+    sync:                             set PM_SYNC_REMOTE_URL env var
 
     flags:
 
