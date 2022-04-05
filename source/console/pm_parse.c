@@ -1,13 +1,13 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "console/parse.h"
+#include "console/b64.h"
 #include "console/io.h"
+#include "console/parse.h"
 #include "console/rand.h"
+#include "console/thread.h"
 #include "console/util.h"
 #include "console/xcrypt.h"
-#include "console/thread.h"
-#include "console/b64.h"
 
 #include <string.h>
 
@@ -84,6 +84,37 @@ int run(uint8_t *aes_key, int argc, char **argv)
     Flags f = {0};
     parse_flags(&f, argc, argv);
 
+    if (f.help.exists)
+    {
+        fprintf(stdout, "%s\n", "\n"
+                                "./pm [flags]                      read or write data\n"
+                                "\n"
+                                "sync:                             set PM_SYNC_REMOTE_URL env var\n"
+                                "\n"
+                                "flags:\n"
+                                "\n"
+                                "-d       --data                   data to encrypt\n"
+                                "-df      --data-file              data to encrypt from file\n"
+                                "-l       --label                  label data / find by label\n"
+                                "-dl      --delete-label           delete label and its data\n"
+#ifdef _WIN32
+                                "-c       --copy                   -l, -gp helper, copy to clipboard\n"
+#else
+                                "-c       --copy                   -l, -gp helper, pipe with clip tools\n"
+#endif
+                                "-gp      --generate-password [N]  put random data\n"
+                                "-k       --key                    key\n"
+                                "-kf      --key-file               key file path\n"
+                                "-i       --input                  encrypted file path\n"
+                                "-o       --output                 decrypted file path\n"
+                                "-b       --binary                 binary mode\n"
+                                "-b64enc  --base64-encode          base64 encode string to stdout, optional key\n"
+                                "-b64dec  --base64-decode          base64 decode string to stdout, optional key\n"
+                                "-v       --version                display version\n"
+                                "-h       --help                   display help\n\n");
+        return 0;
+    }
+
     if (f.version.exists)
     {
         fprintf(stdout, "%s %s\n", "password-manager",
@@ -119,6 +150,12 @@ int run(uint8_t *aes_key, int argc, char **argv)
         File kf = open_and_map_file(f.key_file.value, PM_READ_ONLY);
         memcpy(aes_key, kf.start, kf.size < 32 ? kf.size : 32);
         UNMAP_AND_CLOSE_FILE(kf);
+    }
+
+    if (f.copy.value && !f.label.value)
+    {
+        f.label.exists = 1;
+        f.label.value = f.copy.value;
     }
 
     if (f.input.exists)
@@ -256,36 +293,6 @@ int run(uint8_t *aes_key, int argc, char **argv)
         }
         else
         {
-            if (f.help.exists)
-            {
-                fprintf(stdout, "%s\n", "\n"
-                                        "./pm [flags]                  read or write data\n"
-                                        "\n"
-                                        "sync:                         set PM_SYNC_REMOTE_URL env var\n"
-                                        "\n"
-                                        "flags:\n"
-                                        "\n"
-                                        "-d       --data                   data to encrypt\n"
-                                        "-df      --data-file              data to encrypt from file\n"
-                                        "-l       --label                  label data / find by label\n"
-                                        "-dl      --delete-label           delete label and its data\n"
-#ifdef _WIN32
-                                        "-c       --copy                   -l, -gp helper, copy to clipboard\n"
-#else
-                                        "-c       --copy                   -l, -gp helper, pipe with clip tools\n"
-#endif
-                                        "-gp      --generate-password [N]  put random data\n"
-                                        "-k       --key                    key\n"
-                                        "-kf      --key-file               key file path\n"
-                                        "-i       --input                  encrypted file path\n"
-                                        "-o       --output                 decrypted file path\n"
-                                        "-b       --binary                 binary mode\n"
-                                        "-b64enc  --base64-encode          base64 encode string to stdout, optional key\n"
-                                        "-b64dec  --base64-decode          base64 decode string to stdout, optional key\n"
-                                        "-v       --version                display version\n"
-                                        "-h       --help                   display help\n\n");
-                return 0;
-            }
             if (f.copy.exists)
             {
                 error("%s",
