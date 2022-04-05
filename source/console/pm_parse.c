@@ -98,9 +98,9 @@ int run(uint8_t *aes_key, int argc, char **argv)
                                 "-l       --label                  label data / find by label\n"
                                 "-dl      --delete-label           delete label and its data\n"
 #ifdef _WIN32
-                                "-c       --copy                   -l, -gp helper, copy to clipboard\n"
+                                "-c       --copy [label]           copy to clipboard\n"
 #else
-                                "-c       --copy                   -l, -gp helper, pipe with clip tools\n"
+                                "-c       --copy [label]           pipe with clip tools\n"
 #endif
                                 "-gp      --generate-password [N]  put random data\n"
                                 "-k       --key                    key\n"

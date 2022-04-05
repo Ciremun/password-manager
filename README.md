@@ -15,7 +15,7 @@
     -l       --label                  label data / find by label
     -dl      --delete-label           delete label and its data
     -gp      --generate-password [N]  put random data
-    -c       --copy                   -l, -gp helper, win32: copy to clipboard, posix: pipe with clip tools
+    -c       --copy [label]           win32: copy to clipboard, posix: pipe with clip tools
     -k       --key                    key
     -kf      --key-file               key file path
     -i       --input                  encrypted file path
@@ -35,11 +35,11 @@
 ### generate and copy a password
 
 	echo "secret_key" > key.txt
-	./pm -kf key.txt -gp -l password_name -c | xclip
+	./pm -kf key.txt -gp -c password_name | xclip
 
 ### copy saved password
 
-	./pm -kf key.txt -l pass -c | xclip
+	./pm -kf key.txt -c pass | xclip
 
 ### encrypt binary
 
