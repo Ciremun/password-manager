@@ -1,0 +1,25 @@
+name: build-ui
+on:
+  push:
+    paths:
+    - 'source/ui/**'
+    - 'include/ui/**'
+
+jobs:
+  ubuntu-gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+            sudo apt install -y libsdl2-2.0 libsdl2-dev
+            cd source/ui
+            make
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm-ui-linux-gcc
+          path: |
+            source/ui/pm*
+        env:
+          CC: gcc

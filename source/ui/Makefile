@@ -14,7 +14,7 @@
 #CXX = g++
 #CXX = clang++
 
-EXE = example_sdl_opengl3
+EXE = pm-ui
 IMGUI_DIR = imgui
 PM_CONSOLE_DIR = ../console
 SOURCES = sdl_impl.cpp ui_update.cpp ui_xcrypt.cpp $(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c

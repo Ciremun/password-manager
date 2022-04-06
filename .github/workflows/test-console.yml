@@ -1,0 +1,32 @@
+name: test-console
+on:
+  push:
+    paths:
+    - 'source/console/**'
+    - 'include/console/**'
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: test
+        run: chmod +x *.sh && ./test_console.sh
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: test
+        run: |
+          chmod +x *.sh && ./test_console.sh
+        env:
+          CC: clang
+  test-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: seanmiddleditch/gha-setup-vsdevenv@master
+      - name: test
+        shell: cmd
+        run: |
+          cl /DTEST source/console/test.c source/console/pm_thread.c source/console/pm_aes.c source/console/pm_b64.c source/console/pm_io.c source/console/pm_parse.c source/console/pm_rand.c source/console/pm_sync.c source/console/pm_xcrypt.c /Iinclude /Fe:test && test.exe
