@@ -28,3 +28,41 @@ jobs:
             source/ui/pm-ui
         env:
           CC: gcc
+  build-windows-msys2-mingw:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: [
+          { msystem: MINGW64, msystem_lower: mingw64, arch: x86_64 }
+        ]
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          path: temp
+          fetch-depth: 0
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          install: mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-SDL2
+          update: true
+      - name: update
+        run: |
+          msys2 -c 'pacman --noconfirm -Suuy'
+          msys2 -c 'pacman --noconfirm -Suu'
+      - name: build
+        run: |
+            cd source/ui
+            make
+            cd ../../
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm-ui-windows-gcc
+          path: |
+            source/ui/pm-ui.exe
+        shell: cmd
+        env:
+          CC: gcc
+          CXX: g++
+          PATH: D:\a\_temp\msys\msys64\usr\bin;D:\a\_temp\msys\msys64\${{ matrix.msystem_lower }}\bin;D:\a\_temp\msys
