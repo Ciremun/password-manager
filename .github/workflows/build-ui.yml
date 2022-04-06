@@ -24,6 +24,6 @@ jobs:
         with:
           name: pm-ui-linux-gcc
           path: |
-            source/ui/pm*
+            pm*
         env:
           CC: gcc
