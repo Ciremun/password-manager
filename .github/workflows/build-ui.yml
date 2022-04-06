@@ -52,8 +52,8 @@ jobs:
           msys2 -c 'pacman --noconfirm -Suu'
       - name: build
         run: |
-            msys2 -c 'cd source/ui && make && cd ../../' 
-        shell: cmd
+            cd source/ui && make
+        shell: msys2 {0}
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
