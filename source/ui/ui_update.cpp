@@ -23,7 +23,7 @@ ImVector<std::string *> passwords;
 
 String sync_remote_url;
 
-extern const char* data_store;
+extern "C" char *data_store;
 
 #ifndef __EMSCRIPTEN__
 void write_clipboard(const char* c_str)

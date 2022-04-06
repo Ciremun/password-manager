@@ -10,7 +10,7 @@
 #include "ui/xcrypt.hpp"
 
 extern String sync_remote_url;
-extern char *data_store;
+extern "C" char *data_store;
 
 void ui_write_encrypted_passwords(std::string const &str)
 {
