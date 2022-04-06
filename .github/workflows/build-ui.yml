@@ -44,7 +44,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msystem }}
-          install: mingw-w64-${{ matrix.arch }}-make mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-SDL2 mingw-w64-${{ matrix.arch }}-pkg-config
+          install: mingw-w64-${{ matrix.arch }}-make mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-SDL2
           update: true
       - name: update
         run: |
@@ -52,9 +52,7 @@ jobs:
           msys2 -c 'pacman --noconfirm -Suu'
       - name: build
         run: |
-            cd source/ui
-            make
-            cd ../../
+            msys2 -c 'cd source/ui && make && cd ../../' 
         shell: cmd
       - name: password-manager
         uses: actions/upload-artifact@v2
