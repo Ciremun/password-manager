@@ -34,15 +34,16 @@ jobs:
       - uses: actions/checkout@v2
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
       - name: build
-        shell: cmd
+        shell: powershell
         run: |
           cd source/ui
           wget https://www.libsdl.org/release/SDL2-devel-2.0.20-VC.zip -O SDL2-devel-2.0.20-VC.zip
           tar xf SDL2-devel-2.0.20-VC.zip
           cl /DNDEBUG /D_CRT_SECURE_NO_WARNINGS /DIMGUI_USE_STB_SPRINTF /DIMGUI_DEFINE_MATH_OPERATORS /DPM_THREAD_COUNT=1 /DSDL_MAIN_HANDLED /O2 /W3 /EHsc /FC /I../../include /Iimgui /Iimgui/backends /ISDL2-2.0.20/include imgui/*.cpp imgui/backends/imgui_impl_sdl.cpp imgui/backends/imgui_impl_opengl3.cpp *.cpp ../console/pm_aes.c ../console/pm_b64.c ../console/pm_io.c ../console/pm_parse.c ../console/pm_rand.c ../console/pm_sync.c ../console/pm_thread.c ../console/pm_xcrypt.c /Fe:pm-ui-msvc /link /subsystem:console opengl32.lib SDL2-2.0.20/lib/x64/SDL2.lib
+          cd ../../
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
           name: pm-ui-msvc
           path: |
-            pm-ui-msvc.exe
+            source/ui/pm-ui-msvc.exe
