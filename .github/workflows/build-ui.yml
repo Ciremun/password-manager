@@ -6,7 +6,7 @@ on:
     - 'include/ui/**'
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
     paths:
       - 'source/ui/**'
       - 'include/ui/**'
