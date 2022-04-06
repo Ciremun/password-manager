@@ -19,11 +19,12 @@ jobs:
             sudo apt install -y libsdl2-dev
             cd source/ui
             make
+            cd ../../
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
           name: pm-ui-linux-gcc
           path: |
-            pm*
+            source/ui/pm-ui
         env:
           CC: gcc
