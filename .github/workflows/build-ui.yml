@@ -37,30 +37,23 @@ jobs:
           { msystem: MINGW64, msystem_lower: mingw64, arch: x86_64 }
         ]
     steps:
-      - uses: actions/checkout@v1
-        with:
-          path: temp
-          fetch-depth: 0
+      - uses: actions/checkout@v2
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.msystem }}
-          install: mingw-w64-${{ matrix.arch }}-make mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-SDL2
+          msystem: MINGW64
           update: true
-      - name: update
-        run: |
-          msys2 -c 'pacman --noconfirm -Suuy'
-          msys2 -c 'pacman --noconfirm -Suu'
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2
       - name: build
         run: |
-            cd source/ui && make
-        shell: msys2 {0}
+            cd source/ui
+            make
+            cd ../../
+        env:
+          CC: gcc
+          CXX: g++
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
           name: pm-ui-windows-gcc
           path: |
             source/ui/pm-ui.exe
-        env:
-          CC: gcc
-          CXX: g++
-          PATH: D:\a\_temp\msys\msys64\usr\bin;D:\a\_temp\msys\msys64\${{ matrix.msystem_lower }}\bin;D:\a\_temp\msys
