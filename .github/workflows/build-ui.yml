@@ -5,6 +5,12 @@ on:
     - 'source/ui/**'
     - 'include/ui/**'
 
+on:
+  workflow-dispatch:
+    paths:
+      - 'source/ui/**'
+      - 'include/ui/**'
+
 jobs:
   ubuntu-gcc:
     runs-on: ubuntu-latest
