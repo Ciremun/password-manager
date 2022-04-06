@@ -44,7 +44,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msystem }}
-          install: mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-SDL2 mingw-w64-${{ matrix.arch }}-make pacman -S
+          install: mingw-w64-${{ matrix.arch }}-make mingw-w64-${{ matrix.arch }}-gcc mingw-w64-${{ matrix.arch }}-SDL2 pacman -S
           update: true
       - name: update
         run: |
