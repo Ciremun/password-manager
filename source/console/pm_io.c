@@ -6,7 +6,7 @@
 
 #include <assert.h>
 
-char *data_store = 0;
+const char *data_store = 0;
 
 File open_file(const char *path, flag_t access)
 {

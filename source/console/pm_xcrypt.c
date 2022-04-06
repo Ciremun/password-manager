@@ -11,7 +11,7 @@
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
 extern String sync_remote_url;
-extern char *data_store;
+extern const char *data_store;
 
 void b64_encrypt(Flags *fl, String s, uint8_t *aes_key)
 {

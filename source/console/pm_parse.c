@@ -12,7 +12,7 @@
 #include <string.h>
 
 String sync_remote_url;
-extern char *data_store;
+extern const char *data_store;
 
 int is_flag(char *arg, char *s, char *l)
 {
