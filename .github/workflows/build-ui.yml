@@ -4,8 +4,6 @@ on:
     paths:
     - 'source/ui/**'
     - 'include/ui/**'
-
-on:
   workflow_dispatch:
     paths:
       - 'source/ui/**'
