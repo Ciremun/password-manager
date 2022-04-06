@@ -55,13 +55,13 @@ jobs:
             cd source/ui
             make
             cd ../../
+        shell: cmd
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
           name: pm-ui-windows-gcc
           path: |
             source/ui/pm-ui.exe
-        shell: cmd
         env:
           CC: gcc
           CXX: g++
