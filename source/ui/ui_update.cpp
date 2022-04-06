@@ -23,7 +23,7 @@ ImVector<std::string *> passwords;
 
 String sync_remote_url;
 
-extern "C" char *data_store;
+extern "C" const char *data_store;
 
 #ifndef __EMSCRIPTEN__
 void write_clipboard(const char* c_str)
@@ -118,29 +118,55 @@ void ui_update()
         if (ImGui::BeginTabItem("base64"))
         {
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            static bool use_key_for_b64 = false;
             static std::string base64_encode_bar_str;
             static std::string base64_encode_result;
+            static std::string base64_decode_bar_str;
+            static std::string base64_decode_result;
+            const auto do_base64_encode = [&]() {
+                uint8_t *str_to_encode = (uint8_t *)base64_encode_bar_str.c_str();
+                char *encoded_str = 0;
+                if (use_key_for_b64)
+                {
+                    uint8_t *str_to_encode_copy = (uint8_t *)malloc(base64_encode_bar_str.length());
+                    memcpy(str_to_encode_copy, str_to_encode, base64_encode_bar_str.length());
+                    xcrypt_buffer(str_to_encode_copy, aes_key, base64_encode_bar_str.length());
+                    encoded_str = b64_encode(str_to_encode_copy, base64_encode_bar_str.length(), 0);
+                    free(str_to_encode_copy);
+                }
+                else
+                    encoded_str = b64_encode(str_to_encode, base64_encode_bar_str.length(), 0);
+                base64_encode_result = encoded_str;
+                free(encoded_str);
+            };
+            const auto do_base64_decode = [&]() {
+                uint8_t *str_to_decode = (uint8_t *)base64_decode_bar_str.c_str();
+                size_t decoded_str_length = 0;
+                uint8_t *decoded_str = b64_decode(str_to_decode, base64_decode_bar_str.length(), &decoded_str_length);
+                if (use_key_for_b64)
+                    xcrypt_buffer(decoded_str, aes_key, decoded_str_length);
+                base64_decode_result = (char *)decoded_str;
+                free(decoded_str);
+            };
+            if (ImGui::Checkbox("Use Key", &use_key_for_b64))
+            {
+                if (!base64_encode_bar_str.empty())
+                    do_base64_encode();
+                if (!base64_decode_bar_str.empty())
+                    do_base64_decode();
+            }
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::Text("base64 encode");
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             if (ImGui::InputTextWithHint("##base64_encode", "string to encode...", &base64_encode_bar_str))
-            {
-                char *encoeded_str = b64_encode((uint8_t *)base64_encode_bar_str.c_str(), base64_encode_bar_str.length(), 0);
-                base64_encode_result = encoeded_str;
-                free(encoeded_str);
-            }
+                do_base64_encode();
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::InputTextWithHint("##base64_encode_result", 0, &base64_encode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
             ImGui::Dummy(ImVec2(0.0f, 12.0f));
-            static std::string base64_decode_bar_str;
-            static std::string base64_decode_result;
             ImGui::Text("base64 decode");
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             if (ImGui::InputTextWithHint("##base64_decode", "string to decode...", &base64_decode_bar_str))
-            {
-                uint8_t *decoded_str = b64_decode((uint8_t *)base64_decode_bar_str.c_str(), base64_decode_bar_str.length(), 0);
-                base64_decode_result = (char *)decoded_str;
-                free(decoded_str);
-            }
+                do_base64_decode();
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::InputTextWithHint("##base64_decode_result", 0, &base64_decode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
             ImGui::EndTabItem();
