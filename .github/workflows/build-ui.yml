@@ -61,7 +61,7 @@ jobs:
         with:
           name: pm-ui-windows-gcc
           path: |
-            source/ui/pm-ui.exe
+            pm-ui.exe
         env:
           CC: gcc
           CXX: g++
