@@ -28,9 +28,10 @@ jobs:
             cd ../
             make keystore
             make -B
+            cd ../../../
       - name: password-manager
         uses: actions/upload-artifact@v2
         with:
           name: pm-android
           path: |
-            pm.apk
+            source/ui/android/pm.apk
