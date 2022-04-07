@@ -74,7 +74,7 @@ void ui_update()
         else
         {
             for (const auto &password : passwords)
-                free(password);
+                delete password;
             passwords.clear();
         }
         ui_load_passwords(aes_key, passwords);
@@ -108,7 +108,7 @@ void ui_update()
                     if (password->empty())
                     {
                         passwords.find_erase(password);
-                        free(password);
+                        delete password;
                         last_input_time = ImGui::GetTime();
                     }
                 }
@@ -207,8 +207,8 @@ void ui_update()
             #endif // __ANDROID__
                 if (ImGui::Button("OK", MODAL_BUTTON_SIZE))
                 {
-                    for (auto &pw : passwords)
-                        free(pw);
+                    for (auto &password : passwords)
+                        delete password;
                     passwords.clear();
                     last_input_time = ImGui::GetTime();
                     // last_active_item = -1;
