@@ -108,8 +108,8 @@ int run(uint8_t *aes_key, int argc, char **argv)
                                 "-i       --input                  encrypted file path\n"
                                 "-o       --output                 decrypted file path\n"
                                 "-b       --binary                 binary mode\n"
-                                "-b64enc  --base64-encode          base64 encode string to stdout, optional key\n"
-                                "-b64dec  --base64-decode          base64 decode string to stdout, optional key\n"
+                                "-b64enc  --base64-encode [str]    base64 encode string to stdout, optional key\n"
+                                "-b64dec  --base64-decode [str]    base64 decode string to stdout, optional key\n"
                                 "-v       --version                display version\n"
                                 "-h       --help                   display help\n\n");
         return 0;
@@ -243,6 +243,18 @@ int run(uint8_t *aes_key, int argc, char **argv)
 
             free(s.data);
             UNMAP_AND_CLOSE_FILE(file);
+            return 0;
+        }
+        if (f.b64enc.exists && f.b64enc.value)
+        {
+            String str = PM_STR(f.b64enc.value);
+            b64_encrypt(&f, str, aes_key);
+            return 0;
+        }
+        if (f.b64dec.exists && f.b64dec.value)
+        {
+            String str = PM_STR(f.b64dec.value);
+            b64_decrypt(&f, str, aes_key);
             return 0;
         }
         if (f.generate_password.exists)

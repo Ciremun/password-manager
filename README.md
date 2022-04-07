@@ -21,8 +21,8 @@
     -i       --input                  encrypted file path
     -o       --output                 decrypted file path
     -b       --binary                 binary mode
-    -b64enc  --base64-encode          base64 encode string to stdout, optional key
-    -b64dec  --base64-decode          base64 decode string to stdout, optional key
+    -b64enc  --base64-encode [str]    base64 encode string to stdout, optional key
+    -b64dec  --base64-decode [str]    base64 decode string to stdout, optional key
     -v       --version                display version
     -h       --help                   display help
 
