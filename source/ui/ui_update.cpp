@@ -35,6 +35,7 @@ void write_clipboard(const char* c_str)
 void ui_update()
 {
     static double last_input_time = 0.0;
+    static bool aes_key_changed = false;
     ImGuiIO& io = ImGui::GetIO();
     if (!password_entered)
     {
@@ -57,14 +58,25 @@ void ui_update()
         ImGui::PopStyleVar();
         if (!password_entered)
             return;
+        static bool data_store_initialized = false;
+        if (!data_store_initialized)
+        {
 #ifdef __ANDROID__
-        static char android_storage_path[1024] = {0};
-        stbsp_snprintf(android_storage_path, 1024, "%s/" DEFAULT_DATA_STORE, AndroidGetExternalFilesDir());
-        data_store = android_storage_path;
+            static char android_storage_path[1024] = {0};
+            stbsp_snprintf(android_storage_path, 1024, "%s/" DEFAULT_DATA_STORE, AndroidGetExternalFilesDir());
+            data_store = android_storage_path;
 #else
-        data_store = DEFAULT_DATA_STORE;
+            data_store = DEFAULT_DATA_STORE;
 #endif // __ANDROID__
-        passwords.reserve(256);
+            passwords.reserve(256);
+            data_store_initialized = true;
+        }
+        else
+        {
+            for (const auto &password : passwords)
+                free(password);
+            passwords.clear();
+        }
         ui_load_passwords(aes_key, passwords);
     }
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Once);
@@ -158,14 +170,14 @@ void ui_update()
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::Text("base64 encode");
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
-            if (ImGui::InputTextWithHint("##base64_encode", "string to encode...", &base64_encode_bar_str))
+            if (ImGui::InputTextWithHint("##base64_encode", "string to encode...", &base64_encode_bar_str) || aes_key_changed)
                 do_base64_encode();
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::InputTextWithHint("##base64_encode_result", 0, &base64_encode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
             ImGui::Dummy(ImVec2(0.0f, 12.0f));
             ImGui::Text("base64 decode");
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
-            if (ImGui::InputTextWithHint("##base64_decode", "string to decode...", &base64_decode_bar_str))
+            if (ImGui::InputTextWithHint("##base64_decode", "string to decode...", &base64_decode_bar_str) || aes_key_changed)
                 do_base64_decode();
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::InputTextWithHint("##base64_decode_result", 0, &base64_decode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
@@ -176,6 +188,13 @@ void ui_update()
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             if (ImGui::Button("Clear Passwords"))
                 ImGui::OpenPopup("Clear?");
+            ImGui::SameLine();
+            if (ImGui::Button("Change Key"))
+            {
+                memset(aes_key, 0, 32);
+                aes_key_changed = true;
+                password_entered = false;
+            }
             if (ImGui::BeginPopupModal("Clear?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
             {
                 ImGui::PushTextWrapPos(io.DisplaySize.x);
