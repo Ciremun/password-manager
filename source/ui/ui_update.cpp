@@ -171,14 +171,19 @@ void ui_update()
             ImGui::Text("base64 encode");
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             if (ImGui::InputTextWithHint("##base64_encode", "string to encode...", &base64_encode_bar_str) || aes_key_changed)
+            {
                 do_base64_encode();
+            }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::InputTextWithHint("##base64_encode_result", 0, &base64_encode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
             ImGui::Dummy(ImVec2(0.0f, 12.0f));
             ImGui::Text("base64 decode");
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             if (ImGui::InputTextWithHint("##base64_decode", "string to decode...", &base64_decode_bar_str) || aes_key_changed)
+            {
+                aes_key_changed = false;
                 do_base64_decode();
+            }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::InputTextWithHint("##base64_decode_result", 0, &base64_decode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
             ImGui::EndTabItem();
