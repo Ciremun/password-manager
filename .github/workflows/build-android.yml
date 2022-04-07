@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: build
         run: |
-            sudo apt install -y libsdl2-dev
+            sudo apt install -y libsdl2-dev openjdk-11-jdk-headless unzip zip
             cd source/ui/android
             mkdir android-sdk
             export ANDROID_HOME=android-sdk
