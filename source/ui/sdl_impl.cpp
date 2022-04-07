@@ -16,6 +16,7 @@
 
 #include "ui/update.hpp"
 #include "ui/font.hpp"
+#include "ui/icon.hpp"
 
 // Main code
 int main(int, char**)
@@ -62,6 +63,28 @@ int main(int, char**)
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
+
+    // https://caedesnotes.wordpress.com/2015/04/13/how-to-integrate-your-sdl2-window-icon-or-any-image-into-your-executable/
+    Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    int shift = (pm_ui_icon.bytes_per_pixel == 3) ? 8 : 0;
+    rmask = 0xff000000 >> shift;
+    gmask = 0x00ff0000 >> shift;
+    bmask = 0x0000ff00 >> shift;
+    amask = 0x000000ff >> shift;
+#else // little endian, like x86
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = (pm_ui_icon.bytes_per_pixel == 3) ? 0 : 0xff000000;
+#endif
+
+    SDL_Surface* icon = SDL_CreateRGBSurfaceFrom((void*)pm_ui_icon.pixel_data, pm_ui_icon.width,
+    pm_ui_icon.height, pm_ui_icon.bytes_per_pixel*8, pm_ui_icon.bytes_per_pixel*pm_ui_icon.width,
+    rmask, gmask, bmask, amask);
+
+    SDL_SetWindowIcon(window, icon);
+    SDL_FreeSurface(icon);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
