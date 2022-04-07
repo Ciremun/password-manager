@@ -1,0 +1,36 @@
+name: build-ui-android
+on:
+  push:
+    paths:
+    - 'source/ui/**'
+    - 'include/ui/**'
+  workflow_dispatch:
+    paths:
+      - 'source/ui/**'
+      - 'include/ui/**'
+
+jobs:
+  ubuntu-gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+            sudo apt install -y libsdl2-dev
+            cd source/ui/android
+            mkdir android-sdk
+            export ANDROID_HOME=android-sdk
+            cd android-sdk
+            wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+            unzip commandlinetools-linux-7583922_latest.zip
+            yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} --licenses
+            $ANDROID_HOME/cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} "build-tools;30.0.2" "cmake;3.10.2.4988404" "ndk;21.3.6528147" "patcher;v4" "platform-tools" "platforms;android-29" "tools"
+            cd ../
+            make keystore
+            make -B
+      - name: password-manager
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm-android
+          path: |
+            pm.apk

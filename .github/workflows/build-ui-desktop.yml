@@ -1,4 +1,4 @@
-name: build-ui
+name: build-ui-desktop
 on:
   push:
     paths:
