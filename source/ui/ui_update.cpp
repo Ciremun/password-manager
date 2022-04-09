@@ -1,6 +1,7 @@
 #include <string>
 
 #include <stdint.h>
+#include <limits.h>
 
 #include "stb_sprintf.h"
 #include "imgui_internal.h"
@@ -10,6 +11,7 @@
 #include "console/io.h"
 #include "console/b64.h"
 #include "console/xcrypt.h"
+#include "console/rand.h"
 #include "ui/update.hpp"
 #include "ui/xcrypt.hpp"
 
@@ -83,7 +85,7 @@ void ui_update()
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::Begin("##io", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    if (ImGui::BeginTabBar("##tab_bar", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton))
+    if (ImGui::BeginTabBar("##tab_bar_first_line", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton | ImGuiTabBarFlags_FittingPolicyScroll))
     {
         // static int last_active_item = -1;
         if (ImGui::BeginTabItem("passwords"))
@@ -186,6 +188,57 @@ void ui_update()
             }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
             ImGui::InputTextWithHint("##base64_decode_result", 0, &base64_decode_result, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
+            ImGui::EndTabItem();
+        }
+#ifdef __ANDROID__
+        if (ImGui::BeginTabItem("generate"))
+#else
+        if (ImGui::BeginTabItem("generate password"))
+#endif // __ANDROID__
+        {
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+#ifdef __ANDROID__
+            ImGui::Text("generate password");
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+#endif // __ANDROID__
+            static std::string password_name;
+#ifdef __ANDROID__
+            ImGui::PushItemWidth(io.DisplaySize.x / 1.1f);
+#else
+            ImGui::PushItemWidth(350.0f);
+#endif // __ANDROID__
+            ImGui::InputTextWithHint("##password_name", "password name (optional)", &password_name);
+            static std::string password_length;
+            ImGui::InputTextWithHint("##password_length", "password length (optional)", &password_length, ImGuiInputTextFlags_CharsDecimal);
+            ImGui::PopItemWidth();
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            static std::string generated_password;
+            if (ImGui::Button("generate"))
+            {
+                int generated_str_length = 0;
+                if (password_length.empty())
+                    generated_str_length = random_int();
+                else
+                {
+                    generated_str_length = strtoul(password_length.c_str(), NULL, 10);
+                    if (generated_str_length == 0 || !(generated_str_length <= INT_MAX))
+                        generated_str_length = random_int();
+                }
+                uint8_t *generated_str = (uint8_t *)malloc(generated_str_length);
+                random_string(generated_str_length, generated_str);
+                if (!password_name.empty())
+                {
+                    generated_password = password_name + " ";
+                    generated_password += (char *)generated_str;
+                }
+                else
+                {
+                    generated_password = (char *)generated_str;
+                }
+                free(generated_str);
+            }
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
+            ImGui::InputTextWithHint("##generated_password", "result", &generated_password, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll);
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("settings"))
