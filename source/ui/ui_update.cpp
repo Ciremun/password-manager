@@ -203,12 +203,16 @@ void ui_update()
 #endif // __ANDROID__
             static std::string password_name;
 #ifdef __ANDROID__
-            ImGui::PushItemWidth(io.DisplaySize.x / 1.1f);
+            #define PM_PUSH_INPUT_WIDTH ImGui::PushItemWidth(io.DisplaySize.x / 1.1f);
 #else
-            ImGui::PushItemWidth(350.0f);
+            #define PM_PUSH_INPUT_WIDTH ImGui::PushItemWidth(350.0f);
 #endif // __ANDROID__
+            PM_PUSH_INPUT_WIDTH
             ImGui::InputTextWithHint("##password_name", "password name (optional)", &password_name);
+            ImGui::PopItemWidth();
+            ImGui::Dummy(ImVec2(0.0f, 6.0f));
             static std::string password_length;
+            PM_PUSH_INPUT_WIDTH
             ImGui::InputTextWithHint("##password_length", "password length (optional)", &password_length, ImGuiInputTextFlags_CharsDecimal);
             ImGui::PopItemWidth();
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
