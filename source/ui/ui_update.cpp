@@ -227,14 +227,9 @@ void ui_update()
                 uint8_t *generated_str = (uint8_t *)malloc(generated_str_length);
                 random_string(generated_str_length, generated_str);
                 if (!password_name.empty())
-                {
-                    generated_password = password_name + " ";
-                    generated_password += (char *)generated_str;
-                }
+                    generated_password = password_name + " " + (char *)generated_str;
                 else
-                {
                     generated_password = (char *)generated_str;
-                }
                 free(generated_str);
             }
             ImGui::Dummy(ImVec2(0.0f, 6.0f));
