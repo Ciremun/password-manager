@@ -79,7 +79,7 @@ EM_JS(void, show_keyboard, (void), {
 });
 
 EM_JS(bool, is_mobile, (void), {
-    return navigator.userAgentData ? navigator.userAgentData.mobile : false;
+    return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
 });
 
 EM_JS(void, setup_localstorage, (void), {
