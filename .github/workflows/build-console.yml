@@ -115,4 +115,4 @@ jobs:
         with:
           name: pm-win-msvc
           path: |
-            pm.exe
+            pm-msvc.exe
