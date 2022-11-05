@@ -55,7 +55,7 @@
 
 ### base64 encode string to stdout, optional key
 
-    ./pm -b64enc "string" [-kf key.txt]
+    ./pm -b64enc -d "string" [-kf key.txt]
 
 ## Thank
 
