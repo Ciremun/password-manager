@@ -17,7 +17,7 @@
 EXE = pm-ui
 IMGUI_DIR = imgui
 PM_CONSOLE_DIR = ../console
-SOURCES = sdl_impl.cpp ui_update.cpp ui_xcrypt.cpp $(PM_CONSOLE_DIR)/pm_rand.c $(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c
+SOURCES = sdl_impl.cpp ui_update.cpp ui_xcrypt.cpp $(PM_CONSOLE_DIR)/pm_rand.c $(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_glob.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c
 SOURCES += $(IMGUI_DIR)/imgui_stdlib.cpp $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))

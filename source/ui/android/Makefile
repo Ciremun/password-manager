@@ -6,7 +6,7 @@ all : makecapk.apk
 PM_CONSOLE_DIR = ../../console
 SRC?=android_impl.cpp
 SRC+=../ui_update.cpp ../ui_xcrypt.cpp
-SRC+=$(PM_CONSOLE_DIR)/pm_rand.c $(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c
+SRC+=$(PM_CONSOLE_DIR)/pm_rand.c $(PM_CONSOLE_DIR)/pm_sync.c $(PM_CONSOLE_DIR)/pm_io.c $(PM_CONSOLE_DIR)/pm_aes.c $(PM_CONSOLE_DIR)/pm_glob.c $(PM_CONSOLE_DIR)/pm_xcrypt.c $(PM_CONSOLE_DIR)/pm_b64.c
 SRC+=../imgui/*.cpp ../imgui/backends/imgui_impl_android.cpp ../imgui/backends/imgui_impl_opengl3.cpp
 
 .PHONY : push run

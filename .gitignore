@@ -11,3 +11,4 @@ makecapk/
 *.keystore
 test_console
 *.obj
+pm-linux-x86_64

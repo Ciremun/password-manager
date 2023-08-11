@@ -41,6 +41,10 @@
 
 	./pm -kf key.txt -c pass | xclip
 
+When searching for passwords by label you can also provide a [Glob](#glob) pattern
+
+	./pm -kf key.txt -c '?ass*' | xclip
+
 ### encrypt binary
 
 	./pm -kf key.txt -i binary -o binary.enc -b
@@ -56,6 +60,16 @@
 ### base64 encode string to stdout, optional key
 
     ./pm -b64enc "string" [-kf key.txt]
+
+## Glob
+
+| Wildcard | Description                                         | Example  | Matches                      | Does not match           |
+|----------|-----------------------------------------------------|----------|------------------------------|--------------------------|
+| `*`      | matches any number of any characters including none | `Law*`   | `Law`, `Laws`, or `Lawyer`   | `GrokLaw`, `La`, or `aw` |
+| `?`      | matches any single character                        | `?at`    | `Cat`, `cat`, `Bat` or `bat` | `at`                     |
+| `[abc]`  | matches one character given in the bracket          | `[CB]at` | `Cat` or `Bat`               | `cat`, `bat` or `CBat`   |
+
+*Stolen and adapted from [Wikipedia](https://en.wikipedia.org/wiki/Glob_(programming)#Syntax). Please not that the `[a-z]` syntax mentioned in the original Wikipedia article is NOT supported right now.*
 
 ## Thank
 

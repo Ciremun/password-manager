@@ -7,6 +7,7 @@
 #include "console/sync.h"
 #include "console/thread.h"
 #include "console/xcrypt.h"
+#include "console/glob.h"
 
 extern struct AES_ctx ctx;
 extern uint8_t aes_iv[];
@@ -349,9 +350,16 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
         goto end;
     }
 
-    size_t find_label_len = 0;
-    if (fl->label.exists)
-        find_label_len = strlen(fl->label.value);
+    Glob glob = {0};
+    if (fl->label.exists) {
+        Glob_Result result = glob_compile(fl->label.value, &glob);
+        if (result.error != NULL) {
+            error("%s", fl->label.value);
+            error("%*s", (int) result.location + 1, "^");
+            error("%s", result.error);
+            goto end;
+        }
+    }
 
     size_t line_start = 0;
     size_t line_end = 0;
@@ -364,13 +372,10 @@ void decrypt_and_print(Flags *fl, uint8_t *aes_key)
             xcrypt_buffer(b64_decoded_str, aes_key, b64_decoded_len);
             if (fl->label.exists)
             {
-                if ((find_label_len + 1 >= b64_decoded_len) ||
-                    (memcmp(b64_decoded_str, fl->label.value, find_label_len) != 0))
-                    goto skip_write;
-                size_t label_len = 0;
-                while (b64_decoded_str[++label_len] != ' ')
-                    if (label_len > b64_decoded_len)
-                        goto skip_write;
+                uint8_t *end = memchr(b64_decoded_str, ' ', b64_decoded_len);
+                if (end == NULL) goto skip_write;
+                if (!glob_match((const char *)b64_decoded_str, end - b64_decoded_str, glob.items, glob.count)) goto skip_write;
+                size_t label_len = end - b64_decoded_str;
                 found_label = 1;
                 if (fl->copy.exists)
                 {
@@ -396,4 +401,5 @@ end:
     if (fl->output.exists)
         fclose(o);
     UNMAP_AND_CLOSE_FILE(f);
+    free(glob.items);
 }
