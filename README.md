@@ -69,7 +69,7 @@ When searching for passwords by label you can also provide a [Glob](#glob) patte
 | `?`      | matches any single character                        | `?at`    | `Cat`, `cat`, `Bat` or `bat` | `at`                     |
 | `[abc]`  | matches one character given in the bracket          | `[CB]at` | `Cat` or `Bat`               | `cat`, `bat` or `CBat`   |
 
-*Stolen and adapted from [Wikipedia](https://en.wikipedia.org/wiki/Glob_(programming)#Syntax). Please not that the `[a-z]` syntax mentioned in the original Wikipedia article is NOT supported right now.*
+*Stolen and adapted from [Wikipedia](https://en.wikipedia.org/wiki/Glob_(programming)#Syntax). Please note that the `[a-z]` syntax mentioned in the original Wikipedia article is NOT supported right now.*
 
 ## Thank
 
